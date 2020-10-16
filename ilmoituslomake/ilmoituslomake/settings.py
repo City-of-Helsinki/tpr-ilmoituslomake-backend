@@ -11,6 +11,13 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
+
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +27,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "8jgk1gzk9h6f8dyx3**2x=+66@8*uj+r0l078shbu!xryw_tgi"
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = []
 
@@ -78,7 +85,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": os.environ.get("DB_ENV_DB"),
         "USER": os.environ.get("DB_ENV_POSTGRES_USER"),
-        "PASSWORD": os.environ.get("DB_ENV_POSTGRES_PASSWORD"),
+        "PASSWORD": env("DB_ENV_POSTGRES_PASSWORD"),
         "HOST": os.environ.get("DB_PORT_5432_TCP_ADDR"),
         "PORT": os.environ.get("DB_PORT_5432_TCP_PORT"),
     }
