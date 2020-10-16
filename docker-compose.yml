@@ -1,0 +1,36 @@
+version: "3"
+services: 
+    tpr-ilmoituslomake-db:
+        hostname: tpr-ilmoituslomake-db
+        build:
+            context: ./local_dev
+            dockerfile: Dockerfile.database
+        restart: always
+        environment: 
+            - POSTGRES_PASSWORD=plop123
+            - PGDATA=/pgdata
+        ports:
+            - 5432:5432
+        volumes:
+            - ./pgdata:/pgdata
+        networks:
+            - default
+
+    # tpr-ilmoituslomake
+    tpr-ilmoituslomake:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        hostname: tpr-ilmoituslomake
+        command: bash -c "./run_web.sh"
+        depends_on:
+            - tpr-ilmoituslomake-db
+        env_file:
+            - ./local_dev/.env
+        ports:
+            - 8008:8008
+        volumes:
+            - ./ilmoituslomake:/app
+            - ./local_dev/run_web.sh:/app/run_web.sh
+        networks:
+            - default
