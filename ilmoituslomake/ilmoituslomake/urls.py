@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from notification_form import views as notification_form_views
+
 
 urlpatterns = []
 
@@ -27,3 +29,6 @@ urlpatterns += [
 
 # For Django Rest Framework
 urlpatterns += [path("api-auth/", include("rest_framework.urls"))]
+
+# Notification Form App
+urlpatterns += [path("api/hello/", notification_form_views.HelloView.as_view())]
