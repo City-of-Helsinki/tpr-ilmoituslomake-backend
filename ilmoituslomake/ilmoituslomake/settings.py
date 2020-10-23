@@ -28,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
-print(SECRET_KEY)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # GIS
+    "django.contrib.gis",
     # Third-party apps
     "simple_history",
     # Our apps
@@ -92,12 +94,12 @@ WSGI_APPLICATION = "ilmoituslomake.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("DB_ENV_DB"),
-        "USER": os.environ.get("DB_ENV_POSTGRES_USER"),
+        "ENGINE": "django.contrib.gis.db.backends.postgis",  # "django.db.backends.postgresql_psycopg2",
+        "NAME": env("DB_ENV_DB"),
+        "USER": env("DB_ENV_POSTGRES_USER"),
         "PASSWORD": env("DB_ENV_POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("DB_PORT_5432_TCP_ADDR"),
-        "PORT": os.environ.get("DB_PORT_5432_TCP_PORT"),
+        "HOST": env("DB_PORT_5432_TCP_ADDR"),
+        "PORT": env("DB_PORT_5432_TCP_PORT"),
     }
 }
 
