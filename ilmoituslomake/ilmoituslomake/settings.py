@@ -28,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
-
+print(SECRET_KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
@@ -38,13 +38,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # DRF
     "rest_framework",
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party apps
+    "simple_history",
+    # Our apps
+    "base",
     "notification_form",
 ]
 
@@ -56,6 +62,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # History
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "ilmoituslomake.urls"
