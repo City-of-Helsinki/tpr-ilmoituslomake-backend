@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
+# Permissions
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 # Create your views here.
 from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
@@ -18,6 +21,7 @@ class HelloView(RetrieveAPIView):
     A view that returns Hello! message in JSON.
     """
 
+    permission_classes = [IsAuthenticated]
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
@@ -30,6 +34,7 @@ class NotificationSchemaCreateView(CreateAPIView):
     Create a Notification instance
     """
 
+    permission_classes = [IsAuthenticated]
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
     # permission_classes =
@@ -52,6 +57,7 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     Returns the schema for form data
     """
 
+    permission_classes = [IsAuthenticated]
     lookup_field = "id"
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
@@ -62,6 +68,7 @@ class NotificationCreateView(CreateAPIView):
     Create a Notification instance
     """
 
+    permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # permission_classes =
@@ -84,6 +91,7 @@ class NotificationRetrieveView(RetrieveAPIView):
     Returns a single Notification instance
     """
 
+    permission_classes = [IsAuthenticated]
     lookup_field = "id"
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
@@ -95,6 +103,7 @@ class NotificationListView(ListAPIView):
     Returns a collection of Notification instances
     """
 
+    permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # permission_classes =

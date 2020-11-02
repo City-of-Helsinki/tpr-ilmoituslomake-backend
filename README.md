@@ -17,6 +17,9 @@
 * sudo mkdir pgdata
 * docker-compose up -d
 
+##
+
+localhost/admin/login/?next=/
 
 # Navigate to
 
