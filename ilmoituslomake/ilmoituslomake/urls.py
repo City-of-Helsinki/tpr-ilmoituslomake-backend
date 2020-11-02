@@ -27,8 +27,20 @@ urlpatterns += [
     path("admin/", admin.site.urls),
 ]
 
-# For Django Rest Framework
-urlpatterns += [path("api-auth/", include("rest_framework.urls"))]
-
 # Notification Form App
-urlpatterns += [path("api/hello/", notification_form_views.HelloView.as_view())]
+urlpatterns += [
+    path("api/hello/", notification_form_views.HelloView.as_view()),
+    path("api/schema/", notification_form_views.FormSchemaView.as_view()),
+    # notifications
+    path(
+        "api/notification/create/",
+        notification_form_views.NotificationCreateView.as_view(),
+    ),
+    path(
+        "api/notification/get/",
+        notification_form_views.NotificationRetrieveView.as_view(),
+    ),
+    path(
+        "api/notification/list/", notification_form_views.NotificationListView.as_view()
+    ),
+]

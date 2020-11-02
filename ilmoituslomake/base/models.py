@@ -1,6 +1,8 @@
 from django.contrib.postgres.fields import JSONField
-from django.contrib.gis.db.models import PointField
-from django.db import models
+from django.contrib.gis.db import models
+
+# from django.contrib.gis.db.models import PointField
+# from django.db import models
 from simple_history.models import HistoricalRecords
 
 
@@ -41,31 +43,31 @@ class Notification(models.Model):
 
     name = models.TextField(blank=True)
 
-    CATEGORY_CHOICES = [
-        ("jokutoimiala", "Jokutoimiala"),
-    ]
-    category = models.CharField(
-        max_length=32,
-        choices=CATEGORY_CHOICES,
-        default="jokutoimiala",
-    )
+    # CATEGORY_CHOICES = [
+    #    ("jokutoimiala", "Jokutoimiala"),
+    # ]
+    # category = models.CharField(
+    #    max_length=32,
+    #    choices=CATEGORY_CHOICES,
+    #    default="jokutoimiala",
+    # )
 
     # notification_type
-    geom = PointField()  # TODO: SRID
+    geom = models.PointField()  # TODO: SRID
 
     # schema id & version
     data = JSONField()
 
-    STATUS_CHOICES = [
-        ("new", "New"),
-        ("modified", "Modified"),
-        ("approved", "Approved"),
-    ]
-    status = models.CharField(
-        max_length=16,
-        choices=STATUS_CHOICES,
-        default="new",
-    )
+    # STATUS_CHOICES = [
+    #    ("new", "New"),
+    #    ("modified", "Modified"),
+    #    ("approved", "Approved"),
+    # ]
+    # status = models.CharField(
+    #    max_length=16,
+    #    choices=STATUS_CHOICES,
+    #    default="new",
+    # )
 
     # user
     # action
