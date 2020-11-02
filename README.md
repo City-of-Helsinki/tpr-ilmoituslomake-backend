@@ -16,3 +16,27 @@
 * docker-compose is required
 * sudo mkdir pgdata
 * docker-compose up -d
+
+
+# Navigate to
+
+```
+/api/schema/create/
+```
+
+data
+
+```
+{
+	"$id": "<url>",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"description": "<description>",
+	"type": "object",
+	"properties": {
+		"name": {"type": "string"},
+		"street_address": {"type": "string"},
+		"postal_address": {"type": "string"},
+	},
+	"required": ["name", "street_address", "postal_address"],
+}
+```
