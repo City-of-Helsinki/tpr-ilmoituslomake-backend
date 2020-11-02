@@ -29,6 +29,7 @@ urlpatterns += [
 
 # Notification Form App
 urlpatterns += [
+    path("api/demo/", notification_form_views.ApiDemoView.as_view()),
     path("api/hello/", notification_form_views.HelloView.as_view()),
     path(
         "api/schema/get/<int:id>/",
