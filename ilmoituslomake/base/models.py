@@ -7,41 +7,41 @@ from simple_history.models import HistoricalRecords
 
 
 # ChangeRequest
-class ChangeRequest(models.Model):
-
-    # target id
-    REQUEST_CHOICES = [
-        ("change", "Change"),
-        ("error", "Error"),
-        ("delete", "Delete"),
-    ]
-    request = models.CharField(
-        max_length=32,
-        choices=REQUEST_CHOICES,
-        default="delete",
-    )
-    description = models.TextField(blank=True)
-
-    STATUS_CHOICES = [
-        ("open", "Open"),
-        ("closed", "Closed"),
-    ]
-    status = models.CharField(
-        max_length=16,
-        choices=STATUS_CHOICES,
-        default="open",
-    )
-
-    #
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    history = HistoricalRecords()
+# class ChangeRequest(models.Model):
+#
+#    # target id
+#    REQUEST_CHOICES = [
+#        ("change", "Change"),
+#        ("error", "Error"),
+#        ("delete", "Delete"),
+#    ]
+#    request = models.CharField(
+#        max_length=32,
+#        choices=REQUEST_CHOICES,
+#        default="delete",
+#    )
+#    description = models.TextField(blank=True)
+#
+#    STATUS_CHOICES = [
+#        ("open", "Open"),
+#        ("closed", "Closed"),
+#    ]
+#    status = models.CharField(
+#        max_length=16,
+#        choices=STATUS_CHOICES,
+#        default="open",
+#    )
+#
+#    #
+#    created_at = models.DateTimeField(auto_now_add=True)
+#    updated_at = models.DateTimeField(auto_now=True)
+#    history = HistoricalRecords()
 
 
 # Notification
 class Notification(models.Model):
 
-    name = models.TextField(blank=True)
+    # name = models.TextField(blank=True) # TODO: Is this needed?
 
     # CATEGORY_CHOICES = [
     #    ("jokutoimiala", "Jokutoimiala"),
@@ -53,7 +53,7 @@ class Notification(models.Model):
     # )
 
     # notification_type
-    geom = models.PointField()  # TODO: SRID
+    location = models.PointField()  # TODO: SRID
 
     # schema id & version
     data = JSONField()

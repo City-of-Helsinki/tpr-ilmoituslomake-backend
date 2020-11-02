@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 
@@ -73,14 +74,10 @@ class NotificationRetrieveView(RetrieveAPIView):
     Returns a single Notification instance
     """
 
+    lookup_field = "id"
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # permission_classes =
-
-    def get(self, request):
-        queryset = self.get_queryset()
-        serializer = NotificationSerializer(queryset)
-        return Response(serializer.data)
 
 
 class NotificationListView(ListAPIView):
@@ -91,8 +88,3 @@ class NotificationListView(ListAPIView):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # permission_classes =
-
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = NotificationSerializer(queryset, many=True)
-        return Response(serializer.data)

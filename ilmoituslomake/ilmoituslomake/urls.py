@@ -37,7 +37,7 @@ urlpatterns += [
         notification_form_views.NotificationCreateView.as_view(),
     ),
     path(
-        "api/notification/get/",
+        "api/notification/get/<int:id>/",
         notification_form_views.NotificationRetrieveView.as_view(),
     ),
     path(
