@@ -82,7 +82,7 @@ class Notification(models.Model):
 class NotificationSchema(models.Model):
 
     name = models.TextField(blank=True)
-    schema = models.TextField(blank=True)
+    schema = JSONField()
 
     #
     created_at = models.DateTimeField(auto_now_add=True)

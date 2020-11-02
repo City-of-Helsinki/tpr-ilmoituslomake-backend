@@ -19,20 +19,8 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ("id", "location", "data")
 
     def validate_data(self, data):
-        # TODO: Get JSON Schema from Database
-        schema = {
-            "$id": "<url>",
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "description": "<description>",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "street_address": {"type": "string"},
-                "postal_address": {"type": "string"},
-            },
-            "required": ["name", "street_address", "postal_address"],
-        }
-
+        # TODO: Improve
+        schema = NotificationSchema.objects.get(pk=1).schema
         # Validate
         try:
             # Generic JSON-Schema validation

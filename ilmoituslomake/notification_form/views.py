@@ -52,6 +52,7 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     Returns the schema for form data
     """
 
+    lookup_field = "id"
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
 
