@@ -46,6 +46,6 @@ data
 Notification example
 
 ```
-location: {"type":"Point":"coordinates":[125.6,10.1]}
+location: {"type":"Point","coordinates":[125.6,10.1]}
 data: {"name":"Piippolan talo","street_address": "Tiekatu 123","postal_address":"Tiekatu 123"}
 ```
