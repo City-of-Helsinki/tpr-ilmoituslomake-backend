@@ -1,0 +1,71 @@
+{
+  "tpr_id": "???",
+  "unit_id": "???",
+  "contract_category": "???",
+  "contract_subcategory": "???",
+  "name": {
+    "fi": "string",
+    "sv": "string",
+    "en": "string"
+  },
+  "external_source": "string",
+  "description": {
+    "fi": "string",
+    "sv": "string",
+    "en": "string"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      12,
+      34
+    ]
+  },
+  "street_address": "string",
+  "postal_address": "string",
+  "phone": "string",
+  "fax": "string",
+  "email": "string",
+  "website": {
+      "fi" : "string",
+      "sv": "string",
+      "en": "string"
+  },
+  "images": {
+    "main": {
+      "url": "",
+      "caption": {
+        "fi": "string",
+        "sv": "string",
+        "en": "string"
+      }
+    },
+    "others": []
+  },
+  "google_street_view": "string",
+  "opening_times": {
+    "regular": "???",
+    "exceptions": "???"
+  },
+  "price": "???",
+  "keywords": {
+    "fi": [
+      "string"
+    ],
+    "sv": [
+      "string"
+    ],
+    "en": [
+      "string"
+    ]
+  },
+  "comments": "string",
+  "reporter": {
+    "name": "string",
+    "email": "string",
+    "organization?": "string",
+    "phone?": "string"
+  },
+  "updated_at": "string",
+  "created_at": "string"
+}

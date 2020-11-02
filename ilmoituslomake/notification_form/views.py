@@ -29,6 +29,39 @@ class HelloView(RetrieveAPIView):
         return Response(content)
 
 
+class ApiDemoView(RetrieveAPIView):
+    """
+    A view that returns a mock up of our dataformat
+    """
+
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        content = {
+            "name": {"fi": "string", "sv": "string", "en": "string"},
+            "external_source": "string",  ## ???
+            "description": {"fi": "string", "sv": "string", "en": "string"},
+            "location": {"type": "Point", "coordinates": [12, 34]},
+            "street_address": "string",
+            "postal_address": "string",
+            "phone": "string",
+            "fax": "string",
+            "email": "string",
+            "website": "string",
+            "images": {
+                "main": {
+                    "url": "",
+                    "caption": {"fi": "string", "sv": "string", "en": "string"},
+                },
+                "others": [],
+            },
+            "google_street_view": "string",
+            "opening_times": {"regular": "???", "exceptions": "???"},
+            "keywords": {"fi": ["string"], "sv": ["string"], "en": ["string"]},
+        }
+        return Response(content)
+
+
 class NotificationSchemaCreateView(CreateAPIView):
     """
     Create a Notification instance
