@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from base.models import Notification
+from base.models import Notification, NotificationSchema
 from django.contrib.gis.db.models.functions import AsGeoJSON
 
 # from django.contrib.gis.geos import GEOSGeometry
 from jsonschema import validate
+
+
+# TODO: This is temp
+class NotificationSchemaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationSchema
+        fields = ("id", "name", "schema")
 
 
 class NotificationSerializer(serializers.ModelSerializer):

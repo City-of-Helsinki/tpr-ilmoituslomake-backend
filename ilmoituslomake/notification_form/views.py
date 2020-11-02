@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 
 #
-from base.models import Notification
-from base.serializers import NotificationSerializer
+from base.models import Notification, NotificationSchema
+from base.serializers import NotificationSerializer, NotificationSchemaSerializer
 
 
 # TODO: Remove
@@ -25,26 +25,35 @@ class HelloView(RetrieveAPIView):
         return Response(content)
 
 
-class FormSchemaView(RetrieveAPIView):
+class NotificationSchemaCreateView(CreateAPIView):
+    """
+    Create a Notification instance
+    """
+
+    queryset = NotificationSchema.objects.all()
+    serializer_class = NotificationSchemaSerializer
+    # permission_classes =
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class NotificationSchemaRetrieveView(RetrieveAPIView):
     """
     Returns the schema for form data
     """
 
-    # TODO: Get from database
-    def get(self, request):
-        content = {
-            "$id": "<url>",
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "description": "<description>",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "street_address": {"type": "string"},
-                "postal_address": {"type": "string"},
-            },
-            "required": ["name", "street_address", "postal_address"],
-        }
-        return Response(content)
+    queryset = NotificationSchema.objects.all()
+    serializer_class = NotificationSchemaSerializer
 
 
 class NotificationCreateView(CreateAPIView):

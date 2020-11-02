@@ -30,7 +30,14 @@ urlpatterns += [
 # Notification Form App
 urlpatterns += [
     path("api/hello/", notification_form_views.HelloView.as_view()),
-    path("api/schema/", notification_form_views.FormSchemaView.as_view()),
+    path(
+        "api/schema/get/<int:id>/",
+        notification_form_views.NotificationSchemaRetrieveView.as_view(),
+    ),
+    path(
+        "api/schema/create/",
+        notification_form_views.NotificationSchemaCreateView.as_view(),
+    ),
     # notifications
     path(
         "api/notification/create/",
