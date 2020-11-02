@@ -38,6 +38,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "helusers.apps.HelusersConfig",
+    "helusers.apps.HelusersAdminConfig",
+    "users",
     # DRF
     "rest_framework",
     # Django
@@ -54,7 +57,10 @@ INSTALLED_APPS = [
     # Our apps
     "base",
     "notification_form",
+    "social_django",
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -142,10 +148,51 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+# Authentication
+SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
+
+AUTHENTICATION_BACKENDS = [
+    "helusers.tunnistamo_oidc.TunnistamoOIDCAuth",
+    "django.contrib.auth.backends.ModelBackend",
+]
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# SOCIAL_AUTH_TUNNISTAMO_KEY = 'https://i/am/clientid/in/url/style' # env
+# SOCIAL_AUTH_TUNNISTAMO_SECRET = 'iamyoursecret' # env
+# SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = 'https://tunnistamo.example.com/' # env
+
+# OIDC_API_TOKEN_AUTH = {
+#    # Audience that must be present in the token for the request to be
+#    # accepted. Value must be agreed between your SSO service and your
+#    # application instance. Essentially this allows your application to
+#    # know that the token in meant to be used with it.
+#    'AUDIENCE': 'https://api.hel.fi/auth/projects',
+#    # Who we trust to sign the tokens. The library will request the
+#    # public signature keys from standard locations below this URL
+#    'ISSUER': 'https://api.hel.fi/sso'
+#    # The following can be used if you need certain OAuth2 scopes
+#    # for any functionality of the API. The request will be denied
+#    # if scopes starting with API_SCOPE_PREFIX are not present
+#    # in the token claims. Usually this is not needed, as checking
+#    # the audience is enough.
+#     REQUIRE_API_SCOPE_FOR_AUTHENTICATION': True,
+#    'API_SCOPE_PREFIX': 'projects',
+# }
+
+SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
+    "ui_locales": "fi"
+}  # query param = ui_locales=<language code>
+# HELUSERS_PASSWORD_LOGIN_DISABLED = True
+
 # Django REST Framework
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
+    #    'DEFAULT_AUTHENTICATION_CLASSES': (
+    #        'helusers.oidc.ApiTokenAuthentication',
+    #        'rest_framework.authentication.SessionAuthentication',
+    #    ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",  # TODO: Implement permissions
     ]

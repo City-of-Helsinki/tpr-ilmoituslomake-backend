@@ -27,6 +27,12 @@ urlpatterns += [
     path("admin/", admin.site.urls),
 ]
 
+# Authentication
+urlpatterns += [
+    path("pysocial/", include("social_django.urls", namespace="social")),
+    path("helauth/", include("helusers.urls")),
+]
+
 # Notification Form App
 urlpatterns += [
     path("api/hello/", notification_form_views.HelloView.as_view()),
