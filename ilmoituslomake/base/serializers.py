@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from base.models import Notification, NotificationSchema
-from django.contrib.gis.db.models.functions import AsGeoJSON
-
-# from django.contrib.gis.geos import GEOSGeometry
+import json
 from jsonschema import validate
 
 
@@ -29,3 +27,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(e)
 
         return data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # show geometry as geojson
+        ret["location"] = json.loads(instance.location.json)
+        return ret
