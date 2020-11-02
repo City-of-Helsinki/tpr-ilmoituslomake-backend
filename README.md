@@ -35,8 +35,17 @@ data
 	"properties": {
 		"name": {"type": "string"},
 		"street_address": {"type": "string"},
-		"postal_address": {"type": "string"},
+		"postal_address": {"type": "string"}
 	},
-	"required": ["name", "street_address", "postal_address"],
+	"required": ["name", "street_address", "postal_address"]
 }
+```
+
+### Example
+
+Notification example
+
+```
+location: {"type":"Point":"coordinates":[125.6,10.1]}
+data: {"name":"Piippolan talo","street_address": "Tiekatu 123","postal_address":"Tiekatu 123"}
 ```

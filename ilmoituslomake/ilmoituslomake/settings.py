@@ -38,8 +38,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # DRF
+    # DRF + DRF GIS
     "rest_framework",
+    "rest_framework_gis",
     # Django
     "django.contrib.admin",
     "django.contrib.auth",
