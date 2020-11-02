@@ -34,12 +34,17 @@ class ApiDemoView(RetrieveAPIView):
     A view that returns a mock up of our dataformat
     """
 
+    permission_classes = [AllowAny]
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
         content = {
+            "tpr_id": "???",
+            "unit_id": "???",
+            "contract_category": "???",
+            "contract_subcategory": "???",
             "name": {"fi": "string", "sv": "string", "en": "string"},
-            "external_source": "string",  ## ???
+            "external_source": "???",
             "description": {"fi": "string", "sv": "string", "en": "string"},
             "location": {"type": "Point", "coordinates": [12, 34]},
             "street_address": "string",
@@ -47,7 +52,7 @@ class ApiDemoView(RetrieveAPIView):
             "phone": "string",
             "fax": "string",
             "email": "string",
-            "website": "string",
+            "website": {"fi": "string", "sv": "string", "en": "string"},
             "images": {
                 "main": {
                     "url": "",
@@ -57,7 +62,17 @@ class ApiDemoView(RetrieveAPIView):
             },
             "google_street_view": "string",
             "opening_times": {"regular": "???", "exceptions": "???"},
+            "price": "???",
             "keywords": {"fi": ["string"], "sv": ["string"], "en": ["string"]},
+            "comments": "string",
+            "reporter": {
+                "name": "string",
+                "email": "string",
+                "organization?": "string",
+                "phone?": "string",
+            },
+            "updated_at": "string",
+            "created_at": "string",
         }
         return Response(content)
 
