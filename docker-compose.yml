@@ -18,11 +18,12 @@ services:
 
     # tpr-ilmoituslomake
     tpr-ilmoituslomake:
+        hostname: tpr-ilmoituslomake
         build:
             context: .
             dockerfile: Dockerfile
-        hostname: tpr-ilmoituslomake
         command: bash -c "./run_web.sh"
+        restart: always
         depends_on:
             - tpr-ilmoituslomake-db
         env_file:
@@ -32,5 +33,20 @@ services:
         volumes:
             - ./ilmoituslomake:/app
             - ./local_dev/run_web.sh:/app/run_web.sh
+        networks:
+            - default
+
+    # tpr-reverse-proxy
+    tpr-reverse-proxy:
+        hostname: tpr-reverse-proxy
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile.nginx
+        restart: always
+        depends_on:
+            - tpr-ilmoituslomake
+            - tpr-ilmoituslomake-db
+        ports:
+            - 80:80
         networks:
             - default
