@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     # DRF
     "rest_framework",
     # Django
-    "django.contrib.admin",
+    # "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -100,7 +100,7 @@ WSGI_APPLICATION = "ilmoituslomake.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",  # "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": env("DB_ENV_DB"),
         "USER": env("DB_ENV_POSTGRES_USER"),
         "PASSWORD": env("DB_ENV_POSTGRES_PASSWORD"),
@@ -132,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "fi-FI"
 
 TIME_ZONE = "UTC"
 
@@ -193,7 +193,5 @@ REST_FRAMEWORK = {
     #        'helusers.oidc.ApiTokenAuthentication',
     #        'rest_framework.authentication.SessionAuthentication',
     #    ),
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",  # TODO: Implement permissions
-    ]
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"]
 }

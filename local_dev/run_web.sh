@@ -6,7 +6,7 @@
 sleep 10
 
 # prepare init migration
-python manage.py makemigrations base
+python manage.py makemigrations users base
 # migrate db, so we have the latest db schema
 python manage.py migrate
 # start development server on public ip interface, on port 8008
