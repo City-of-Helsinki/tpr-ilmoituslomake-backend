@@ -19,8 +19,6 @@
 
 ##
 
-localhost/admin/login/?next=/
-
 # Navigate to
 
 ```

@@ -21,7 +21,7 @@ class HelloView(RetrieveAPIView):
     A view that returns Hello! message in JSON.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     renderer_classes = [JSONRenderer]
 
     def get(self, request):

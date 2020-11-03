@@ -16,8 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from users import views as users_views
 from notification_form import views as notification_form_views
-
 
 urlpatterns = []
 
@@ -31,6 +31,7 @@ urlpatterns += [
 urlpatterns += [
     path("pysocial/", include("social_django.urls", namespace="social")),
     path("helauth/", include("helusers.urls")),
+    path("api/user/", users_views.UserView.as_view()),
 ]
 
 # Notification Form App
