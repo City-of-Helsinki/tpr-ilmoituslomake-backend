@@ -139,9 +139,22 @@
             "additionalProperties": true
         },
         "price": {
-          "fi": "object",
-          "sv": "object",
-          "en": "object"
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "string",
+                    "maxLength": 4000
+                },
+                "sv": {
+                    "type": "string",
+                    "maxLength": 4000
+                },
+                "en": {
+                    "type": "string",
+                    "maxLength": 4000
+                }
+          },
+          "required": ["fi", "sv", "en"]
         },
         "ontology_ids": {
             "type": "array",
