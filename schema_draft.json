@@ -1,71 +1,61 @@
 {
-  "tpr_id": "???",
-  "unit_id": "???",
-  "contract_category": "???",
-  "contract_subcategory": "???",
+  "id": "number",
+  "status": "string",
+  "action": "string",
+  "published": "bool",
+  "organization": "object",
+  "reporter": "object",
+  "moderator": "object",
   "name": {
     "fi": "string",
     "sv": "string",
     "en": "string"
   },
-  "external_source": "???",
   "description": {
-    "fi": "string",
-    "sv": "string",
-    "en": "string"
+    "short": {
+      "fi": "string",
+      "sv": "string",
+      "en": "string"
+    },
+    "long": {
+      "fi": "string",
+      "sv": "string",
+      "en": "string"
+    }
   },
-  "location": {
-    "type": "Point",
-    "coordinates": [
+  "location": [
       12,
       34
-    ]
+   ],
+  "district": "object",
+  "address": {
+    "fi": {
+      "street": "string",
+      "postal_code": "string",
+      "post_office": "string"
+    },
+    "sv": {
+      "street": "string",
+      "postal_code": "string",
+      "post_office": "string"
+    }
   },
-  "street_address": "string",
-  "postal_address": "string",
   "phone": "string",
-  "fax": "string",
   "email": "string",
   "website": {
       "fi" : "string",
       "sv": "string",
       "en": "string"
   },
-  "images": {
-    "main": {
-      "url": "",
-      "caption": {
-        "fi": "string",
-        "sv": "string",
-        "en": "string"
-      }
-    },
-    "others": []
+  "images": "object",
+  "opening_times": "object",
+  "price": {
+    "fi": "object",
+    "sv": "object",
+    "en": "object"
   },
-  "google_street_view": "string",
-  "opening_times": {
-    "regular": "???",
-    "exceptions": "???"
-  },
-  "price": "???",
-  "keywords": {
-    "fi": [
-      "string"
-    ],
-    "sv": [
-      "string"
-    ],
-    "en": [
-      "string"
-    ]
-  },
+  "ontology_ids": "array",
   "comments": "string",
-  "reporter": {
-    "name": "string",
-    "email": "string",
-    "organization?": "string",
-    "phone?": "string"
-  },
   "updated_at": "string",
   "created_at": "string"
 }
