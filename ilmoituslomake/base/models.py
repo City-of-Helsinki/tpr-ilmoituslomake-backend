@@ -1,9 +1,61 @@
 from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
-
-# from django.contrib.gis.db.models import PointField
-# from django.db import models
 from simple_history.models import HistoricalRecords
+from users.models import User
+
+
+# Notification
+class Notification(models.Model):
+
+    # revision number
+    revision = models.IntegerField(default=0)
+
+    # notification status
+    STATUS_CHOICES = [
+        ("created", "created"),
+        ("modified", "modified"),
+        ("approved", "approved"),
+    ]
+    status = models.CharField(
+        max_length=16, choices=STATUS_CHOICES, default="created", db_index=True
+    )
+
+    # is published - only approved & published items are show in API
+    published = models.BooleanField(default=False, db_index=True)
+
+    # last action performed
+    action = models.CharField(max_length=16, blank=True)
+    location = models.PointField(srid=4326)
+
+    moderator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+
+    comments = models.TextField(blank=True)
+
+    schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
+    schema_revision = models.IntegerField()
+    data = JSONField()
+
+    #
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    history = HistoricalRecords()
+
+
+# JsonSchema
+class NotificationSchema(models.Model):
+
+    # revision number
+    revision = models.IntegerField(default=0)
+
+    # description of the schema
+    name = models.TextField(blank=True)
+    schema = JSONField()
+
+    #
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
 
 # ChangeRequest
@@ -36,55 +88,3 @@ from simple_history.models import HistoricalRecords
 #    created_at = models.DateTimeField(auto_now_add=True)
 #    updated_at = models.DateTimeField(auto_now=True)
 #    history = HistoricalRecords()
-
-
-# Notification
-class Notification(models.Model):
-
-    # name = models.TextField(blank=True) # TODO: Is this needed?
-
-    # CATEGORY_CHOICES = [
-    #    ("jokutoimiala", "Jokutoimiala"),
-    # ]
-    # category = models.CharField(
-    #    max_length=32,
-    #    choices=CATEGORY_CHOICES,
-    #    default="jokutoimiala",
-    # )
-
-    # notification_type
-    location = models.PointField()  # TODO: SRID
-
-    # schema id & version
-    data = JSONField()
-
-    # STATUS_CHOICES = [
-    #    ("new", "New"),
-    #    ("modified", "Modified"),
-    #    ("approved", "Approved"),
-    # ]
-    # status = models.CharField(
-    #    max_length=16,
-    #    choices=STATUS_CHOICES,
-    #    default="new",
-    # )
-
-    # user
-    # action
-
-    #
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    history = HistoricalRecords()
-
-
-# JsonSchema
-class NotificationSchema(models.Model):
-
-    name = models.TextField(blank=True)
-    schema = JSONField()
-
-    #
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    history = HistoricalRecords()

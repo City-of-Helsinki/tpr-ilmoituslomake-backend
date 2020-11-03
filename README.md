@@ -39,6 +39,54 @@ data
 		"postal_address": {"type": "string"}
 	},
 	"required": ["name", "street_address", "postal_address"]
+	{
+  "organization": "object",
+  "name": {
+    "fi": "string",
+    "sv": "string",
+    "en": "string"
+  },
+  "description": {
+    "short": {
+      "fi": "string",
+      "sv": "string",
+      "en": "string"
+    },
+    "long": {
+      "fi": "string",
+      "sv": "string",
+      "en": "string"
+    }
+  },
+  "district": "object",
+  "address": {
+    "fi": {
+      "street": "string",
+      "postal_code": "string",
+      "post_office": "string"
+    },
+    "sv": {
+      "street": "string",
+      "postal_code": "string",
+      "post_office": "string"
+    }
+  },
+  "phone": "string",
+  "email": "string",
+  "website": {
+      "fi" : "string",
+      "sv": "string",
+      "en": "string"
+  },
+  "images": "object",
+  "opening_times": "object",
+  "price": {
+    "fi": "object",
+    "sv": "object",
+    "en": "object"
+  },
+  "ontology_ids": "array"
+}
 }
 ```
 
