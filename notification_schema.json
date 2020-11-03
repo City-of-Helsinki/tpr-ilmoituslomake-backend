@@ -1,0 +1,166 @@
+{
+	"$id": "<url>",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Notification Schema",
+	"description": "<description>",
+	"type": "object",
+	"properties": {
+        "organization": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "fi": {
+                "type": "string"
+            },
+            "sv": {
+                "type": "string"
+            },
+            "en": {
+                "type": "string"
+            }
+          },
+          "required": ["fi", "sv", "en"]
+        },
+        "description": {
+            "type": "object",
+            "properties": {
+                "short": {
+                    "type": "object",
+                    "properties": {
+                        "fi": {
+                            "type": "string",
+                            "maxLength": 150
+                        },
+                        "sv": {
+                            "type": "string",
+                            "maxLength": 150
+                        },
+                        "en": {
+                            "type": "string",
+                            "maxLength": 150
+                        }
+                    },
+                    "required": ["fi", "sv", "en"]
+                },
+                "long": {
+                    "type": "object",
+                    "properties": {
+                        "fi": {
+                            "type": "string",
+                            "maxLength": 4000
+                        },
+                        "sv": {
+                            "type": "string",
+                            "maxLength": 4000
+                        },
+                        "en": {
+                            "type": "string",
+                            "maxLength": 4000
+                        }
+                    },
+                    "required": ["fi", "sv", "en"]
+                }
+            },
+            "required": ["short", "long"]        
+        },
+        "address": {
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "object",
+                    "properties": {
+                        "street": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "type": "string",
+                            "regex": "^[0-9][0-9][0-9][0-9][0-9]$"
+                        },
+                        "post_office": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["street", "postal_code", "post_office"]
+                },
+                "sv": {
+                    "type": "object",
+                    "properties": {
+                        "street": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "type": "string",
+                            "regex": "^[0-9][0-9][0-9][0-9][0-9]$"
+                        },
+                        "post_office": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["street", "postal_code", "post_office"]
+                }
+            },
+            "required": ["fi", "sv"]
+        },
+        "phone": {
+            "type": "string",
+            "regex": "^\\+?[0-9- ]+$"
+        },
+        "email": {
+            "type": "string",
+            "format": "idn-email"
+        },
+        "website": {
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "string",
+                    "format": "iri-reference"
+                },
+                "sv": {
+                    "type": "string",
+                    "format": "iri-reference"
+                },
+                "en": {
+                    "type": "string",
+                    "format": "iri-reference"
+                }
+            },
+            "required": ["fi", "sv", "en"]
+        },
+        "images": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "opening_times": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "price": {
+          "fi": "object",
+          "sv": "object",
+          "en": "object"
+        },
+        "ontology_ids": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+	"required": [
+        "organization",
+        "name",
+        "description",
+        "address",
+        "phone",
+        "email",
+        "website",
+        "images",
+        "opening_times",
+        "price",
+        "ontology_ids"
+    ]
+}
