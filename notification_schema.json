@@ -143,18 +143,29 @@
             "properties": {
                 "fi": {
                     "type": "string",
-                    "maxLength": 4000
+                    "maxLength": 500
                 },
                 "sv": {
                     "type": "string",
-                    "maxLength": 4000
+                    "maxLength": 500
                 },
                 "en": {
                     "type": "string",
-                    "maxLength": 4000
+                    "maxLength": 500
                 }
           },
           "required": ["fi", "sv", "en"]
+        },
+        "payment_options": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "ontology_ids": {
             "type": "array",
@@ -174,6 +185,7 @@
         "images",
         "opening_times",
         "price",
+        "payment_options",
         "ontology_ids"
     ]
 }
