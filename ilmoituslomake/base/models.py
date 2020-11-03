@@ -23,20 +23,23 @@ class Notification(models.Model):
     # is published - only approved & published items are show in API
     published = models.BooleanField(default=False, db_index=True)
 
-    # last action performed
-    action = models.CharField(max_length=16, blank=True)
+    # coordinates
     location = models.PointField(srid=4326)
 
+    # last action performed and last users
+    action = models.CharField(max_length=16, blank=True)
     moderator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
+    #
     comments = models.TextField(blank=True)
 
+    # json data
     schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
     schema_revision = models.IntegerField()
     data = JSONField()
 
-    #
+    # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     history = HistoricalRecords()
