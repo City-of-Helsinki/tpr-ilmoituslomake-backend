@@ -24,6 +24,14 @@
           },
           "required": ["fi", "sv", "en"]
         },
+        "location": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+                "type": "number"
+            } 
+        },
         "description": {
             "type": "object",
             "properties": {
@@ -172,11 +180,15 @@
             "items": {
                 "type": "string"
             }
+        },
+        "comments": {
+            "type": "string"
         }
     },
 	"required": [
         "organization",
         "name",
+        "location",
         "description",
         "address",
         "phone",
@@ -186,6 +198,7 @@
         "opening_times",
         "price",
         "payment_options",
-        "ontology_ids"
+        "ontology_ids",
+        "comments"
     ]
 }

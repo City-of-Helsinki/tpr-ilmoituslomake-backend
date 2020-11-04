@@ -31,8 +31,8 @@ class Notification(models.Model):
     moderator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
-    #
-    comments = models.TextField(blank=True)
+    # TODO: Remove?
+    # comments = models.TextField(blank=True)
 
     # json data
     schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)

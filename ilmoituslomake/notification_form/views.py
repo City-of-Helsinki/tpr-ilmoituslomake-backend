@@ -13,7 +13,7 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 #
 from base.models import Notification, NotificationSchema
 from base.serializers import NotificationSerializer, NotificationSchemaSerializer
-
+from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
 
 # TODO: Remove
 class HelloView(RetrieveAPIView):
@@ -143,7 +143,6 @@ class NotificationRetrieveView(RetrieveAPIView):
     lookup_field = "id"
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    # permission_classes =
 
 
 class NotificationListView(ListAPIView):
@@ -154,4 +153,27 @@ class NotificationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    # permission_classes =
+
+
+## ToimipisterekisteriAPI views
+
+
+class ToimipisterekisteriNotificationAPIRetrieveView(RetrieveAPIView):
+    """
+    Returns a single Notification for ToimipisterekisteriAPI
+    """
+
+    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
+    lookup_field = "id"
+    queryset = Notification.objects.all()
+    serializer_class = ToimipisterekisteriNotificationAPISerializer
+
+
+class ToimipisterekisteriNotificationAPIListView(ListAPIView):
+    """
+    Returns a collection of Notification instances for ToimipisterekisteriAPI
+    """
+
+    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
+    queryset = Notification.objects.all()
+    serializer_class = ToimipisterekisteriNotificationAPISerializer
