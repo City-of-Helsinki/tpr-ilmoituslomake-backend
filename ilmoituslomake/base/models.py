@@ -48,12 +48,13 @@ class Notification(models.Model):
 
     # last action performed and last users
     action = models.CharField(max_length=16, blank=True)
-    moderator = models.ForeignKey(
-        User, related_name="moderated", on_delete=models.DO_NOTHING
-    )
-    reporter = models.ForeignKey(
-        User, related_name="reported", on_delete=models.DO_NOTHING
-    )
+
+    # moderator = models.ForeignKey(
+    #    User, related_name="moderated", on_delete=models.DO_NOTHING
+    # )
+    # reporter = models.ForeignKey(
+    #    User, related_name="reported", on_delete=models.DO_NOTHING
+    # )
 
     # TODO: Remove?
     # comments = models.TextField(blank=True)
