@@ -82,7 +82,7 @@ class NotificationSchemaCreateView(CreateAPIView):
     Create a Notification instance
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
     # permission_classes =
@@ -105,7 +105,7 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     Returns the schema for form data
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     lookup_field = "id"
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
@@ -116,7 +116,7 @@ class NotificationCreateView(CreateAPIView):
     Create a Notification instance
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # permission_classes =
@@ -139,7 +139,7 @@ class NotificationRetrieveView(RetrieveAPIView):
     Returns a single Notification instance
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     lookup_field = "id"
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
@@ -150,7 +150,7 @@ class NotificationListView(ListAPIView):
     Returns a collection of Notification instances
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
