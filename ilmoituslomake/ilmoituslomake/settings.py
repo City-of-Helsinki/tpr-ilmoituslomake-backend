@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     # Our apps
     "base",
     "notification_form",
+    "moderation",
     "social_django",
 ]
 
