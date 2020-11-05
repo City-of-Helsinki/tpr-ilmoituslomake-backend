@@ -8,6 +8,22 @@ from simple_history.models import HistoricalRecords
 from users.models import User
 
 
+# JsonSchema
+class NotificationSchema(models.Model):
+
+    # revision number
+    revision = models.IntegerField(default=0)
+
+    # description of the schema
+    name = models.TextField(blank=True)
+    schema = JSONField()
+
+    #
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
+
+
 # Notification
 class Notification(models.Model):
 
@@ -32,8 +48,12 @@ class Notification(models.Model):
 
     # last action performed and last users
     action = models.CharField(max_length=16, blank=True)
-    moderator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    moderator = models.ForeignKey(
+        User, related_name="moderated", on_delete=models.DO_NOTHING
+    )
+    reporter = models.ForeignKey(
+        User, related_name="reported", on_delete=models.DO_NOTHING
+    )
 
     # TODO: Remove?
     # comments = models.TextField(blank=True)
@@ -57,22 +77,6 @@ class Notification(models.Model):
         )
         # Save
         super().save(*args, **kwargs)
-
-
-# JsonSchema
-class NotificationSchema(models.Model):
-
-    # revision number
-    revision = models.IntegerField(default=0)
-
-    # description of the schema
-    name = models.TextField(blank=True)
-    schema = JSONField()
-
-    #
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    history = HistoricalRecords()
 
 
 # ChangeRequest
