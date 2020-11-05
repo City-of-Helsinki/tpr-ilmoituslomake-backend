@@ -61,7 +61,7 @@ class Notification(models.Model):
 
     # json data
     schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
-    schema_revision = models.IntegerField()
+    # schema_revision = models.IntegerField()
     data = JSONField()
 
     # auto-fields
@@ -73,8 +73,9 @@ class Notification(models.Model):
     def save(self, *args, **kwargs):
         # Auto-update location
         # TODO: Handle error
+        self.revision += 1
         self.location = GEOSGeometry(
-            json.dumps({"type": "Point", "coordinates": self.data.location})
+            json.dumps({"type": "Point", "coordinates": self.data["location"]})
         )
         # Save
         super().save(*args, **kwargs)
