@@ -60,7 +60,7 @@ class Notification(models.Model):
     # comments = models.TextField(blank=True)
 
     # json data
-    schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
+    # schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
     # schema_revision = models.IntegerField()
     data = JSONField()
 
