@@ -3,7 +3,7 @@
 # run Django development server
 
 # wait for PSQL server to start
-sleep 10
+sleep 20
 
 # prepare init migration
 python manage.py makemigrations users base
