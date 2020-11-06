@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     # GIS
     "django.contrib.gis",
     # Third-party apps
+    "django_filters",
     "simple_history",
     # Our apps
     "base",
@@ -194,5 +195,7 @@ REST_FRAMEWORK = {
     #        'helusers.oidc.ApiTokenAuthentication',
     #        'rest_framework.authentication.SessionAuthentication',
     #    ),
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"]
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100,
 }
