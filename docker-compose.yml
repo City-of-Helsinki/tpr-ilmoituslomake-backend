@@ -54,6 +54,8 @@ services:
         build:
             context: ./nginx
             dockerfile: Dockerfile.nginx
+        environment:
+            - HOSTIP=$HOSTIP
         restart: always
         depends_on:
             - tpr-ilmoituslomake
