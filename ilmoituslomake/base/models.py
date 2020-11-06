@@ -47,7 +47,7 @@ class Notification(models.Model):
     location = models.PointField(srid=4326)
 
     # last action performed and last users
-    action = models.CharField(max_length=16, blank=True)
+    action = models.CharField(max_length=16, blank=True, db_index=True)
 
     # moderator = models.ForeignKey(
     #    User, related_name="moderated", on_delete=models.DO_NOTHING
