@@ -22,7 +22,7 @@
                 "type": "string"
             }
           },
-          "required": ["fi", "sv", "en"]
+          "required": ["fi"]
         },
         "location": {
             "type": "array",
@@ -51,7 +51,7 @@
                             "maxLength": 150
                         }
                     },
-                    "required": ["fi", "sv", "en"]
+                    "required": ["fi"]
                 },
                 "long": {
                     "type": "object",
@@ -69,7 +69,7 @@
                             "maxLength": 4000
                         }
                     },
-                    "required": ["fi", "sv", "en"]
+                    "required": ["fi"]
                 }
             },
             "required": ["short", "long"]        
@@ -110,7 +110,7 @@
                     "required": ["street", "postal_code", "post_office"]
                 }
             },
-            "required": ["fi", "sv"]
+            "required": ["fi"]
         },
         "phone": {
             "type": "string",
@@ -136,7 +136,7 @@
                     "format": "uri"
                 }
             },
-            "required": ["fi", "sv", "en"]
+            "required": ["fi"]
         },
         "images": {
             "type": "object",
@@ -162,7 +162,7 @@
                     "maxLength": 500
                 }
           },
-          "required": ["fi", "sv", "en"]
+          "required": ["fi"]
         },
         "payment_options": {
             "type": "array",
