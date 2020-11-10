@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from base.models import Notification, NotificationSchema
+from base.models import Notification, NotificationSchema, OntologyWord
 import json
 from jsonschema import validate
+
+
+class OntologyWordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OntologyWord
+        fields = ("id", "data")
 
 
 # TODO: This is temp
