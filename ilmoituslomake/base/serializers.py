@@ -7,7 +7,11 @@ from jsonschema import validate
 class OntologyWordSerializer(serializers.ModelSerializer):
     class Meta:
         model = OntologyWord
-        fields = ("id", "data")
+        fields = ("data",)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        return ret["data"]
 
 
 # TODO: This is temp
