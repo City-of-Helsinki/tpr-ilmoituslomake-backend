@@ -16,6 +16,9 @@ from base.models import Notification, NotificationSchema
 from base.serializers import NotificationSerializer, NotificationSchemaSerializer
 from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
 
+#
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 # TODO: Remove
 class HelloView(RetrieveAPIView):
     """
@@ -112,6 +115,12 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
+# TODO: Remove once authentication is implemented
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
+
 class NotificationCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -120,7 +129,8 @@ class NotificationCreateView(CreateAPIView):
     permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    # permission_classes =
+    # TODO: Remove once authentication is implemented
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

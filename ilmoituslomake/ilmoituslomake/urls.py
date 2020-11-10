@@ -19,8 +19,6 @@ from django.urls import path, include
 from users import views as users_views
 from notification_form import views as notification_form_views
 
-from django.views.decorators.csrf import csrf_exempt
-
 urlpatterns = []
 
 # Django Admin
@@ -51,8 +49,7 @@ urlpatterns += [
     # notifications
     path(
         "api/notification/create/",
-        # TODO: Remove csrf exempt once proper authentication backend has been implemented
-        csrf_exempt(notification_form_views.NotificationCreateView.as_view()),
+        notification_form_views.NotificationCreateView.as_view(),
     ),
     path(
         "api/notification/get/<int:id>/",
