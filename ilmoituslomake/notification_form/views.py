@@ -185,7 +185,7 @@ class OntologyWordListView(ListAPIView):
     filter_backends = [filters.SearchFilter]
     # TODO: Add more search fields
     # TODO: Create migration which generates indices for JSON data
-    search_fields = ["ontologyword__fi"]
+    search_fields = ["data__ontologyword__fi"]
 
 
 ## ToimipisterekisteriAPI views
