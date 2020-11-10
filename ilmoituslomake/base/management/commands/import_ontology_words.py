@@ -53,22 +53,17 @@ class Command(BaseCommand):
             "description": "<description>",
             "type": "object",
             "properties": {
-                "data": {
+                "id": {"type": "number"},
+                "ontologyword": {
                     "type": "object",
                     "properties": {
-                        "id": {"type": "number"},
-                        "ontologyword": {
-                            "type": "object",
-                            "properties": {
-                                "fi": {"type": "string"},
-                                "sv": {"type": "string"},
-                                "en": {"type": "string"},
-                            },
-                        },
-                        "can_add_schoolyear": {"type": "boolean"},
-                        "can_add_clarification": {"type": "boolean"},
+                        "fi": {"type": "string"},
+                        "sv": {"type": "string"},
+                        "en": {"type": "string"},
                     },
-                }
+                },
+                "can_add_schoolyear": {"type": "boolean"},
+                "can_add_clarification": {"type": "boolean"},
             },
         }
 
@@ -85,10 +80,12 @@ class Command(BaseCommand):
             # Iterate through words (should be a list)
             save_array = []
             for word in json_data:
-                transformed_word = {"data": self.transform_data(word.copy())}
+                transformed_word = self.transform_data(word.copy())
                 validate(instance=transformed_word, schema=ontology_save_schema)
                 save_array.append(transformed_word)
 
+            # Delete
+            OntologyWord.objects.all().delete()
             # Save
             batch_size = 100
             objs = (OntologyWord(data=i) for i in save_array)
@@ -103,4 +100,6 @@ class Command(BaseCommand):
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
-            # self.stdout.write(self.style.SUCCESS('Successfully closed poll "%s"' % poll_id))
+
+        # Success
+        self.stdout.write(self.style.SUCCESS("Ontologies loaded successfully."))
