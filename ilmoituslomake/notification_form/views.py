@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework import filters
 
 #
 from base.models import Notification, NotificationSchema
@@ -147,12 +148,16 @@ class NotificationRetrieveView(RetrieveAPIView):
 
 class NotificationListView(ListAPIView):
     """
-    Returns a collection of Notification instances
+    Returns a collection of Notification instances. Search support
     """
 
     permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+    filter_backends = [filters.SearchFilter]
+    # TODO: Add more search fields
+    # TODO: Create migration which generates indices for JSON data
+    search_fields = ["data__name__fi"]
 
 
 ## ToimipisterekisteriAPI views
