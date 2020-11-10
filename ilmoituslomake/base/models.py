@@ -8,6 +8,10 @@ from simple_history.models import HistoricalRecords
 from users.models import User
 
 
+class OntologyWord(models.Model):
+    data = JSONField()
+
+
 # JsonSchema
 class NotificationSchema(models.Model):
 

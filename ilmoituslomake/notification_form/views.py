@@ -12,8 +12,12 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 from rest_framework import filters
 
 #
-from base.models import Notification, NotificationSchema
-from base.serializers import NotificationSerializer, NotificationSchemaSerializer
+from base.models import Notification, NotificationSchema, OntologyWord
+from base.serializers import (
+    NotificationSerializer,
+    NotificationSchemaSerializer,
+    OntologyWordSerializer,
+)
 from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
 
 #
@@ -168,6 +172,20 @@ class NotificationListView(ListAPIView):
     # TODO: Add more search fields
     # TODO: Create migration which generates indices for JSON data
     search_fields = ["data__name__fi"]
+
+
+class OntologyWordListView(ListAPIView):
+    """
+    Returns a collection of ontology words instances. Search support
+    """
+
+    permission_classes = [AllowAny]
+    queryset = OntologyWord.objects.all()
+    serializer_class = OntologyWordSerializer
+    filter_backends = [filters.SearchFilter]
+    # TODO: Add more search fields
+    # TODO: Create migration which generates indices for JSON data
+    search_fields = ["data__ontologyword__fi"]
 
 
 ## ToimipisterekisteriAPI views
