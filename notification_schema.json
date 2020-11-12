@@ -199,7 +199,7 @@
                 }
             }
         },
-        "ontology_words": {
+        "ontologywords": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -237,7 +237,7 @@
         "opening_times",
         "price",
         "payment_options",
-        "ontology_ids",
+        "ontologywords",
         "comments"
     ]
 }
