@@ -23,12 +23,16 @@ from base.serializers import NotificationSerializer
 class ChangeRequestListView(ListAPIView):
     """"""
 
-    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
+    permission_classes = [AllowAny]
     queryset = ChangeRequest.objects.all().filter(status="open")
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["updated_at"]
     ordering = ["-updated_at"]
     serializer_class = ChangeRequestSerializer
+
+    # TODO: Implement save()
+    # Check if Notification exists
+    # Check if authenticated
 
 
 class ModerationNotificationListView(ListAPIView):

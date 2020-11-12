@@ -3,6 +3,8 @@ from simple_history.models import HistoricalRecords
 
 from base.models import Notification
 
+from users.models import User
+
 # Create your models here.
 
 
@@ -30,6 +32,11 @@ class ChangeRequest(models.Model):
     STATUS_CHOICES = [("open", "open"), ("closed", "closed")]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
+    )
+
+    # If logged in
+    user = models.ForeignKey(
+        User, null=True, related_name="requested_change", on_delete=models.DO_NOTHING
     )
 
     #
