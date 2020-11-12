@@ -11,13 +11,27 @@ from rest_framework import filters
 from django.db.models import Q
 
 #
+from moderation.models import ChangeRequest
+from moderation.serializers import ChangeRequestSerializer
+
 from base.models import Notification
 from base.serializers import NotificationSerializer
 
 # Create your views here.
 
 
-class ModerationNotificationAPIListView(ListAPIView):
+class ChangeRequestListView(ListAPIView):
+    """"""
+
+    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
+    queryset = ChangeRequest.objects.all().filter(status="open")
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["updated_at"]
+    ordering = ["-updated_at"]
+    serializer_class = ChangeRequestSerializer
+
+
+class ModerationNotificationListView(ListAPIView):
     """
     Returns a collection of Notification instances open for moderation
     """

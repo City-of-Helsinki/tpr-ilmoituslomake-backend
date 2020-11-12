@@ -83,35 +83,3 @@ class Notification(models.Model):
         )
         # Save
         super().save(*args, **kwargs)
-
-
-# ChangeRequest
-# class ChangeRequest(models.Model):
-#
-#    # target id
-#    REQUEST_CHOICES = [
-#        ("change", "Change"),
-#        ("error", "Error"),
-#        ("delete", "Delete"),
-#    ]
-#    request = models.CharField(
-#        max_length=32,
-#        choices=REQUEST_CHOICES,
-#        default="delete",
-#    )
-#    description = models.TextField(blank=True)
-#
-#    STATUS_CHOICES = [
-#        ("open", "Open"),
-#        ("closed", "Closed"),
-#    ]
-#    status = models.CharField(
-#        max_length=16,
-#        choices=STATUS_CHOICES,
-#        default="open",
-#    )
-#
-#    #
-#    created_at = models.DateTimeField(auto_now_add=True)
-#    updated_at = models.DateTimeField(auto_now=True)
-#    history = HistoricalRecords()
