@@ -58,14 +58,17 @@
                     "properties": {
                         "fi": {
                             "type": "string",
+                            "minLength": 120,
                             "maxLength": 4000
                         },
                         "sv": {
                             "type": "string",
+                            "minLength": 120,
                             "maxLength": 4000
                         },
                         "en": {
                             "type": "string",
+                            "minLength": 120,
                             "maxLength": 4000
                         }
                     },
