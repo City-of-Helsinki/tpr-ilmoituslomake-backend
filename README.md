@@ -2,6 +2,13 @@
 
 ## About
 
+Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. People will be able to post notifications about places in Helsinki area (restaurants, travel, etc.) and after moderation process these places will be transfered to Toimipisterekisteri. This is the backend for the app.
+
+## Tech stack
+
+Backend is based on Django 2.2 LTS and Python 3.7.
+
+# Development
 
 ## Getting started
 
@@ -9,92 +16,34 @@
 * python3 -m venv venv
 * source venv/bin/activate
 * pip install -r requirements.txt
+* python manage.py runserver 0.0.0.0:8008
 
 
-## Gettings started with docker
+## Getting started with Docker
 
-* docker-compose is required
-* sudo mkdir pgdata
-* docker-compose up -d
+* Docker & docker-compose is required
+* Build: rebuild_dev.sh
+* Run: run_dev.sh
+* You need the UI: https://github.com/City-of-Helsinki/tpr-ilmoituslomake-ui/ and run it in development mode
 
-##
+# API Endpoints
 
-# Navigate to
+## Admin
 
-```
-/api/schema/create/
-```
+* /admin/, admin panel which will only available in dev
 
-data
+## Authentication
 
-```
-{
-	"$id": "<url>",
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"description": "<description>",
-	"type": "object",
-	"properties": {
-		"name": {"type": "string"},
-		"street_address": {"type": "string"},
-		"postal_address": {"type": "string"}
-	},
-	"required": ["name", "street_address", "postal_address"]
-	{
-  "organization": "object",
-  "name": {
-    "fi": "string",
-    "sv": "string",
-    "en": "string"
-  },
-  "description": {
-    "short": {
-      "fi": "string",
-      "sv": "string",
-      "en": "string"
-    },
-    "long": {
-      "fi": "string",
-      "sv": "string",
-      "en": "string"
-    }
-  },
-  "district": "object",
-  "address": {
-    "fi": {
-      "street": "string",
-      "postal_code": "string",
-      "post_office": "string"
-    },
-    "sv": {
-      "street": "string",
-      "postal_code": "string",
-      "post_office": "string"
-    }
-  },
-  "phone": "string",
-  "email": "string",
-  "website": {
-      "fi" : "string",
-      "sv": "string",
-      "en": "string"
-  },
-  "images": "object",
-  "opening_times": "object",
-  "price": {
-    "fi": "object",
-    "sv": "object",
-    "en": "object"
-  },
-  "ontology_ids": "array"
-}
-}
-```
+* /api/user/, GET current user info
 
-### Example
 
-Notification example
+# Notification Form App
 
-```
-location: {"type":"Point","coordinates":[125.6,10.1]}
-data: {"name":"Piippolan talo","street_address": "Tiekatu 123","postal_address":"Tiekatu 123"}
-```
+The current API is unstable. It will go towards CRUD model once the functional requirements have been specified.
+
+* /api/schema/get/<int:id>/, GET json schema
+* /api/schema/create/, POST create json schema
+* /api/notification/create/, POST create notification
+* /api/notification/get/<int:id>/, GET notification
+* /api/notification/list/, GET notifications
+* /api/ontologywords/, GET ontology words

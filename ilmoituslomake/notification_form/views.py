@@ -9,11 +9,19 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework import filters
 
 #
-from base.models import Notification, NotificationSchema
-from base.serializers import NotificationSerializer, NotificationSchemaSerializer
+from base.models import Notification, NotificationSchema, OntologyWord
+from base.serializers import (
+    NotificationSerializer,
+    NotificationSchemaSerializer,
+    OntologyWordSerializer,
+)
 from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
+
+#
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 # TODO: Remove
 class HelloView(RetrieveAPIView):
@@ -111,6 +119,12 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
+# TODO: Remove once authentication is implemented
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
+
 class NotificationCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -119,7 +133,8 @@ class NotificationCreateView(CreateAPIView):
     permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    # permission_classes =
+    # TODO: Remove once authentication is implemented
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -147,12 +162,30 @@ class NotificationRetrieveView(RetrieveAPIView):
 
 class NotificationListView(ListAPIView):
     """
-    Returns a collection of Notification instances
+    Returns a collection of Notification instances. Search support
     """
 
     permission_classes = [AllowAny]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+    filter_backends = [filters.SearchFilter]
+    # TODO: Add more search fields
+    # TODO: Create migration which generates indices for JSON data
+    search_fields = ["data__name__fi"]
+
+
+class OntologyWordListView(ListAPIView):
+    """
+    Returns a collection of ontology words instances. Search support
+    """
+
+    permission_classes = [AllowAny]
+    queryset = OntologyWord.objects.all()
+    serializer_class = OntologyWordSerializer
+    filter_backends = [filters.SearchFilter]
+    # TODO: Add more search fields
+    # TODO: Create migration which generates indices for JSON data
+    search_fields = ["data__ontologyword__fi"]
 
 
 ## ToimipisterekisteriAPI views

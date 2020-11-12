@@ -36,12 +36,26 @@ services:
         networks:
             - default
 
+    # tpr-ilmoituslomake-ui
+    # tpr-ilmoituslomake-ui:
+    #    hostname: tpr-ilmoituslomake-ui
+    #    image: tpr-ilmoituslomake-ui
+    #    restart: always
+    #    depends_on:
+    #        - tpr-ilmoituslomake
+    #    ports:
+    #        - 3000:3000
+    #    networks:
+    #        - default
+
     # tpr-reverse-proxy
     tpr-reverse-proxy:
         hostname: tpr-reverse-proxy
         build:
             context: ./nginx
             dockerfile: Dockerfile.nginx
+        environment:
+            - HOSTIP=$HOSTIP
         restart: always
         depends_on:
             - tpr-ilmoituslomake

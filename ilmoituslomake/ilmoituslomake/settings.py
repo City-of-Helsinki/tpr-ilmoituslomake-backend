@@ -32,7 +32,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake"]
 
 
 # Application definition
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "notification_form",
     "moderation",
     "social_django",
+    "huey.contrib.djhuey",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -197,5 +198,27 @@ REST_FRAMEWORK = {
     #    ),
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 100,
+    "PAGE_SIZE": 50,
+}
+
+HUEY = {
+    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
+    "name": DATABASES["default"]["NAME"],  # Use db name for huey.
+    "results": True,  # Store return values of tasks.
+    "store_none": False,  # If a task returns None, do not save to results.
+    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
+    "utc": True,  # Use UTC for all times internally.
+    "blocking": True,  # Perform blocking pop rather than poll Redis.
+    "connection": {"filename": "huey.sqlite3", "cache_mb": 64, "fsync": True},
+    "consumer": {
+        "workers": 1,
+        "worker_type": "thread",
+        "initial_delay": 0.1,  # Smallest polling interval, same as -d.
+        "backoff": 1.15,  # Exponential backoff using this rate, -b.
+        "max_delay": 10.0,  # Max possible polling interval, -m.
+        "scheduler_interval": 1,  # Check schedule every second, -s.
+        "periodic": True,  # Enable crontab feature.
+        "check_worker_health": True,  # Enable worker health checks.
+        "health_check_interval": 1,  # Check worker health every second.
+    },
 }

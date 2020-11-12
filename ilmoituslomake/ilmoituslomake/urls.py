@@ -70,4 +70,6 @@ urlpatterns += [
     path(
         "api/notification/list/", notification_form_views.NotificationListView.as_view()
     ),
+    # ontology words
+    path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
 ]
