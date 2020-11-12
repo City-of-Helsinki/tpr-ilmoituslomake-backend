@@ -210,7 +210,7 @@
                         "properties": {
                             "fi": {"type": "string"},
                             "sv": {"type": "string"},
-                            "en": {"type": "string"},
+                            "en": {"type": "string"}
                         },
                         "required": ["fi", "sv", "en"]
                     },
