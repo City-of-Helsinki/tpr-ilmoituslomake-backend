@@ -45,6 +45,14 @@ class Command(BaseCommand):
                     "can_add_schoolyear": {"type": "boolean"},
                     "can_add_clarification": {"type": "boolean"},
                 },
+                "required": [
+                    "id",
+                    "ontologyword_fi",
+                    "ontologyword_sv",
+                    "ontologyword_en",
+                    "can_add_schoolyear",
+                    "can_add_clarification",
+                ],
             },
         }
         ontology_save_schema = {
@@ -61,10 +69,17 @@ class Command(BaseCommand):
                         "sv": {"type": "string"},
                         "en": {"type": "string"},
                     },
+                    "required": ["fi", "sv", "en"],
                 },
                 "can_add_schoolyear": {"type": "boolean"},
                 "can_add_clarification": {"type": "boolean"},
             },
+            "required": [
+                "id",
+                "ontologyword",
+                "can_add_schoolyear",
+                "can_add_clarification",
+            ],
         }
 
         try:
