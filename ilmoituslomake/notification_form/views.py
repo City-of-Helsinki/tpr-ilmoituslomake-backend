@@ -12,6 +12,9 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 from rest_framework import filters
 
 #
+from moderation.models import ChangeRequest
+from moderation.serializers import ChangeRequestSerializer
+
 from base.models import Notification, NotificationSchema, OntologyWord
 from base.serializers import (
     NotificationSerializer,
@@ -210,3 +213,28 @@ class ToimipisterekisteriNotificationAPIListView(ListAPIView):
     permission_classes = [AllowAny]  # TODO: Require authentication & authorization
     queryset = Notification.objects.all()
     serializer_class = ToimipisterekisteriNotificationAPISerializer
+
+
+# ChangeRequest
+
+
+class ChangeRequestCreateView(CreateAPIView):
+    """
+    Create a ChangeRequest
+    """
+
+    permission_classes = [AllowAny]
+    queryset = ChangeRequest.objects.all()
+    serializer_class = ChangeRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)

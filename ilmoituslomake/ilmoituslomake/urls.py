@@ -76,4 +76,9 @@ urlpatterns += [
     ),
     # ontology words
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
+    # change request
+    path(
+        "api/changerequest/",
+        notification_form_views.ChangeRequestCreateView.as_view(),
+    ),
 ]

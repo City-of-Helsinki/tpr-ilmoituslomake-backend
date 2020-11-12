@@ -23,7 +23,7 @@ from base.serializers import NotificationSerializer
 class ChangeRequestListView(ListAPIView):
     """"""
 
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
     queryset = ChangeRequest.objects.all().filter(status="open")
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["updated_at"]
