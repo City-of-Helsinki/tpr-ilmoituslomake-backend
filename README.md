@@ -6,7 +6,7 @@ Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. Peopl
 
 ## Tech stack
 
-Backend is based on Django and Python.
+Backend is based on Django 2.2 LTS and Python 3.7.
 
 # Development
 
@@ -16,11 +16,12 @@ Backend is based on Django and Python.
 * python3 -m venv venv
 * source venv/bin/activate
 * pip install -r requirements.txt
+* python manage.py runserver 0.0.0.0:8008
 
 
-## Gettings started with docker
+## Getting started with Docker
 
-* docker-compose is required
+* Docker & docker-compose is required
 * Build: rebuild_dev.sh
 * Run: run_dev.sh
 * You need the UI: https://github.com/City-of-Helsinki/tpr-ilmoituslomake-ui/ and run it in development mode
