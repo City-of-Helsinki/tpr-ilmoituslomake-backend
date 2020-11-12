@@ -10,9 +10,13 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         model = ChangeRequest
         fields = (
             "target",
-            "revision",
+            "target_revision",
             "change_type",
             "description",
             "contact_details",
+            "status",
+        )
+        read_only_fields = (
+            "target_revision",
             "status",
         )
