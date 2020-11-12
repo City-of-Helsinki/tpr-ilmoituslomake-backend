@@ -2,7 +2,13 @@
 
 ## About
 
-Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. People will be able to notifications about places in Helsinki area (restaurants, travel, etc.) and after moderation process these places will be transfered to Toimipisterekisteri. This is the backend for the app.
+Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. People will be able to post notifications about places in Helsinki area (restaurants, travel, etc.) and after moderation process these places will be transfered to Toimipisterekisteri. This is the backend for the app.
+
+## Tech stack
+
+Backend is based on Django and Python.
+
+# Development
 
 ## Getting started
 
@@ -18,8 +24,6 @@ Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. Peopl
 * Build: rebuild_dev.sh
 * Run: run_dev.sh
 * You need the UI: https://github.com/City-of-Helsinki/tpr-ilmoituslomake-ui/ and run it in development mode
-
-##
 
 # API Endpoints
 
