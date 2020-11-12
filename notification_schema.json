@@ -124,16 +124,40 @@
             "type": "object",
             "properties": {
                 "fi": {
-                    "type": "string",
-                    "format": "uri"
+                   "oneOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }                  
+                    ]
                 },
                 "sv": {
-                    "type": "string",
-                    "format": "uri"
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }                  
+                    ]
                 },
                 "en": {
-                    "type": "string",
-                    "format": "uri"
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }                  
+                    ]
                 }
             },
             "required": ["fi"]
@@ -175,10 +199,25 @@
                 }
             }
         },
-        "ontology_ids": {
+        "ontology_words": {
             "type": "array",
             "items": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                    "id": {"type": "number"},
+                    "ontologyword": {
+                        "type": "object",
+                        "properties": {
+                            "fi": {"type": "string"},
+                            "sv": {"type": "string"},
+                            "en": {"type": "string"},
+                        },
+                        "required": ["fi", "sv", "en"]
+                    },
+                    "can_add_schoolyear": {"type": "boolean"},
+                    "can_add_clarification": {"type": "boolean"}    
+                },
+                "required": ["id", "ontologyword", "can_add_schoolyear", "can_add_clarification"]
             }
         },
         "comments": {
