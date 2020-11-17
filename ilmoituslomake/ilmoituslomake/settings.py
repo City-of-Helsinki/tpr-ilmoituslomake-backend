@@ -159,27 +159,9 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# SOCIAL_AUTH_TUNNISTAMO_KEY = 'https://i/am/clientid/in/url/style' # env
-# SOCIAL_AUTH_TUNNISTAMO_SECRET = 'iamyoursecret' # env
-# SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = 'https://tunnistamo.example.com/' # env
-
-# OIDC_API_TOKEN_AUTH = {
-#    # Audience that must be present in the token for the request to be
-#    # accepted. Value must be agreed between your SSO service and your
-#    # application instance. Essentially this allows your application to
-#    # know that the token in meant to be used with it.
-#    'AUDIENCE': 'https://api.hel.fi/auth/projects',
-#    # Who we trust to sign the tokens. The library will request the
-#    # public signature keys from standard locations below this URL
-#    'ISSUER': 'https://api.hel.fi/sso'
-#    # The following can be used if you need certain OAuth2 scopes
-#    # for any functionality of the API. The request will be denied
-#    # if scopes starting with API_SCOPE_PREFIX are not present
-#    # in the token claims. Usually this is not needed, as checking
-#    # the audience is enough.
-#     REQUIRE_API_SCOPE_FOR_AUTHENTICATION': True,
-#    'API_SCOPE_PREFIX': 'projects',
-# }
+SOCIAL_AUTH_TUNNISTAMO_KEY = env("TUNNISTAMO_CLIENT_ID")
+SOCIAL_AUTH_TUNNISTAMO_SECRET = env("TUNNISTAMO_CLIENT_SECRET")
+SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso/"
 
 SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
     "ui_locales": "fi"
