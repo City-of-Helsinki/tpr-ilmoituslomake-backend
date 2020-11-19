@@ -258,25 +258,10 @@
                 }
             }
         },
-        "ontologywords": {
+        "ontology_ids": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "number"},
-                    "ontologyword": {
-                        "type": "object",
-                        "properties": {
-                            "fi": {"type": "string"},
-                            "sv": {"type": "string"},
-                            "en": {"type": "string"}
-                        },
-                        "required": ["fi", "sv", "en"]
-                    },
-                    "can_add_schoolyear": {"type": "boolean"},
-                    "can_add_clarification": {"type": "boolean"}    
-                },
-                "required": ["id", "ontologyword", "can_add_schoolyear", "can_add_clarification"]
+                "type": "number"
             }
         },
         "comments": {
