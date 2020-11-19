@@ -281,7 +281,7 @@
         "opening_times",
         "price",
         "payment_options",
-        "ontologywords",
+        "ontology_ids",
         "comments"
     ]
 }
