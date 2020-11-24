@@ -31,8 +31,9 @@ urlpatterns += [
 
 # Authentication
 urlpatterns += [
-    path("pysocial/", include("social_django.urls", namespace="social")),
+    path("auth/", include("social_django.urls", namespace="social")),
     path("helauth/", include("helusers.urls")),
+    path("api/user/logout/", users_views.UserLogout.as_view()),
     path("api/user/", users_views.UserView.as_view()),
 ]
 
