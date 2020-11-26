@@ -1,22 +1,36 @@
 from rest_framework import serializers
-from moderation.models import ChangeRequest
+from moderation.models import ModerationItem
 
 import json
 from jsonschema import validate
 
 
-class ChangeRequestSerializer(serializers.ModelSerializer):
+class ModerationItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChangeRequest
+        model = ModerationItem
+        fields = (
+            "target",
+            "category",
+            "item_type",
+            "status",
+            "created_at",
+            "updated_at",
+        )
+
+
+class ModerationItemDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModerationItem
         fields = (
             "target",
             "target_revision",
-            "change_type",
-            "description",
-            "contact_details",
+            "category",
+            "item_type",
             "status",
-        )
-        read_only_fields = (
-            "target_revision",
-            "status",
+            "data",
+            "user_comments",
+            "user_details",
+            "moderator_comments",
+            "created_at",
+            "updated_at",
         )
