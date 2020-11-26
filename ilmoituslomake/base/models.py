@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
+from moderation.models import ModerationItem
 
 
 class OntologyWord(models.Model):
@@ -41,6 +42,7 @@ class Notification(models.Model):
     STATUS_CHOICES = [
         ("created", "created"),
         ("modified", "modified"),
+        ("rejected", "rejected"),
         ("approved", "approved"),
     ]
     status = models.CharField(
@@ -54,7 +56,7 @@ class Notification(models.Model):
     location = models.PointField(srid=4326)
 
     # last action performed
-    action = models.CharField(max_length=16, blank=True, db_index=True)
+    # action = models.CharField(max_length=16, blank=True, db_index=True)
 
     data = JSONField()
 
@@ -74,5 +76,16 @@ class Notification(models.Model):
         self.location = GEOSGeometry(
             json.dumps({"type": "Point", "coordinates": self.data["location"]})
         )
-        # Save
+        # Save notification
         super().save(*args, **kwargs)
+
+        # Create ModerationItem if status is not approved or rejected
+        if not self.status in ["rejected", "approved"]:
+            moderation_item = ModerationItem(
+                target=self,
+                target_revision=self.revision,
+                category="moderation_task",
+                item_type=self.status,
+                data=self.data,
+            )
+            moderation_item.save()

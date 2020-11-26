@@ -1,5 +1,6 @@
-from django.db import models
+from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
+from django.contrib.postgres.fields import JSONField
 
 from base.models import Notification
 
@@ -8,46 +9,55 @@ from users.models import User
 # Create your models here.
 
 
-class ChangeRequest(models.Model):
+class ModerationItem(models.Model):
 
     target = models.ForeignKey(
-        Notification, related_name="change_requests", on_delete=models.CASCADE
+        Notification, related_name="moderation_tasks", on_delete=models.CASCADE
     )
     target_revision = models.IntegerField()
+
+    CATEGORY_CHOICES = [
+        ("change_request", "change_request"),
+        ("moderation_task", "moderation_task"),
+    ]
+    category = models.CharField(
+        max_length=16, choices=CATEGORY_CHOICES, default="change_request", db_index=True
+    )
 
     CHANGE_TYPE_CHOICES = [
         ("change", "change"),
         ("delete", "delete"),
     ]
-    change_type = models.CharField(
-        max_length=16, choices=CHANGE_TYPE_CHOICES, default="change", db_index=True
+    MODERATION_TYPE_CHOICES = [
+        ("created", "created"),
+        ("modified", "modified"),
+    ]
+    ITEM_TYPE_CHOICES = CHANGE_TYPE_CHOICES + MODERATION_TYPE_CHOICES
+    item_type = models.CharField(
+        max_length=16, choices=ITEM_TYPE_CHOICES, default="change", db_index=True
     )
 
-    # description
-    description = models.TextField()
-    # contact_details
-    contact_details = models.TextField()
-
     #
-    STATUS_CHOICES = [("open", "open"), ("closed", "closed")]
+    STATUS_CHOICES = [
+        ("open", "open"),
+        ("in_progress", "in_progress"),
+        ("closed", "closed"),
+    ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
     )
 
-    # If logged in
-    user = models.ForeignKey(
-        User, null=True, related_name="requested_change", on_delete=models.DO_NOTHING
-    )
+    #
+    data = JSONField()
+
+    #
+    user_comments = models.TextField(default="")
+    user_details = models.TextField(default="")
+
+    moderator_comments = models.TextField(default="")
+    # moderator =
 
     #
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
-
-
-# class ModerationTask(models.Model):
-#
-#    #
-#    created_at = models.DateTimeField(auto_now_add=True)
-#    updated_at = models.DateTimeField(auto_now=True)
-#    history = HistoricalRecords()
