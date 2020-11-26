@@ -41,7 +41,7 @@ urlpatterns += [
 # Moderation App
 urlpatterns += [
     path(
-        "api/moderation/items/",
+        "api/moderation/todos/",
         moderation_views.ModerationItemListView.as_view(),
     )
 ]
@@ -73,9 +73,4 @@ urlpatterns += [
     ),
     # ontology words
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
-    # change request
-    path(
-        "api/changerequest/",
-        notification_form_views.ChangeRequestCreateView.as_view(),
-    ),
 ]

@@ -6,7 +6,8 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
-from moderation.models import ModerationItem
+
+# from moderation.models import ModerationItem
 
 
 class OntologyWord(models.Model):
@@ -80,12 +81,12 @@ class Notification(models.Model):
         super().save(*args, **kwargs)
 
         # Create ModerationItem if status is not approved or rejected
-        if not self.status in ["rejected", "approved"]:
-            moderation_item = ModerationItem(
-                target=self,
-                target_revision=self.revision,
-                category="moderation_task",
-                item_type=self.status,
-                data=self.data,
-            )
-            moderation_item.save()
+        # if not self.status in ["rejected", "approved"]:
+        #    moderation_item = ModerationItem(
+        #        target=self,
+        #        target_revision=self.revision,
+        #        category="moderation_task",
+        #        item_type=self.status,
+        #        data=self.data,
+        #    )
+        #    moderation_item.save()
