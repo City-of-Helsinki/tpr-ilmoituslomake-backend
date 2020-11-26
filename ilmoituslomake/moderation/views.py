@@ -21,9 +21,7 @@ class ModerationItemListView(ListAPIView):
     """"""
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-    queryset = ModerationItem.objects.all().filter(
-        Q(status="open") | Q(status="in_progress")
-    )
+    queryset = ModerationItem.objects.all().filter(Q(status="open"))
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["updated_at"]
     ordering = ["-updated_at"]

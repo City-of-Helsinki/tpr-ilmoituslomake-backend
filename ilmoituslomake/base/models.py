@@ -79,14 +79,3 @@ class Notification(models.Model):
         )
         # Save notification
         super().save(*args, **kwargs)
-
-        # Create ModerationItem if status is not approved or rejected
-        # if not self.status in ["rejected", "approved"]:
-        #    moderation_item = ModerationItem(
-        #        target=self,
-        #        target_revision=self.revision,
-        #        category="moderation_task",
-        #        item_type=self.status,
-        #        data=self.data,
-        #    )
-        #    moderation_item.save()

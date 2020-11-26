@@ -40,7 +40,6 @@ class ModerationItem(models.Model):
     #
     STATUS_CHOICES = [
         ("open", "open"),
-        ("in_progress", "in_progress"),
         ("closed", "closed"),
     ]
     status = models.CharField(
