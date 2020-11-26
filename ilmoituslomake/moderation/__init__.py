@@ -1,1 +1,1 @@
-default_app_config = "ilmoituslomake.moderation.apps.ModerationConfig"
+default_app_config = "moderation.apps.ModerationConfig"
