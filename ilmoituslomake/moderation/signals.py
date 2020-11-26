@@ -16,4 +16,4 @@ def create_moderation_item(sender, instance, **kwargs):
             item_type=self.status,
             data=self.data,
         )
-    moderation_item.save()
+        moderation_item.save()
