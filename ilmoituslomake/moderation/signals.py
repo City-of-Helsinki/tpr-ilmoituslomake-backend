@@ -8,12 +8,12 @@ from moderation.models import ModerationItem
 @receiver(post_save, sender=Notification)
 def create_moderation_item(sender, instance, **kwargs):
     # Create ModerationItem if status is not approved or rejected
-    if not self.status in ["rejected", "approved"]:
+    if not instance.status in ["rejected", "approved"]:
         moderation_item = ModerationItem(
-            target=self,
-            target_revision=self.revision,
+            target=instance,
+            target_revision=instance.revision,
             category="moderation_task",
-            item_type=self.status,
-            data=self.data,
+            item_type=instance.status,
+            data=instance.data,
         )
         moderation_item.save()

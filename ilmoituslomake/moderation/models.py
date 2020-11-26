@@ -39,11 +39,13 @@ class ModerationItem(models.Model):
 
     #
     STATUS_CHOICES = [
+        ("new", "new"),
         ("open", "open"),
+        ("in_progress", "in_progress"),
         ("closed", "closed"),
     ]
     status = models.CharField(
-        max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
+        max_length=16, choices=STATUS_CHOICES, default="new", db_index=True
     )
 
     #
@@ -53,7 +55,7 @@ class ModerationItem(models.Model):
     user_comments = models.TextField(default="")
     user_details = models.TextField(default="")
 
-    moderator_comments = models.TextField(default="")
+    # moderator_comments = models.TextField(default="")
     # moderator =
 
     #
