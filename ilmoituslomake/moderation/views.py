@@ -23,12 +23,12 @@ from moderation.serializers import (
 
 # Create your views here.
 
-# TODO: Conver to new moderation
-class ModerationItemListView(ListAPIView):
+
+class NewModerationItemListView(ListAPIView):
     """"""
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-    queryset = ModerationItem.objects.all().filter(Q(status="open"))
+    queryset = ModerationItem.objects.all().filter(Q(moderator=None), Q(status="open"))
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["updated_at"]
     ordering = ["-updated_at"]
@@ -53,58 +53,70 @@ class ModerationItemListView(ListAPIView):
 class AssignModerationItemView(UpdateAPIView):
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-    queryset = ModerationItem.objects.all().filter()
+    queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemSerializer
 
-    def update(self, request, id, *args, **kwargs):
+    def update(self, request, id=None, *args, **kwargs):
         moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        serializer = self.get_serializer(moderation_item)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
         if moderation_item.moderator != None:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
         moderation_item.moderator = request.user
-
-        serializer = self.get_serializer(data=moderation_item)
-        serializer.is_valid(raise_exception=True)
-        headers = self.get_success_headers(serializer.data)
-
         moderation_item.save()
-        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
-
-        # serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        # self.perform_create(serializer)
-        # headers = self.get_success_headers(serializer.data)
-        # return Response(
-        #     serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        # )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # Unassign
-# class UnassignModerationItemView(UpdateAPIView):
+class UnassignModerationItemView(UpdateAPIView):
 
-#     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-#     queryset = ModerationItem.objects.all().filter()
-#     serializer_class = ModerationItemDetailSerializer
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    queryset = ModerationItem.objects.all()
+    serializer_class = ModerationItemSerializer
 
-#     def update(self, request, id, *args, **kwargs):
-#         moderation_item = get_object_or_404(ModerationItem, pk=id)
-#         moderation_item.moderator = None
-#         moderation_item.save()
-#         pass
+    def update(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        serializer = self.get_serializer(moderation_item)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        if moderation_item.moderator != None:
+            moderation_item.moderator = None
+            moderation_item.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.data, status=status.HTTP_304_NOT_MODIFIED)
+
 
 # Reject ModerationItem
-# class RejectModerationItemView(DestroyAPIView):
+class RejectModerationItemView(DestroyAPIView):
 
-#     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-#     queryset = ModerationItem.objects.all().filter()
-#     serializer_class = ModerationItemDetailSerializer
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    queryset = ModerationItem.objects.all()
+    serializer_class = ModerationItemSerializer
 
-#     def delete(self, request, id, *args, **kwargs):
-#         moderation_item = get_object_or_404(ModerationItem, pk=id)
-#         # Only assigned moderator can reject
-#         if moderation_item.moderator != request.user:
-#             pass
-#         moderation_item.delete()
-#         pass
+    def delete(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        serializer = self.get_serializer(moderation_item)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        if moderation_item.moderator != request.user:
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+        moderation_item.status = "closed"
+        moderation_item.save()
+
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
 
 # Delete Notification
 # class DeleteNotificationView(DestroyAPIView):

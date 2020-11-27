@@ -55,9 +55,9 @@ class ModerationItem(models.Model):
     user_details = models.TextField(default="")
 
     # moderator_comments = models.TextField(default="")
-    # moderator = models.ForeignKey(
-    #    User, null=True, related_name="tasks", on_delete=models.DO_NOTHING
-    # )
+    moderator = models.ForeignKey(
+        User, null=True, related_name="tasks", on_delete=models.DO_NOTHING
+    )
 
     #
     created_at = models.DateTimeField(auto_now_add=True)
