@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.shortcuts import render, get_object_or_404
 
 # Permissions
@@ -28,14 +30,18 @@ class NewModerationItemListView(ListAPIView):
     """"""
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
-    queryset = ModerationItem.objects.all().filter(Q(moderator=None), Q(status="open"))
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ["updated_at"]
-    ordering = ["-updated_at"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
     serializer_class = ModerationItemSerializer
 
+    def get_queryset(self):
+        time_threshold = datetime.now() - timedelta(hours=72)
+        return ModerationItem.objects.all().filter(
+            Q(moderator=None), Q(created_at__gt=time_threshold), Q(status="open")
+        )
 
-# TODO: Convert to all open ones
+
 class ModerationItemListView(ListAPIView):
     """"""
 
@@ -44,9 +50,24 @@ class ModerationItemListView(ListAPIView):
         Q(status="open") | Q(status="in_progress")
     )
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ["updated_at"]
-    ordering = ["-updated_at"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
     serializer_class = ModerationItemSerializer
+
+
+class MyModerationItemListView(ListAPIView):
+    """"""
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+    serializer_class = ModerationItemSerializer
+
+    def get_queryset(self):
+        return ModerationItem.objects.all().filter(
+            Q(moderator=self.request.user), ~Q(status="closed")
+        )
 
 
 # Assign
