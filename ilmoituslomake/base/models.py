@@ -50,7 +50,7 @@ class Notification(models.Model):
         max_length=16, choices=STATUS_CHOICES, default="created", db_index=True
     )
 
-    # is published - only approved & published items are show in API
+    # is published
     published = models.BooleanField(default=False, db_index=True)
 
     # coordinates

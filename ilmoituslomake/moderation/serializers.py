@@ -55,6 +55,8 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
             "user_comments",
             "user_details",
             "moderator_comments",
+            "moderator",
             "created_at",
             "updated_at",
         )
+        read_only_fields = "id"

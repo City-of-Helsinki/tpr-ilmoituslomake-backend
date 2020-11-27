@@ -12,7 +12,7 @@ from users.models import User
 class ModerationItem(models.Model):
 
     target = models.ForeignKey(
-        Notification, related_name="moderation_tasks", on_delete=models.CASCADE
+        Notification, related_name="moderation_items", on_delete=models.CASCADE
     )
     target_revision = models.IntegerField()
 
@@ -39,13 +39,12 @@ class ModerationItem(models.Model):
 
     #
     STATUS_CHOICES = [
-        ("new", "new"),
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
     ]
     status = models.CharField(
-        max_length=16, choices=STATUS_CHOICES, default="new", db_index=True
+        max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
     )
 
     #
@@ -56,7 +55,9 @@ class ModerationItem(models.Model):
     user_details = models.TextField(default="")
 
     # moderator_comments = models.TextField(default="")
-    # moderator =
+    # moderator = models.ForeignKey(
+    #    User, null=True, related_name="tasks", on_delete=models.DO_NOTHING
+    # )
 
     #
     created_at = models.DateTimeField(auto_now_add=True)
