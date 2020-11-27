@@ -24,7 +24,8 @@ class NotificationSchemaSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ("id", "data")
+        fields = ("id", "status", "location", "data", "updated_at", "created_at")
+        read_only_fields = ("id", "status", "location", "updated_at", "created_at")
 
     def validate_data(self, data):
         # TODO: Improve
@@ -42,5 +43,5 @@ class NotificationSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         # TODO: Remove
         # show geometry as geojson
-        # ret["location"] = json.loads(instance.location.json)
+        ret["location"] = json.loads(instance.location.json)
         return ret

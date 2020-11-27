@@ -36,6 +36,9 @@ Backend is based on Django 2.2 LTS and Python 3.7.
 
 * /api/user/, GET current user info
 
+# Moderation App
+* /api/moderation/todos/
+
 
 # Notification Form App
 

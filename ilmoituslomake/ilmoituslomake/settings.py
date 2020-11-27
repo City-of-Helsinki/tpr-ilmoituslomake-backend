@@ -53,10 +53,12 @@ INSTALLED_APPS = [
     # GIS
     "django.contrib.gis",
     # Third-party apps
+    "django_filters",
     "simple_history",
     # Our apps
     "base",
     "notification_form",
+    "moderation",
     "social_django",
     "huey.contrib.djhuey",
 ]

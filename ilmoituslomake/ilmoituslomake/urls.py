@@ -18,6 +18,7 @@ from django.urls import path, include
 
 from users import views as users_views
 from notification_form import views as notification_form_views
+from moderation import views as moderation_views
 
 urlpatterns = []
 
@@ -27,6 +28,7 @@ urlpatterns += [
     path("admin/", admin.site.urls),
 ]
 
+
 # Authentication
 urlpatterns += [
     path("auth/", include("social_django.urls", namespace="social")),
@@ -35,10 +37,18 @@ urlpatterns += [
     path("api/user/", users_views.UserView.as_view()),
 ]
 
+
+# Moderation App
+urlpatterns += [
+    path(
+        "api/moderation/todos/",
+        moderation_views.ModerationItemListView.as_view(),
+    )
+]
+
+
 # Notification Form App
 urlpatterns += [
-    path("api/demo/", notification_form_views.ApiDemoView.as_view()),
-    path("api/hello/", notification_form_views.HelloView.as_view()),
     path(
         "api/schema/get/<int:id>/",
         notification_form_views.NotificationSchemaRetrieveView.as_view(),

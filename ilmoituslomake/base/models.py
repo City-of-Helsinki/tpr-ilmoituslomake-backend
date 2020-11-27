@@ -7,9 +7,14 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
+# from moderation.models import ModerationItem
+
 
 class OntologyWord(models.Model):
     data = JSONField()
+
+    # def __str__(self):
+    #    return self.data['ontologyword']['fi']
 
 
 # JsonSchema
@@ -38,6 +43,7 @@ class Notification(models.Model):
     STATUS_CHOICES = [
         ("created", "created"),
         ("modified", "modified"),
+        ("rejected", "rejected"),
         ("approved", "approved"),
     ]
     status = models.CharField(
@@ -50,28 +56,18 @@ class Notification(models.Model):
     # coordinates
     location = models.PointField(srid=4326)
 
-    # last action performed and last users
-    action = models.CharField(max_length=16, blank=True)
+    # last action performed
+    # action = models.CharField(max_length=16, blank=True, db_index=True)
 
-    # moderator = models.ForeignKey(
-    #    User, related_name="moderated", on_delete=models.DO_NOTHING
-    # )
-    # reporter = models.ForeignKey(
-    #    User, related_name="reported", on_delete=models.DO_NOTHING
-    # )
-
-    # TODO: Remove?
-    # comments = models.TextField(blank=True)
-
-    # json data
-    # schema = models.ForeignKey(NotificationSchema, on_delete=models.DO_NOTHING)
-    # schema_revision = models.IntegerField()
     data = JSONField()
 
     # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.data["name"]["fi"]
 
     # Overwrite save
     def save(self, *args, **kwargs):
@@ -81,37 +77,5 @@ class Notification(models.Model):
         self.location = GEOSGeometry(
             json.dumps({"type": "Point", "coordinates": self.data["location"]})
         )
-        # Save
+        # Save notification
         super().save(*args, **kwargs)
-
-
-# ChangeRequest
-# class ChangeRequest(models.Model):
-#
-#    # target id
-#    REQUEST_CHOICES = [
-#        ("change", "Change"),
-#        ("error", "Error"),
-#        ("delete", "Delete"),
-#    ]
-#    request = models.CharField(
-#        max_length=32,
-#        choices=REQUEST_CHOICES,
-#        default="delete",
-#    )
-#    description = models.TextField(blank=True)
-#
-#    STATUS_CHOICES = [
-#        ("open", "Open"),
-#        ("closed", "Closed"),
-#    ]
-#    status = models.CharField(
-#        max_length=16,
-#        choices=STATUS_CHOICES,
-#        default="open",
-#    )
-#
-#    #
-#    created_at = models.DateTimeField(auto_now_add=True)
-#    updated_at = models.DateTimeField(auto_now=True)
-#    history = HistoricalRecords()
