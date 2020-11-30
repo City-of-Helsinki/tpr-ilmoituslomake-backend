@@ -11,6 +11,7 @@ from rest_framework.generics import UpdateAPIView, ListAPIView, DestroyAPIView
 
 from rest_framework import filters
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 #
 from base.models import Notification
@@ -24,6 +25,25 @@ from moderation.serializers import (
 )
 
 # Create your views here.
+
+
+class ModerationItemSearchListView(ListAPIView):
+    """
+    Search all closed moderation items
+
+    """
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    queryset = ModerationItem.objects.all().filter(~Q(status="closed"))
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    search_fields = (
+        "target__data__name__fi",
+        "target__data__name__sv",
+        "target__data__name__en",
+        "target__id",
+    )
+    filter_fields = ("category",)
+    serializer_class = ModerationItemSerializer
 
 
 class NewModerationItemListView(ListAPIView):

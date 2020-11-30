@@ -7,8 +7,6 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
-# from moderation.models import ModerationItem
-
 
 class OntologyWord(models.Model):
     data = JSONField()
