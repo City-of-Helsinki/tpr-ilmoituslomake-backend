@@ -37,7 +37,13 @@ Backend is based on Django 2.2 LTS and Python 3.7.
 * /api/user/, GET current user info
 
 # Moderation App
-* /api/moderation/todos/
+* /api/moderation/todos/, show all moderation items (ones with moderator are shown last)
+* /api/moderation/todos/my/, show all current user's moderation items
+* /api/moderation/todos/recent/, show all recent unassigned moderation items
+* /api/moderation/assign/<int:id>/, assign moderation item to current user
+* /api/moderation/unassign/<int:id>/, unassign moderation
+* /api/moderation/reject/<int:id>/, reject moderation task
+
 
 
 # Notification Form App

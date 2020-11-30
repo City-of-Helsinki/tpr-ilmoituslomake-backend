@@ -43,7 +43,10 @@ class NewModerationItemListView(ListAPIView):
 
 
 class ModerationItemListView(ListAPIView):
-    """"""
+    """
+    Show all moderation items
+
+    """
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
     queryset = ModerationItem.objects.all().filter(
@@ -51,12 +54,14 @@ class ModerationItemListView(ListAPIView):
     )
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["created_at"]
-    ordering = ["-created_at"]
+    ordering = ["-moderator", "-created_at"]
     serializer_class = ModerationItemSerializer
 
 
 class MyModerationItemListView(ListAPIView):
-    """"""
+    """
+    Show all current user's moderation items
+    """
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
     filter_backends = [filters.OrderingFilter]
@@ -72,6 +77,9 @@ class MyModerationItemListView(ListAPIView):
 
 # Assign
 class AssignModerationItemView(UpdateAPIView):
+    """
+    Assign moderation item to the current user
+    """
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
     queryset = ModerationItem.objects.all()
@@ -94,6 +102,10 @@ class AssignModerationItemView(UpdateAPIView):
 
 # Unassign
 class UnassignModerationItemView(UpdateAPIView):
+    """
+    Unassign moderation item
+
+    """
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
     queryset = ModerationItem.objects.all()
@@ -117,6 +129,9 @@ class UnassignModerationItemView(UpdateAPIView):
 
 # Reject ModerationItem
 class RejectModerationItemView(DestroyAPIView):
+    """
+    Reject moderation item (close it)
+    """
 
     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
     queryset = ModerationItem.objects.all()
