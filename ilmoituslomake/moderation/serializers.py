@@ -2,6 +2,9 @@ from rest_framework import serializers
 from moderation.models import ModerationItem
 from base.models import Notification
 
+#
+from users.serializers import ModeratorSerializer
+
 # import json
 # from jsonschema import validate
 
@@ -22,11 +25,13 @@ class NotificationTargetSerializer(serializers.ModelSerializer):
             "id",
             "name",
         )
+        read_only_fields = fields
 
 
 class ModerationItemSerializer(serializers.ModelSerializer):
 
     target = NotificationTargetSerializer()
+    moderator = ModeratorSerializer()
 
     class Meta:
         model = ModerationItem
@@ -36,9 +41,11 @@ class ModerationItemSerializer(serializers.ModelSerializer):
             "category",
             "item_type",
             "status",
+            "moderator",
             "created_at",
             "updated_at",
         )
+        read_only_fields = fields
 
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
@@ -55,6 +62,8 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
             "user_comments",
             "user_details",
             "moderator_comments",
+            "moderator",
             "created_at",
             "updated_at",
         )
+        read_only_fields = "id"

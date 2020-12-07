@@ -7,8 +7,6 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
-# from moderation.models import ModerationItem
-
 
 class OntologyWord(models.Model):
     data = JSONField()
@@ -50,7 +48,7 @@ class Notification(models.Model):
         max_length=16, choices=STATUS_CHOICES, default="created", db_index=True
     )
 
-    # is published - only approved & published items are show in API
+    # is published
     published = models.BooleanField(default=False, db_index=True)
 
     # coordinates
