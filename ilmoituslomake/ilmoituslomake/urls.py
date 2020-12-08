@@ -56,6 +56,10 @@ urlpatterns += [
         "api/moderation/todos/",
         moderation_views.ModerationItemListView.as_view(),
     ),
+    path(
+        "api/moderation/todos/<int:id>/",
+        moderation_views.ModerationItemRetrieveUpdateView.as_view(),
+    ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
     path(
         "api/moderation/assign/<int:id>/",

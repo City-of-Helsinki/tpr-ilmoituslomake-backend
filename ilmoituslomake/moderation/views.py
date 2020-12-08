@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime, timedelta
 
 from django.shortcuts import render, get_object_or_404
@@ -7,7 +9,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.generics import UpdateAPIView, ListAPIView, DestroyAPIView
+from rest_framework.generics import (
+    UpdateAPIView,
+    ListAPIView,
+    DestroyAPIView,
+    RetrieveAPIView,
+    RetrieveUpdateAPIView,
+)
 
 from rest_framework import filters
 from django.db.models import Q
@@ -189,5 +197,33 @@ class RejectModerationItemView(DestroyAPIView):
 #         moderation_item.delete()
 #         pass
 
-# Save in progress
+# Get or Save in progress
+class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
+    """
+    Save moderation item as a draft
+    """
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    lookup_field = "id"
+    queryset = ModerationItem.objects.all()
+    serializer_class = ModerationItemDetailSerializer
+
+    def update(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        serializer = self.get_serializer(moderation_item)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        if moderation_item.moderator != request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+
+        moderation_item.status = "in_progress"
+        moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
+
+        moderation_item.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 # Save

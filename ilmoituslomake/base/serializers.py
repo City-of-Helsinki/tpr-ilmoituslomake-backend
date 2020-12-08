@@ -29,7 +29,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def validate_data(self, data):
         # TODO: Improve
-        schema = NotificationSchema.objects.get(pk=1).schema
+        schema = NotificationSchema.objects.latest("created_at").schema
         # Validate
         try:
             # Generic JSON-Schema validation
