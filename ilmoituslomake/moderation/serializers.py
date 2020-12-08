@@ -4,6 +4,7 @@ from base.models import Notification
 
 #
 from users.serializers import ModeratorSerializer
+from base.serializers import NotificationSerializer
 
 # import json
 # from jsonschema import validate
@@ -49,21 +50,35 @@ class ModerationItemSerializer(serializers.ModelSerializer):
 
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
+
+    target = NotificationSerializer(read_only=True)
+    # data = NotificationSerializer() # Does not work because of location = GeomField
+    moderator = ModeratorSerializer(read_only=True)
+
     class Meta:
         model = ModerationItem
         fields = (
             "id",
             "target",
-            "target_revision",
             "category",
             "item_type",
             "status",
             "data",
             "user_comments",
             "user_details",
-            "moderator_comments",
             "moderator",
             "created_at",
             "updated_at",
         )
-        read_only_fields = "id"
+        read_only_fields = (
+            "id",
+            "target",
+            "category",
+            "item_type",
+            "status",
+            "user_comments",
+            "user_details",
+            "moderator",
+            "created_at",
+            "updated_at",
+        )
