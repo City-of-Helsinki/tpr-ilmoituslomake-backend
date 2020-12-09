@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     # Third-party apps
     "django_filters",
     "simple_history",
-    "djangoql",
     # Our apps
     "base",
     "notification_form",
