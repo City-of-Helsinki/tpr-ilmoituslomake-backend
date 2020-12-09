@@ -11,5 +11,7 @@ python manage.py makemigrations users base moderation
 python manage.py migrate
 # load ontologies
 python manage.py import_ontology_words
+# load neighborhoods
+python manage.py import_neighborhoods
 # start development server on public ip interface, on port 8008
 python manage.py runserver 0.0.0.0:8008

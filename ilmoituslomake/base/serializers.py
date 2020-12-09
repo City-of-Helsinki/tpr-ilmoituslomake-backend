@@ -1,7 +1,17 @@
 from rest_framework import serializers
-from base.models import Notification, NotificationSchema, OntologyWord
+from base.models import Notification, NotificationSchema, OntologyWord, Neighborhood
 import json
 from jsonschema import validate
+
+
+class NeighborhoodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Neighborhood
+        fields = ("data",)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        return ret["data"]
 
 
 class OntologyWordSerializer(serializers.ModelSerializer):

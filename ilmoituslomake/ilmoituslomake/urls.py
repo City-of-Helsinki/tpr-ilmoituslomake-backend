@@ -41,6 +41,10 @@ urlpatterns += [
 # Moderation App
 urlpatterns += [
     path(
+        "api/moderation/neighborhoods/",
+        moderation_views.NeighborhoodListView.as_view(),
+    ),
+    path(
         "api/moderation/todos/find/",
         moderation_views.ModerationItemSearchListView.as_view(),
     ),

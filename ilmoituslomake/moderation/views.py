@@ -22,8 +22,8 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
 #
-from base.models import Notification
-from base.serializers import NotificationSerializer
+from base.models import Notification, Neighborhood
+from base.serializers import NotificationSerializer, NeighborhoodSerializer
 
 #
 from moderation.models import ModerationItem
@@ -33,6 +33,17 @@ from moderation.serializers import (
 )
 
 # Create your views here.
+
+
+class NeighborhoodListView(ListAPIView):
+    """
+    Returns a collection of neighborhood words instances
+    """
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    queryset = Neighborhood.objects.all()
+    serializer_class = NeighborhoodSerializer
+    pagination_class = None
 
 
 class ModerationItemSearchListView(ListAPIView):
