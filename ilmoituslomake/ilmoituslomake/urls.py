@@ -45,6 +45,10 @@ urlpatterns += [
         moderation_views.NeighborhoodListView.as_view(),
     ),
     path(
+        "api/moderation/notifications/find/",
+        moderation_views.NotificationSearchListView.as_view(),
+    ),
+    path(
         "api/moderation/todos/find/",
         moderation_views.ModerationItemSearchListView.as_view(),
     ),

@@ -50,11 +50,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     # GIS
     "django.contrib.gis",
     # Third-party apps
     "django_filters",
     "simple_history",
+    "djangoql",
     # Our apps
     "base",
     "notification_form",

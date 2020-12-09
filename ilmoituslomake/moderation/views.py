@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 
 from django.shortcuts import render, get_object_or_404
 
+from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+
 # Permissions
 from rest_framework.permissions import IsAuthenticated
 
@@ -238,3 +241,44 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
 
 
 # Save
+
+
+#
+class NotificationSearchListView(ListAPIView):
+    """
+    Search notifications.
+    """
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        lang = "fi"
+        #
+        search = {
+            "search_name__contains": "iip",
+            "address": None,
+            "keyword": None,
+            "comments": None,
+        }
+        keys = search.keys()
+
+        # Delete None search words
+        delete = [key for key in search if search[key] == None]
+        # delete the key
+        for key in delete:
+            del search[key]
+
+        queryset = (
+            Notification.objects.annotate(
+                search_name=SearchVector(
+                    KeyTextTransform(lang, KeyTextTransform("name", "data"))
+                )
+            )
+            .annotate(address=SearchVector(KeyTextTransform("address", "data")))
+            .annotate(comments=SearchVector(KeyTextTransform("comments", "data")))
+            .filter(**search)
+        )
+        # keyword?
+
+        return queryset
