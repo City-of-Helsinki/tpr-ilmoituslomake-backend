@@ -222,41 +222,50 @@
             "required": ["fi", "sv", "en"]
         },
         "images": {
-            "type": "object",
-            "additionalProperties": true
-        },
-        "opening_times": {
-            "type": "object",
-            "additionalProperties": true
-        },
-        "price": {
-            "type": "object",
-            "properties": {
-                "fi": {
-                    "type": "string",
-                    "maxLength": 500
-                },
-                "sv": {
-                    "type": "string",
-                    "maxLength": 500
-                },
-                "en": {
-                    "type": "string",
-                    "maxLength": 500
-                }
-          },
-          "required": ["fi", "sv", "en"]
-        },
-        "payment_options": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "name": {
+                    "index": {
+                        "type": "number"
+                    },
+                    "source_type": {
                         "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "permission": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "alt_text": {
+                        "type": "object",
+                        "properties": {
+                            "fi": {
+                                "type": "string",
+                                "maxLength": 125
+                            },
+                            "sv": {
+                                "type": "string",
+                                "maxLength": 125
+                            },
+                            "en": {
+                                "type": "string",
+                                "maxLength": 125
+                            }
+                        },
+                        "required": ["fi", "sv", "en"]
                     }
-                }
+                },
+                "required": ["index", "source_type", "url", "permission", "source", "alt_text"]
             }
+        },
+        "opening_times": {
+            "type": "object",
+            "additionalProperties": true
         },
         "ontology_ids": {
             "type": "array",
@@ -266,6 +275,24 @@
         },
         "comments": {
             "type": "string"
+        },
+        "notifier": {
+            "type": "object",
+            "properties": {
+                "notifier_type": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            },
+            "required": ["notifier_type", "full_name", "email", "phone"]
         }
     },
 	"required": [
@@ -279,9 +306,8 @@
         "website",
         "images",
         "opening_times",
-        "price",
-        "payment_options",
         "ontology_ids",
-        "comments"
+        "comments",
+        "notifier"
     ]
 }
