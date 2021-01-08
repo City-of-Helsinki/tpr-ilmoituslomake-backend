@@ -220,7 +220,10 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         moderation_item.status = "in_progress"
-        moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
+        if type(request.data["data"]) is not dict:
+            moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
+        else:
+            moderation_item.data = request.data["data"]  # TODO: Validate
 
         moderation_item.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
