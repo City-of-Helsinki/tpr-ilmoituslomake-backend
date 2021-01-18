@@ -79,10 +79,46 @@ class NotificationCreateView(CreateAPIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def create(self, request, *args, **kwargs):
+        headers = None
+        # Serialize
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+
+        # Id
+        notification_id = None
+        if "id" in request.data:
+            notification_id = request.data["id"]
+
+        # Handle images
+        data_images = request.data["data"]["images"]
+        images = request.data["images"]  # validate
+
+        if len(images) > 0:
+            # if permmission = false?
+            # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
+            # Handle base64 image
+            for i in range(len(images)):
+                image_idx = images[i]["index"]
+                for image in data_images:
+                    if image["index"] == image_idx:
+                        data_image = data_images[image_idx]
+                        base64 = images[i]["base64"]
+                        # handle base64 data, how to refer to this data?
+                        request.data["data"]["images"][image_idx][
+                            "url"
+                        ] = "https://edit.myhelsinki.fi/sites/default/files/styles/square_600/public/2020-05/espa_x.jpg"
+                        break
+            # Create
+            del request.data["images"]
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+        else:
+            # Create
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
