@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -80,18 +80,18 @@ class NotificationCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
+        is_update = False
+        instance = None
+        images = []
         # Serialize
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Id
-        notification_id = None
-        if "id" in request.data:
-            notification_id = request.data["id"]
-
         # Handle images
         data_images = request.data["data"]["images"]
-        images = request.data["images"]  # validate
+        if "images" in request.data:
+            images = request.data["images"]  # validate
+            del request.data["images"]
 
         if len(images) > 0:
             # if permmission = false?
@@ -109,9 +109,6 @@ class NotificationCreateView(CreateAPIView):
                         ] = "https://edit.myhelsinki.fi/sites/default/files/styles/square_600/public/2020-05/espa_x.jpg"
                         break
             # Create
-            del request.data["images"]
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
         else:
