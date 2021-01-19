@@ -52,7 +52,7 @@ class ModerationItemSerializer(serializers.ModelSerializer):
 class ChangeRequestSerializer(serializers.ModelSerializer):
 
     # target = serializers.IntegerField()
-
+    # TODO: Validate against schema
     class Meta:
         model = ModerationItem
         fields = ("target", "category", "item_type", "data")
