@@ -84,6 +84,10 @@ urlpatterns += [
 # Notification Form App
 urlpatterns += [
     path(
+        "api/change_request/",
+        notification_form_views.ChangeRequestCreateView.as_view(),
+    ),
+    path(
         "api/schema/get/<int:id>/",
         notification_form_views.NotificationSchemaRetrieveView.as_view(),
     ),

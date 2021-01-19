@@ -12,6 +12,8 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
 from rest_framework import filters
 
 #
+from moderation.models import ModerationItem
+from moderation.serializers import ChangeRequestSerializer
 
 from base.models import Notification, NotificationSchema, OntologyWord
 from base.serializers import (
@@ -65,6 +67,50 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
+
+
+class ChangeRequestCreateView(CreateAPIView):
+    """
+    Create a ModerationItem of type change_request
+    """
+
+    permission_classes = [AllowAny]
+    queryset = ModerationItem.objects.all()
+    serializer_class = ChangeRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        headers = None
+        # Serialize
+        # request.data["target_revision"] = -1
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        target_notification = get_object_or_404(Notification, pk=request.data["target"])
+        # set revision
+        # request.data["target_revision"] = -1
+
+        if request.data["category"] != "change_request" or request.data[
+            "item_type"
+        ] not in ["change", "delete"]:
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+        # request.data[]
+        request.data["status"] = "open"
+
+        # Revalidate
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 class NotificationCreateView(CreateAPIView):

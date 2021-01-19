@@ -14,7 +14,7 @@ class ModerationItem(models.Model):
     target = models.ForeignKey(
         Notification, related_name="moderation_items", on_delete=models.CASCADE
     )
-    target_revision = models.IntegerField()
+    target_revision = models.IntegerField(default=0)
 
     CATEGORY_CHOICES = [
         ("change_request", "change_request"),

@@ -49,6 +49,15 @@ class ModerationItemSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class ChangeRequestSerializer(serializers.ModelSerializer):
+
+    # target = serializers.IntegerField()
+
+    class Meta:
+        model = ModerationItem
+        fields = ("target", "category", "item_type", "data")
+
+
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
 
     target = NotificationSerializer(read_only=True)
