@@ -6,29 +6,26 @@
 	"type": "object",
 	"properties": {
         "target": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "number"
-                },
-                "revision": {
-                    "type": "number"
-                }
-            },
-            "required": ["id", "revision"]
+            "type": "number"
         },
         "change_type": {
             "type": "string",
             "enum": ["change", "delete"]
         },
-        "description": {
-            "type": "string",
-            "maxLength": 400
-        },
-        "contact_details": {
-            "type": "string",
-            "maxLength": 400,
-            "default": ""
+        "data": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 400
+                },
+                "contact_details": {
+                    "type": "string",
+                    "maxLength": 400,
+                    "default": ""
+                }
+            },
+            "required": ["description", "contact_details"]
         }
     },
 	"required": [
