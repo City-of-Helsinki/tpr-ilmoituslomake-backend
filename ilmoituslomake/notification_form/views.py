@@ -82,6 +82,7 @@ class ChangeRequestCreateView(CreateAPIView):
         headers = None
         # Serialize
         # request.data["target_revision"] = -1
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -89,9 +90,7 @@ class ChangeRequestCreateView(CreateAPIView):
         # set revision
         # request.data["target_revision"] = -1
 
-        if request.data["category"] != "change_request" or request.data[
-            "item_type"
-        ] not in ["change", "delete"]:
+        if request.data["item_type"] not in ["change", "delete"]:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         # request.data[]

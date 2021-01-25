@@ -48,7 +48,7 @@ class ModerationItem(models.Model):
     )
 
     #
-    data = JSONField()
+    data = JSONField(default=dict)
 
     #
     user_comments = models.TextField(default="")

@@ -55,7 +55,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
     # TODO: Validate against schema
     class Meta:
         model = ModerationItem
-        fields = ("target", "category", "item_type", "data")
+        fields = ("target", "item_type", "user_comments", "user_details")
 
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
