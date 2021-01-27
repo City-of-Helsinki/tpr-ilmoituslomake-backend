@@ -63,12 +63,6 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
-# TODO: Remove once authentication is implemented
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request):
-        return  # To not perform the csrf check previously happening
-
-
 class ChangeRequestCreateView(CreateAPIView):
     """
     Create a ModerationItem of type change_request
@@ -117,11 +111,9 @@ class NotificationCreateView(CreateAPIView):
     Create a Notification instance
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    # TODO: Remove once authentication is implemented
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def create(self, request, *args, **kwargs):
         headers = None
