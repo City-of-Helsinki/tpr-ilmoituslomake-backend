@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     # Third-party apps
     "django_filters",
     "simple_history",
+    "storages",
     # Our apps
     "base",
     "notification_form",
@@ -204,3 +205,16 @@ HUEY = {
         "health_check_interval": 1,  # Check worker health every second.
     },
 }
+
+
+# Azure storage
+# DEFAULT_FILE_STORAGE = 'backend.custom_azure.AzureMediaStorage'
+# STATICFILES_STORAGE = 'backend.custom_azure.AzureStaticStorage'
+# STATIC_LOCATION = "static"
+# MEDIA_LOCATION = "media"
+
+AZURE_ACCOUNT_NAME = env("AZURE_ACCOUNT_NAME")
+AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+# STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+# MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+AZURE_ACCOUNT_KEY = env("AZURE_ACCOUNT_KEY")
