@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
-from base.models import Notification, NotificationSchema, OntologyWord
+from base.models import (
+    Notification,
+    NotificationSchema,
+    OntologyWord,
+    NotificationImage,
+)
 import json
 from jsonschema import validate
 
@@ -21,6 +26,18 @@ class NotificationSchemaSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationSchema
         fields = ("id", "name", "schema")
+
+
+class NotificationImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationImage
+        fields = ("metadata",)
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret["metadata"]["url"] = instance.data.url
+        return ret["metadata"]
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -81,8 +98,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         if "notifier" in ret["data"]:
             del ret["data"]["notifier"]
         # Remove created_at && user
+        del ret["data"]["images"]
         del ret["created_at"]
         del ret["user"]
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
+        # images
+        serializer = NotificationImageSerializer(instance.images, many=True)
+        ret["data"]["images"] = serializer.data
         return ret
