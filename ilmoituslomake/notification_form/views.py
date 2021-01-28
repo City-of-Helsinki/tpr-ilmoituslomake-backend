@@ -181,9 +181,8 @@ class NotificationListView(ListAPIView):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     filter_backends = [filters.SearchFilter]
-    # TODO: Add more search fields
     # TODO: Create migration which generates indices for JSON data
-    search_fields = ["data__name__fi"]
+    search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
 
 
 class OntologyWordListView(ListAPIView):

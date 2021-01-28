@@ -41,7 +41,11 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        # TODO: Remove
+        # Remove some keys
+        if "notifier" in ret["data"]:
+            del ret["data"]["notifier"]
+        # Remove created_at
+        del ret["created_at"]
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         return ret
