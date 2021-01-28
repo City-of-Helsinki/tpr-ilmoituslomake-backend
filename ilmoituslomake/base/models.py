@@ -100,7 +100,7 @@ class NotificationImage(models.Model):
     data = models.ImageField(storage=afs, upload_to=upload_image_to)
 
     notification = models.ForeignKey(
-        Notification, related_name="images", on_delete=models.DO_NOTHING
+        Notification, null=True, related_name="images", on_delete=models.DO_NOTHING
     )
 
     metadata = JSONField()
