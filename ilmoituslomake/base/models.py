@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -6,6 +7,10 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
+
+from base.storage import PublicAzureStorage
+
+afs = PublicAzureStorage()
 
 
 class OntologyWord(models.Model):
@@ -81,3 +86,28 @@ class Notification(models.Model):
         )
         # Save notification
         super().save(*args, **kwargs)
+
+
+def upload_image_to(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return "{0}/{1}".format(instance.notification.pk, str(uuid.uuid4()))
+
+
+class Image(models.Model):
+
+    name = models.TextField(blank=True)
+    filename = models.TextField(blank=True)
+
+    photo = models.ImageField(storage=afs, upload_to=upload_image_to)
+
+    notification = models.ForeignKey(
+        Notification, related_name="photos", on_delete=models.DO_NOTHING
+    )
+
+    # auto-fields
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.photo.url
