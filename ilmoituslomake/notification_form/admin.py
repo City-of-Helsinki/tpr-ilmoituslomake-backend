@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from base.models import Notification, OntologyWord, Image
+from base.models import Notification, OntologyWord, NotificationImage
 
 
 class NotificationAdmin(admin.ModelAdmin):
@@ -12,11 +12,11 @@ class OntologyWordAdmin(admin.ModelAdmin):
     pass
 
 
-class ImageAdmin(admin.ModelAdmin):
+class NotificationImageAdmin(admin.ModelAdmin):
     pass
 
 
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(OntologyWord, OntologyWordAdmin)
 
-admin.site.register(Image, ImageAdmin)
+admin.site.register(NotificationImage, NotificationImageAdmin)

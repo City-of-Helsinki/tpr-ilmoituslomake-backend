@@ -1,5 +1,6 @@
 import json
-import uuid
+
+# import uuid
 
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -89,20 +90,20 @@ class Notification(models.Model):
 
 
 def upload_image_to(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return "{0}/{1}".format(instance.notification.pk, str(uuid.uuid4()))
+    return "{0}/{1}".format(instance.notification.pk, filename)
 
 
-class Image(models.Model):
+class NotificationImage(models.Model):
 
-    name = models.TextField(blank=True)
     filename = models.TextField(blank=True)
 
-    photo = models.ImageField(storage=afs, upload_to=upload_image_to)
+    data = models.ImageField(storage=afs, upload_to=upload_image_to)
 
     notification = models.ForeignKey(
-        Notification, related_name="photos", on_delete=models.DO_NOTHING
+        Notification, related_name="images", on_delete=models.DO_NOTHING
     )
+
+    metadata = JSONField()
 
     # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -110,4 +111,4 @@ class Image(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.photo.url
+        return self.data.url

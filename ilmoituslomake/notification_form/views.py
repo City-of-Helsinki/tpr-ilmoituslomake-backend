@@ -1,3 +1,9 @@
+import base64
+import uuid
+import io
+from PIL import Image
+
+
 from django.shortcuts import render, get_object_or_404
 
 # Permissions
@@ -15,7 +21,12 @@ from rest_framework import filters
 from moderation.models import ModerationItem
 from moderation.serializers import ChangeRequestSerializer
 
-from base.models import Notification, NotificationSchema, OntologyWord
+from base.models import (
+    Notification,
+    NotificationSchema,
+    OntologyWord,
+    NotificationImage,
+)
 from base.serializers import (
     NotificationSerializer,
     NotificationSchemaSerializer,
@@ -25,6 +36,7 @@ from notification_form.serializers import ToimipisterekisteriNotificationAPISeri
 
 #
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 
 # TODO: Remove
 
@@ -117,9 +129,10 @@ class NotificationCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        is_update = False
-        instance = None
-        images = []
+        request_images = []
+
+        image_uploads = []
+
         # Serialize
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -127,38 +140,60 @@ class NotificationCreateView(CreateAPIView):
         # Handle images
         data_images = request.data["data"]["images"]
         if "images" in request.data:
-            images = request.data["images"]  # validate
-            del request.data["images"]
+            request_images = request.data["images"]  # validate
+            # del request.data["images"]
 
         if len(images) > 0:
-            # if permmission = false?
+            # if permission = false?
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             # Handle base64 image
             for i in range(len(images)):
-                image_idx = images[i]["index"]
+                image_idx = request_images[i]["index"]
                 for image in data_images:
                     if image["index"] == image_idx:
                         data_image = data_images[image_idx]
-                        base64 = images[i]["base64"]
-                        # handle base64 data, how to refer to this data?
-                        request.data["data"]["images"][image_idx][
-                            "url"
-                        ] = "https://edit.myhelsinki.fi/sites/default/files/styles/square_600/public/2020-05/espa_x.jpg"
+                        #  image = base64.b64decode(str('stringdata'))
+
+                        image_uploads.append(
+                            {
+                                "filename": str(uuid.uuid4()) + ".jpg",
+                                "base64": request_images[i]["base64"],
+                                "metadata": data_image,
+                            }
+                        )
+
+                        # request.data["data"]["images"][image_idx][
+                        #    "url"
+                        # ] = "https://tprimages.blob.core.windows.net/tpr-notification-dev/id/uuid.jpg"
                         break
             # Create
-            self.perform_create(serializer)
+            self.perform_create(serializer, image_uploads)
             headers = self.get_success_headers(serializer.data)
         else:
             # Create
-            self.perform_create(serializer)
+            self.perform_create(serializer, [])
             headers = self.get_success_headers(serializer.data)
 
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def perform_create(self, serializer, image_uploads):
+        instance = serializer.save(user=self.request.user)
+        for upload in image_uploads:
+            data = base64.decodestring(upload["base64"])
+            del upload["base64"]
+            image = Image.open(io.BytesIO(data))
+            with io.BytesIO() as output:
+                image.save(output, format="jpg")
+                upload["data"] = output.getvalue()
+            notif_image = NotificationImage(
+                filename=upload["filename"],
+                data=upload["data"],
+                notification=instance,
+                metadata=upload["metadata"],
+            )
+            notif_image.save()
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
