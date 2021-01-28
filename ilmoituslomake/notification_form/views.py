@@ -6,6 +6,9 @@ from PIL import Image
 
 from django.shortcuts import render, get_object_or_404
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.base import ContentFile
+
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -52,7 +55,7 @@ class NotificationSchemaCreateView(CreateAPIView):
     # permission_classes =
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -143,11 +146,11 @@ class NotificationCreateView(CreateAPIView):
             request_images = request.data["images"]  # validate
             # del request.data["images"]
 
-        if len(images) > 0:
+        if len(request_images) > 0:
             # if permission = false?
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             # Handle base64 image
-            for i in range(len(images)):
+            for i in range(len(request_images)):
                 image_idx = request_images[i]["index"]
                 for image in data_images:
                     if image["index"] == image_idx:
@@ -181,15 +184,22 @@ class NotificationCreateView(CreateAPIView):
     def perform_create(self, serializer, image_uploads):
         instance = serializer.save(user=self.request.user)
         for upload in image_uploads:
-            data = base64.decodestring(upload["base64"])
+            data = base64.b64decode(upload["base64"])
             del upload["base64"]
             image = Image.open(io.BytesIO(data))
             with io.BytesIO() as output:
-                image.save(output, format="jpg")
-                upload["data"] = output.getvalue()
+                image.save(output, format="JPEG")
+                upload["data"] = ContentFile(output.getvalue())
             notif_image = NotificationImage(
                 filename=upload["filename"],
-                data=upload["data"],
+                data=InMemoryUploadedFile(
+                    upload["data"],
+                    None,  # field_name
+                    upload["filename"],  # file name
+                    "image/jpeg",  # content_type
+                    upload["data"].tell,  # size
+                    None,  # content_type_extra
+                ),
                 notification=instance,
                 metadata=upload["metadata"],
             )
