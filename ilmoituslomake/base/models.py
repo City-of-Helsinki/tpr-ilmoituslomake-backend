@@ -49,7 +49,11 @@ class Notification(models.Model):
     )
 
     # is published
-    published = models.BooleanField(default=False, db_index=True)
+    # published = models.BooleanField(default=False, db_index=True)
+
+    user = models.ForeignKey(
+        User, null=True, related_name="notifications", on_delete=models.DO_NOTHING
+    )
 
     # coordinates
     location = models.PointField(srid=4326)
