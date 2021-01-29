@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
+from ilmoituslomake.settings import AZURE_READ_KEY
+
 from base.models import (
     Notification,
     NotificationSchema,
@@ -36,7 +38,9 @@ class NotificationImageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret["metadata"]["url"] = instance.data.url
+        ret["metadata"]["url"] = (
+            instance.data.url + AZURE_READ_KEY
+        )  # TODO: Move this to ModerationSerializer
         return ret["metadata"]
 
 
