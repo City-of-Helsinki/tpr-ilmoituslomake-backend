@@ -13,7 +13,7 @@ from base.serializers import NotificationSerializer
 class JSONSerializerField(serializers.Field):
     # """ Serializer for JSONField -- required to make field writable"""
     def to_representation(self, obj):
-        return obj["name"]["fi"]
+        return obj["name"]
 
 
 class NotificationTargetSerializer(serializers.ModelSerializer):
