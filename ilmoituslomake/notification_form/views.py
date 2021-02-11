@@ -1,6 +1,7 @@
 import base64
 import uuid
 import io
+import requests
 from PIL import Image
 
 
@@ -151,16 +152,21 @@ class NotificationCreateView(CreateAPIView):
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             # Handle base64 image
             for i in range(len(request_images)):
-                image_idx = request_images[i]["index"]
+                image_idx = request_images[i]["uuid"]
                 for image in data_images:
-                    if image["index"] == image_idx:
+                    if image["uuid"] == image_idx:
                         data_image = data_images[image_idx]
                         #  image = base64.b64decode(str('stringdata'))
 
                         image_uploads.append(
                             {
-                                "filename": str(uuid.uuid4()) + ".jpg",
-                                "base64": request_images[i]["base64"],
+                                "filename": str(image_idx) + ".jpg",
+                                "base64": request_images[i]["base64"]
+                                if ("base64" in request_images[i])
+                                else "",
+                                "url": request_images[i]["url"]
+                                if ("url" in request_images[i])
+                                else "",
                                 "metadata": data_image,
                             }
                         )
@@ -183,13 +189,32 @@ class NotificationCreateView(CreateAPIView):
 
     def perform_create(self, serializer, image_uploads):
         instance = serializer.save(user=self.request.user)
+        # TODO: What if not an image
+        data = None
         for upload in image_uploads:
-            data = base64.b64decode(upload["base64"])
-            del upload["base64"]
-            image = Image.open(io.BytesIO(data))
-            with io.BytesIO() as output:
-                image.save(output, format="JPEG")
-                upload["data"] = ContentFile(output.getvalue())
+            if upload["base64"] != "":
+                data = base64.b64decode(upload["base64"])
+                del upload["base64"]
+            elif upload["url"] != "":
+                response = requests.get(upload["url"], stream=True)
+                if response.status_code == 200:
+                    response.raw.decode_content = True
+                    data = response.raw
+                else:
+                    continue
+            else:
+                continue
+            # TODO: Virus check
+            # check
+            #
+            if data != None:
+                image = Image.open(io.BytesIO(data))
+                with io.BytesIO() as output:
+                    image.save(output, format="JPEG")
+                    upload["data"] = ContentFile(output.getvalue())
+            else:
+                continue
+            #
             notif_image = NotificationImage(
                 filename=upload["filename"],
                 data=InMemoryUploadedFile(
