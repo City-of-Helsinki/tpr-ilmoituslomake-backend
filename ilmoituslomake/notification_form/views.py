@@ -170,10 +170,6 @@ class NotificationCreateView(CreateAPIView):
                                 "metadata": data_image,
                             }
                         )
-
-                        # request.data["data"]["images"][image_idx][
-                        #    "url"
-                        # ] = "https://tprimages.blob.core.windows.net/tpr-notification-dev/id/uuid.jpg"
                         break
             # Create
             self.perform_create(serializer, image_uploads)
