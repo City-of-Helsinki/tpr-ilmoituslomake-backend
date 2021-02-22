@@ -84,7 +84,7 @@ class ChangeRequestCreateView(CreateAPIView):
         # set revision
         # request.data["target_revision"] = -1
 
-        if request.data["item_type"] not in ["change", "delete"]:
+        if request.data["item_type"] not in ["change", "add", "delete"]:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         # request.data[]

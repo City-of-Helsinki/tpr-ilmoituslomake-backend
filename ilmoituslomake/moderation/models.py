@@ -26,6 +26,7 @@ class ModerationItem(models.Model):
 
     CHANGE_TYPE_CHOICES = [
         ("change", "change"),
+        ("add", "add"),
         ("delete", "delete"),
     ]
     MODERATION_TYPE_CHOICES = [
@@ -51,8 +52,9 @@ class ModerationItem(models.Model):
     data = JSONField(default=dict)
 
     #
+    user_place_name = models.TextField(default="", blank=True)
     user_comments = models.TextField(default="")
-    user_details = models.TextField(default="")
+    user_details = models.TextField(default="", blank=True)
 
     # moderator_comments = models.TextField(default="")
     moderator = models.ForeignKey(
