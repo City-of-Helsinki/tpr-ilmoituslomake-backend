@@ -45,6 +45,7 @@ class ModerationItemSerializer(serializers.ModelSerializer):
             "moderator",
             "created_at",
             "updated_at",
+            "user_place_name",
         )
         read_only_fields = fields
 

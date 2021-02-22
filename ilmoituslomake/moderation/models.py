@@ -12,7 +12,7 @@ from users.models import User
 class ModerationItem(models.Model):
 
     target = models.ForeignKey(
-        Notification, related_name="moderation_items", on_delete=models.CASCADE
+        Notification, null=True, related_name="moderation_items", on_delete=models.CASCADE
     )
     target_revision = models.IntegerField(default=0)
 

@@ -80,7 +80,8 @@ class ChangeRequestCreateView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        target_notification = get_object_or_404(Notification, pk=request.data["target"])
+        if request.data["item_type"] != "add":
+            target_notification = get_object_or_404(Notification, pk=request.data["target"])
         # set revision
         # request.data["target_revision"] = -1
 
