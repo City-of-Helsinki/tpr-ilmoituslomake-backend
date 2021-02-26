@@ -24,9 +24,9 @@ urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-urlpatterns += [
-    path("admin/", admin.site.urls),
-]
+# urlpatterns += [
+#    path("admin/", admin.site.urls),
+# ]
 
 
 # Authentication

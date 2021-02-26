@@ -153,9 +153,10 @@ class NotificationCreateView(CreateAPIView):
             # Handle base64 image
             for i in range(len(request_images)):
                 image_idx = request_images[i]["uuid"]
-                for image in data_images:
+                for idx in range(len(data_images)):  # image in data_images:
+                    image = data_images[idx]
                     if image["uuid"] == image_idx:
-                        data_image = data_images[image_idx]
+                        data_image = data_images[idx]
                         #  image = base64.b64decode(str('stringdata'))
 
                         image_uploads.append(
@@ -189,13 +190,14 @@ class NotificationCreateView(CreateAPIView):
         data = None
         for upload in image_uploads:
             if upload["base64"] != "":
-                data = base64.b64decode(upload["base64"])
+                data = base64.b64decode(upload["base64"].split(",")[1])
+                # print(upload["base64"][0:64])
                 del upload["base64"]
             elif upload["url"] != "":
                 response = requests.get(upload["url"], stream=True)
                 if response.status_code == 200:
                     response.raw.decode_content = True
-                    data = response.raw
+                    data = response.raw.read()
                 else:
                     continue
             else:
@@ -206,6 +208,7 @@ class NotificationCreateView(CreateAPIView):
             if data != None:
                 image = Image.open(io.BytesIO(data))
                 with io.BytesIO() as output:
+                    # print(output)
                     image.save(output, format="JPEG")
                     upload["data"] = ContentFile(output.getvalue())
             else:
