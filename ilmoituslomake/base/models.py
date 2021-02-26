@@ -2,10 +2,10 @@ import json
 
 # import uuid
 
-from django.contrib.gis.geos import GEOSGeometry
+# from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.postgres.fields import JSONField
-from django.contrib.gis.db import models
+from django.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
@@ -62,7 +62,7 @@ class Notification(models.Model):
     )
 
     # coordinates
-    location = models.PointField(srid=4326)
+    # location = models.PointField(srid=4326)
 
     # last action performed
     # action = models.CharField(max_length=16, blank=True, db_index=True)
@@ -82,14 +82,15 @@ class Notification(models.Model):
         # Auto-update location
         # TODO: Handle error
         self.revision += 1
-        self.location = GEOSGeometry(
-            json.dumps({"type": "Point", "coordinates": self.data["location"]})
-        )
+        # self.location = GEOSGeometry(
+        #    json.dumps({"type": "Point", "coordinates": self.data["location"]})
+        # )
         # Save notification
         super().save(*args, **kwargs)
 
 
 def upload_image_to(instance, filename):
+    #     return "{0}/{1}".format("1", filename)
     return "{0}/{1}".format(instance.notification.pk, filename)
 
 
