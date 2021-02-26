@@ -85,7 +85,7 @@ class Command(BaseCommand):
         try:
             # Making a get request
             response = requests.get(
-                "https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/"
+                "https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/?category=MyHelsinki"
             )
 
             # Parse JSON
