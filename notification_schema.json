@@ -124,9 +124,12 @@
                         },
                         "post_office": {
                             "type": "string"
+                        },
+                        "neighborhood": {
+                            "type": "string"
                         }
                     },
-                    "required": ["street", "postal_code", "post_office"]
+                    "required": ["street", "postal_code", "post_office", "neighborhood"]
                 },
                 "sv": {
                     "type": "object",
@@ -148,9 +151,12 @@
                         },
                         "post_office": {
                             "type": "string"
+                        },
+                        "neighborhood": {
+                            "type": "string"
                         }
                     },
-                    "required": ["street", "postal_code", "post_office"]
+                    "required": ["street", "postal_code", "post_office", "neighborhood"]
                 }
             },
             "required": ["fi", "sv"]
@@ -229,6 +235,9 @@
                     "index": {
                         "type": "number"
                     },
+                    "uuid": {
+                        "type": "string"
+                    },
                     "source_type": {
                         "type": "string"
                     },
@@ -260,7 +269,7 @@
                         "required": ["fi", "sv", "en"]
                     }
                 },
-                "required": ["index", "source_type", "url", "permission", "source", "alt_text"]
+                "required": ["index", "uuid", "source_type", "url", "permission", "source", "alt_text"]
             }
         },
         "opening_times": {
