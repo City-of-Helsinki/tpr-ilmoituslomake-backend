@@ -10,7 +10,7 @@
         },
         "change_type": {
             "type": "string",
-            "enum": ["change", "delete"]
+            "enum": ["change", "add", "delete"]
         },
         "data": {
             "type": "object",

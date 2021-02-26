@@ -14,7 +14,7 @@ from users.models import User
 class ModerationItem(models.Model):
 
     target = models.ForeignKey(
-        Notification, related_name="moderation_items", on_delete=models.CASCADE
+        Notification, null=True, related_name="moderation_items", on_delete=models.CASCADE
     )
     target_revision = models.IntegerField(default=0)
 
@@ -28,6 +28,7 @@ class ModerationItem(models.Model):
 
     CHANGE_TYPE_CHOICES = [
         ("change", "change"),
+        ("add", "add"),
         ("delete", "delete"),
     ]
     MODERATION_TYPE_CHOICES = [
@@ -53,8 +54,9 @@ class ModerationItem(models.Model):
     data = JSONField(default=dict)
 
     #
+    user_place_name = models.TextField(default="", blank=True)
     user_comments = models.TextField(default="")
-    user_details = models.TextField(default="")
+    user_details = models.TextField(default="", blank=True)
 
     # moderator_comments = models.TextField(default="")
     moderator = models.ForeignKey(
