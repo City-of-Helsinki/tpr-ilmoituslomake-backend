@@ -99,9 +99,16 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        # Remove some keys
-        if "notifier" in ret["data"]:
-            del ret["data"]["notifier"]
+        # Check if user is notifier, and only return notifier details if so
+        is_notifier = self.get_is_notifier(instance)
+        # Remove some keys, but always return notifier_type
+        if is_notifier is False and "notifier" in ret["data"]:
+            if "full_name" in ret["data"]["notifier"]:
+                del ret["data"]["notifier"]["full_name"]
+            if "email" in ret["data"]["notifier"]:
+                del ret["data"]["notifier"]["email"]
+            if "phone" in ret["data"]["notifier"]:
+                del ret["data"]["notifier"]["phone"]
         # Remove created_at && user
         del ret["data"]["images"]
         del ret["created_at"]
