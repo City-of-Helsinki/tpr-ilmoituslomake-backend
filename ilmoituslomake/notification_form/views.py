@@ -25,9 +25,9 @@ from rest_framework import filters
 from moderation.models import ModerationItem
 from moderation.serializers import ChangeRequestSerializer
 
-from notification_form.models import Notification
+from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
-from base.models import NotificationSchema, OntologyWord, NotificationImage
+from base.models import NotificationSchema, OntologyWord
 
 from base.serializers import (
     NotificationSerializer,
@@ -35,6 +35,8 @@ from base.serializers import (
     OntologyWordSerializer,
 )
 from moderation.serializers import PublicModeratedNotificationSerializer
+
+from django.db.models import Q
 
 #
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -251,7 +253,7 @@ class NotificationListView(ListAPIView):
     """
 
     permission_classes = [AllowAny]
-    queryset = ModeratedNotification.objects.all()
+    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
     serializer_class = PublicModeratedNotificationSerializer
     filter_backends = [filters.SearchFilter]
     # TODO: Create migration which generates indices for JSON data

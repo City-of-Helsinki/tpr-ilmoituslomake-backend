@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # GIS
-    # "django.contrib.gis",
+    "django.contrib.gis",
     # Third-party apps
     "django_filters",
     "simple_history",
@@ -104,12 +104,12 @@ WSGI_APPLICATION = "ilmoituslomake.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": env("DB_ENV_DB"),
         "USER": env("DB_ENV_POSTGRES_USER"),
         "PASSWORD": env("DB_ENV_POSTGRES_PASSWORD"),
         "HOST": env("DB_PORT_5432_TCP_ADDR"),
-        "PORT": "5433",  # env("DB_PORT_5432_TCP_PORT"),
+        "PORT": env("DB_PORT_5432_TCP_PORT"),
     }
 }
 
@@ -210,12 +210,11 @@ HUEY = {
 # Azure storage
 AZURE_CONTAINER = env("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = env("AZURE_CONNECTION_STRING")
-# AZURE_READ_KEY = env("AZURE_READ_KEY")
+AZURE_READ_KEY = env("AZURE_READ_KEY")
 
 # Setup support for proxy headers
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-FORCE_SCRIPT_NAME = "/TPRalusta_testi"
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# FORCE_SCRIPT_NAME = "/TPRalusta_testi"
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10

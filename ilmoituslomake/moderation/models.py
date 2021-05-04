@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField
 
-from base.models import BaseNotification
+from base.models import BaseNotification, BaseNotificationImage
 from notification_form.models import Notification
 
 from users.models import User
@@ -80,5 +80,14 @@ class ModeratedNotification(BaseNotification):
         Notification,
         null=True,
         related_name="moderated_notification",
+        on_delete=models.DO_NOTHING,
+    )
+
+
+class ModeratedNotificationImage(BaseNotificationImage):
+    notification = models.ForeignKey(
+        ModeratedNotification,
+        null=True,
+        related_name="images",
         on_delete=models.DO_NOTHING,
     )

@@ -99,15 +99,13 @@ def upload_image_to(instance, filename):
     return "{0}/{1}".format(instance.notification.pk, filename)
 
 
-class NotificationImage(models.Model):
+class BaseNotificationImage(models.Model):
+    class Meta:
+        abstract = True
 
     filename = models.TextField(blank=True)
 
     data = models.ImageField(storage=afs, upload_to=upload_image_to)
-
-    notification = models.ForeignKey(
-        Notification, null=True, related_name="images", on_delete=models.DO_NOTHING
-    )
 
     metadata = JSONField()
 
