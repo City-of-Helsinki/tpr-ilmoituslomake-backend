@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from moderation.models import ModerationItem
-from base.models import Notification
+
+# from base.models import Notification
+from notification_form.models import Notification
 
 #
 from users.serializers import ModeratorSerializer

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
-from base.models import Notification, NotificationSchema, OntologyWord
+from base.models import NotificationSchema, OntologyWord
+from notification_form.models import Notification
 import json
 from jsonschema import validate
 

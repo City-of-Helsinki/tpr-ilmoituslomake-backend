@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from base.models import Notification
+from notification_form.models import Notification
 
 
 class ToimipisterekisteriNotificationAPISerializer(serializers.ModelSerializer):

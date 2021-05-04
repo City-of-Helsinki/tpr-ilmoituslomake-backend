@@ -15,7 +15,8 @@ from rest_framework import filters
 from moderation.models import ModerationItem
 from moderation.serializers import ChangeRequestSerializer
 
-from base.models import Notification, NotificationSchema, OntologyWord
+from notification_form.models import Notification
+from base.models import NotificationSchema, OntologyWord
 from base.serializers import (
     NotificationSerializer,
     NotificationSchemaSerializer,

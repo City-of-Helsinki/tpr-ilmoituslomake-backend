@@ -2,7 +2,8 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField
 
-from base.models import Notification
+from base.models import BaseNotification
+from notification_form.models import Notification
 
 from users.models import User
 
@@ -63,3 +64,7 @@ class ModerationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+
+class ModeratedNotification(BaseNotification):
+    pass

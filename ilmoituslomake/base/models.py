@@ -32,7 +32,9 @@ class NotificationSchema(models.Model):
 
 
 # Notification
-class Notification(models.Model):
+class BaseNotification(models.Model):
+    class Meta:
+        abstract = True
 
     # revision number
     revision = models.IntegerField(default=0, db_index=True)

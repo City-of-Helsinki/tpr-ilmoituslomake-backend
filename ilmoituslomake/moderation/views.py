@@ -22,7 +22,9 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
 #
-from base.models import Notification
+# from base.models import Notification
+from notification_form.models import Notification
+from moderation.models import ModeratedNotification
 from base.serializers import NotificationSerializer
 
 #
@@ -229,4 +231,44 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# Save
+# Approve
+class ModerationItemUpdateView(UpdateAPIView):
+    """
+    Save moderation
+    """
+
+    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    lookup_field = "id"
+    queryset = ModerationItem.objects.all()
+    serializer_class = ModerationItemDetailSerializer
+
+    def update(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        serializer = self.get_serializer(moderation_item)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        if moderation_item.moderator != request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+
+        moderation_item.status = "closed"
+        if type(request.data["data"]) is not dict:
+            moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
+        else:
+            moderation_item.data = request.data["data"]  # TODO: Validate
+
+        #
+        try:
+            moderated_notification = ModeratedNotification.objects.get(pk=id)
+            moderated_notification.data = moderation_item.data
+        except ModeratedNotification.DoesNotExist:
+            moderated_notification = ModeratedNotification(
+                user=None, status="approved", data=moderation_item.data
+            )
+        finally:
+            moderated_notification.save()
+
+        moderation_item.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
