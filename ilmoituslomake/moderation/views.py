@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404
 
 # Permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -43,7 +43,7 @@ class ModerationItemSearchListView(ListAPIView):
 
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     queryset = ModerationItem.objects.all().filter(~Q(status="closed"))
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
@@ -59,7 +59,7 @@ class ModerationItemSearchListView(ListAPIView):
 class NewModerationItemListView(ListAPIView):
     """"""
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
@@ -78,7 +78,7 @@ class ModerationItemListView(ListAPIView):
 
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     queryset = ModerationItem.objects.all().filter(
         Q(status="open") | Q(status="in_progress")
     )
@@ -93,7 +93,7 @@ class MyModerationItemListView(ListAPIView):
     Show all current user's moderation items
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["created_at"]
     ordering = ["-created_at"]
@@ -111,7 +111,7 @@ class AssignModerationItemView(UpdateAPIView):
     Assign moderation item to the current user
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemSerializer
 
@@ -137,7 +137,7 @@ class UnassignModerationItemView(UpdateAPIView):
 
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemSerializer
 
@@ -163,7 +163,7 @@ class RejectModerationItemView(DestroyAPIView):
     Reject moderation item (close it)
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemSerializer
 
@@ -187,7 +187,7 @@ class RejectModerationItemView(DestroyAPIView):
 # Delete Notification
 # class DeleteNotificationView(DestroyAPIView):
 
-#     permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+#     permission_classes = [IsAdminUser]
 #     queryset = Notification.objects.all().filter()
 #     serializer_class = NotificationSerializer
 
@@ -205,7 +205,7 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
     Save moderation item as a draft
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemDetailSerializer
@@ -237,7 +237,7 @@ class ModerationItemUpdateView(UpdateAPIView):
     Save moderation
     """
 
-    permission_classes = [IsAuthenticated]  # TODO: Require user to be a moderator
+    permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemDetailSerializer

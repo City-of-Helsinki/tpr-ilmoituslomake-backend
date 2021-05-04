@@ -50,11 +50,11 @@ class BaseNotification(models.Model):
         max_length=16, choices=STATUS_CHOICES, default="created", db_index=True
     )
 
-    # is published
-    # published = models.BooleanField(default=False, db_index=True)
-
     user = models.ForeignKey(
-        User, null=True, related_name="notifications", on_delete=models.DO_NOTHING
+        User,
+        null=True,
+        related_name="%(class)s_notifications",
+        on_delete=models.DO_NOTHING,
     )
 
     # coordinates
@@ -68,7 +68,7 @@ class BaseNotification(models.Model):
     # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     def __str__(self):
         return self.data["name"]["fi"]
