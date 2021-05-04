@@ -2,10 +2,10 @@ import json
 
 # import uuid
 
-# from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
@@ -64,7 +64,7 @@ class BaseNotification(models.Model):
     )
 
     # coordinates
-    # location = models.PointField(srid=4326)
+    location = models.PointField(srid=4326)
 
     # last action performed
     # action = models.CharField(max_length=16, blank=True, db_index=True)
@@ -81,12 +81,15 @@ class BaseNotification(models.Model):
 
     # Overwrite save
     def save(self, *args, **kwargs):
-        # Auto-update location
-        # TODO: Handle error
+        # Auto-update revision and location
         self.revision += 1
-        # self.location = GEOSGeometry(
-        #    json.dumps({"type": "Point", "coordinates": self.data["location"]})
-        # )
+        try:
+            self.location = GEOSGeometry(
+                json.dumps({"type": "Point", "coordinates": self.data["location"]})
+            )
+        except Exception as e:
+            pass
+
         # Save notification
         super().save(*args, **kwargs)
 
@@ -111,7 +114,7 @@ class NotificationImage(models.Model):
     # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     def __str__(self):
         return self.data.url

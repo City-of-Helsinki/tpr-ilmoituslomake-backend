@@ -159,12 +159,20 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        # Remove some keys
-        if "notifier" in ret["data"]:
-            del ret["data"]["notifier"]
+        # Check if user is notifier, and only return notifier details if so
+        is_notifier = self.get_is_notifier(instance)
+        # Remove some keys, but always return notifier_type
+        if "notifier" in ret["data"] and not is_notifier:
+            del ret["data"]["notifier"]["full_name"]
+            del ret["data"]["notifier"]["email"]
+            del ret["data"]["notifier"]["phone"]
         # Remove created_at && user
+        del ret["data"]["images"]
         del ret["created_at"]
         del ret["user"]
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
+        # images
+        serializer = NotificationImageSerializer(instance.images, many=True)
+        ret["data"]["images"] = serializer.data
         return ret

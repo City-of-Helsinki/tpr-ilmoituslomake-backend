@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 from helusers.models import AbstractUser
 from django.contrib.postgres.fields import JSONField
 
