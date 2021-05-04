@@ -16,13 +16,14 @@ from moderation.models import ModerationItem
 from moderation.serializers import ChangeRequestSerializer
 
 from notification_form.models import Notification
+from moderation.models import ModeratedNotification
 from base.models import NotificationSchema, OntologyWord
 from base.serializers import (
     NotificationSerializer,
     NotificationSchemaSerializer,
     OntologyWordSerializer,
 )
-from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
+from moderation.serializers import PublicModeratedNotificationSerializer
 
 #
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -178,12 +179,12 @@ class NotificationRetrieveView(RetrieveAPIView):
 
 class NotificationListView(ListAPIView):
     """
-    Returns a collection of Notification instances. Search support
+    Returns a collection of ModeratedNotification instances. Search support
     """
 
     permission_classes = [AllowAny]
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    queryset = ModeratedNotification.objects.all()
+    serializer_class = PublicModeratedNotificationSerializer
     filter_backends = [filters.SearchFilter]
     # TODO: Create migration which generates indices for JSON data
     search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
@@ -202,27 +203,3 @@ class OntologyWordListView(ListAPIView):
     # TODO: Create migration which generates indices for JSON data
     # search_fields = ["data__ontologyword__fi"]
     pagination_class = None
-
-
-## ToimipisterekisteriAPI views
-
-
-class ToimipisterekisteriNotificationAPIRetrieveView(RetrieveAPIView):
-    """
-    Returns a single Notification for ToimipisterekisteriAPI
-    """
-
-    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
-    lookup_field = "id"
-    queryset = Notification.objects.all()
-    serializer_class = ToimipisterekisteriNotificationAPISerializer
-
-
-class ToimipisterekisteriNotificationAPIListView(ListAPIView):
-    """
-    Returns a collection of Notification instances for ToimipisterekisteriAPI
-    """
-
-    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
-    queryset = Notification.objects.all()
-    serializer_class = ToimipisterekisteriNotificationAPISerializer
