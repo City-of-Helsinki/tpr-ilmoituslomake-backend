@@ -2,7 +2,10 @@ from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
 from base.models import NotificationSchema, OntologyWord
-from notification_form.models import Notification
+from notification_form.models import Notification, NotificationImage
+
+# from ilmoituslomake.settings import AZURE_READ_KEY
+
 import json
 from jsonschema import validate
 
@@ -24,6 +27,21 @@ class NotificationSchemaSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "schema")
 
 
+class NotificationImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationImage
+        fields = ("metadata",)
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret["metadata"]["url"] = (
+            instance.data.url
+            + "?sv=2019-12-12&ss=bf&srt=sco&sp=r&se=2021-03-31T13:17:17Z&st=2021-02-14T06:17:17Z&spr=https&sig=XcDH%2F6NT26aRx5K2NRqrzVxo7AwoLuM2TNXRyvK%2F9Iw%3D"
+        )  # TODO: Move this to ModerationSerializer
+        return ret["metadata"]
+
+
 class NotificationSerializer(serializers.ModelSerializer):
 
     # is_notifier = serializers.SerializerMethodField()
@@ -35,7 +53,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "status",
             "is_notifier",
             "user",
-            "location",
+            #            "location",
             "data",
             "updated_at",
             "created_at",
@@ -45,7 +63,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "status",
             "is_notifier",
             "user",
-            "location",
+            #            "location",
             "updated_at",
             "created_at",
         )
@@ -82,8 +100,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         if "notifier" in ret["data"]:
             del ret["data"]["notifier"]
         # Remove created_at && user
+        del ret["data"]["images"]
         del ret["created_at"]
         del ret["user"]
         # show geometry as geojson
-        ret["location"] = json.loads(instance.location.json)
+        # ret["location"] = json.loads(instance.location.json)
+        # images
+        serializer = NotificationImageSerializer(instance.images, many=True)
+        ret["data"]["images"] = serializer.data
         return ret

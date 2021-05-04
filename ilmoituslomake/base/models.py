@@ -1,11 +1,17 @@
 import json
 
-from django.contrib.gis.geos import GEOSGeometry
+# import uuid
+
+# from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.postgres.fields import JSONField
-from django.contrib.gis.db import models
+from django.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
+
+from base.storage import PublicAzureStorage
+
+afs = PublicAzureStorage()
 
 
 class OntologyWord(models.Model):
@@ -58,7 +64,7 @@ class BaseNotification(models.Model):
     )
 
     # coordinates
-    location = models.PointField(srid=4326)
+    # location = models.PointField(srid=4326)
 
     # last action performed
     # action = models.CharField(max_length=16, blank=True, db_index=True)
@@ -78,8 +84,34 @@ class BaseNotification(models.Model):
         # Auto-update location
         # TODO: Handle error
         self.revision += 1
-        self.location = GEOSGeometry(
-            json.dumps({"type": "Point", "coordinates": self.data["location"]})
-        )
+        # self.location = GEOSGeometry(
+        #    json.dumps({"type": "Point", "coordinates": self.data["location"]})
+        # )
         # Save notification
         super().save(*args, **kwargs)
+
+
+def upload_image_to(instance, filename):
+    #     return "{0}/{1}".format("1", filename)
+    return "{0}/{1}".format(instance.notification.pk, filename)
+
+
+class NotificationImage(models.Model):
+
+    filename = models.TextField(blank=True)
+
+    data = models.ImageField(storage=afs, upload_to=upload_image_to)
+
+    notification = models.ForeignKey(
+        Notification, null=True, related_name="images", on_delete=models.DO_NOTHING
+    )
+
+    metadata = JSONField()
+
+    # auto-fields
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.data.url

@@ -48,6 +48,7 @@ class ModerationItemSerializer(serializers.ModelSerializer):
             "moderator",
             "created_at",
             "updated_at",
+            "user_place_name",
         )
         read_only_fields = fields
 
@@ -58,7 +59,13 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
     # TODO: Validate against schema
     class Meta:
         model = ModerationItem
-        fields = ("target", "item_type", "user_comments", "user_details")
+        fields = (
+            "target",
+            "item_type",
+            "user_place_name",
+            "user_comments",
+            "user_details",
+        )
 
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
@@ -76,6 +83,7 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
             "item_type",
             "status",
             "data",
+            "user_place_name",
             "user_comments",
             "user_details",
             "moderator",
@@ -88,6 +96,7 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
             "category",
             "item_type",
             "status",
+            "user_place_name",
             "user_comments",
             "user_details",
             "moderator",

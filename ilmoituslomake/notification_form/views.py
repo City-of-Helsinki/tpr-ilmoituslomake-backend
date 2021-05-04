@@ -1,4 +1,14 @@
+import base64
+import uuid
+import io
+import requests
+from PIL import Image
+
+
 from django.shortcuts import render, get_object_or_404
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.base import ContentFile
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,7 +27,8 @@ from moderation.serializers import ChangeRequestSerializer
 
 from notification_form.models import Notification
 from moderation.models import ModeratedNotification
-from base.models import NotificationSchema, OntologyWord
+from base.models import NotificationSchema, OntologyWord, NotificationImage
+
 from base.serializers import (
     NotificationSerializer,
     NotificationSchemaSerializer,
@@ -27,6 +38,7 @@ from moderation.serializers import PublicModeratedNotificationSerializer
 
 #
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 
 # TODO: Remove
 
@@ -82,11 +94,14 @@ class ChangeRequestCreateView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        target_notification = get_object_or_404(Notification, pk=request.data["target"])
+        if request.data["item_type"] != "add":
+            target_notification = get_object_or_404(
+                Notification, pk=request.data["target"]
+            )
         # set revision
         # request.data["target_revision"] = -1
 
-        if request.data["item_type"] not in ["change", "delete"]:
+        if request.data["item_type"] not in ["change", "add", "delete"]:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         # request.data[]
@@ -119,9 +134,10 @@ class NotificationCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        is_update = False
-        instance = None
-        images = []
+        request_images = []
+
+        image_uploads = []
+
         # Serialize
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -129,38 +145,90 @@ class NotificationCreateView(CreateAPIView):
         # Handle images
         data_images = request.data["data"]["images"]
         if "images" in request.data:
-            images = request.data["images"]  # validate
-            del request.data["images"]
+            request_images = request.data["images"]  # validate
+            # del request.data["images"]
 
-        if len(images) > 0:
-            # if permmission = false?
+        if len(request_images) > 0:
+            # if permission = false?
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             # Handle base64 image
-            for i in range(len(images)):
-                image_idx = images[i]["index"]
-                for image in data_images:
-                    if image["index"] == image_idx:
-                        data_image = data_images[image_idx]
-                        base64 = images[i]["base64"]
-                        # handle base64 data, how to refer to this data?
-                        request.data["data"]["images"][image_idx][
-                            "url"
-                        ] = "https://edit.myhelsinki.fi/sites/default/files/styles/square_600/public/2020-05/espa_x.jpg"
+            for i in range(len(request_images)):
+                image_idx = request_images[i]["uuid"]
+                for idx in range(len(data_images)):  # image in data_images:
+                    image = data_images[idx]
+                    if image["uuid"] == image_idx:
+                        data_image = data_images[idx]
+                        #  image = base64.b64decode(str('stringdata'))
+
+                        image_uploads.append(
+                            {
+                                "filename": str(image_idx) + ".jpg",
+                                "base64": request_images[i]["base64"]
+                                if ("base64" in request_images[i])
+                                else "",
+                                "url": request_images[i]["url"]
+                                if ("url" in request_images[i])
+                                else "",
+                                "metadata": data_image,
+                            }
+                        )
                         break
             # Create
-            self.perform_create(serializer)
+            self.perform_create(serializer, image_uploads)
             headers = self.get_success_headers(serializer.data)
         else:
             # Create
-            self.perform_create(serializer)
+            self.perform_create(serializer, [])
             headers = self.get_success_headers(serializer.data)
 
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def perform_create(self, serializer, image_uploads):
+        instance = serializer.save(user=self.request.user)
+        # TODO: What if not an image
+        data = None
+        for upload in image_uploads:
+            if upload["base64"] != "":
+                data = base64.b64decode(upload["base64"].split(",")[1])
+                # print(upload["base64"][0:64])
+                del upload["base64"]
+            elif upload["url"] != "":
+                response = requests.get(upload["url"], stream=True)
+                if response.status_code == 200:
+                    response.raw.decode_content = True
+                    data = response.raw.read()
+                else:
+                    continue
+            else:
+                continue
+            # TODO: Virus check
+            # check
+            #
+            if data != None:
+                image = Image.open(io.BytesIO(data))
+                with io.BytesIO() as output:
+                    # print(output)
+                    image.save(output, format="JPEG")
+                    upload["data"] = ContentFile(output.getvalue())
+            else:
+                continue
+            #
+            notif_image = NotificationImage(
+                filename=upload["filename"],
+                data=InMemoryUploadedFile(
+                    upload["data"],
+                    None,  # field_name
+                    upload["filename"],  # file name
+                    "image/jpeg",  # content_type
+                    upload["data"].tell,  # size
+                    None,  # content_type_extra
+                ),
+                notification=instance,
+                metadata=upload["metadata"],
+            )
+            notif_image.save()
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
