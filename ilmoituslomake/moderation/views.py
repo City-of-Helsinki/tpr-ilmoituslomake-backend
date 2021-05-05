@@ -198,6 +198,16 @@ class RejectModerationItemView(DestroyAPIView):
         moderation_item.status = "closed"
         moderation_item.save()
 
+        #
+        try:
+            notification = moderation_item.target
+            notification.status = "rejected"
+            notification.save()
+        except Exception as e:
+            pass
+        finally:
+            pass
+
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 
