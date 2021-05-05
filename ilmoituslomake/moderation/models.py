@@ -75,13 +75,9 @@ class ModerationItem(models.Model):
 class ModeratedNotification(BaseNotification):
     # is published
     published = models.BooleanField(default=False, db_index=True)
+
     #
-    notification = models.ForeignKey(
-        Notification,
-        null=True,
-        related_name="moderated_notification",
-        on_delete=models.DO_NOTHING,
-    )
+    notification_id = models.IntegerField(default=0)
 
 
 class ModeratedNotificationImage(BaseNotificationImage):

@@ -1,14 +1,17 @@
 from django.contrib import admin
 
 # Register your models here.
-# Register your models here.
 from base.models import OntologyWord
 from notification_form.models import Notification
-from moderation.models import ModeratedNotification
+from moderation.models import ModeratedNotification, ModerationItem
 from users.models import Organization
 
 
 class ModeratedNotificationAdmin(admin.ModelAdmin):
+    pass
+
+
+class ModerationItemAdmin(admin.ModelAdmin):
     pass
 
 
@@ -25,6 +28,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ModeratedNotification, ModeratedNotificationAdmin)
+admin.site.register(ModerationItem, ModerationItemAdmin)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(OntologyWord, OntologyWordAdmin)
 admin.site.register(Organization, OrganizationAdmin)

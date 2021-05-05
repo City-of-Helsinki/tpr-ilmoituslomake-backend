@@ -58,8 +58,8 @@ INSTALLED_APPS = [
     "storages",
     # Our apps
     "base",
-    "notification_form",
     "moderation",
+    "notification_form",
     "social_django",
     # "huey.contrib.djhuey",
 ]

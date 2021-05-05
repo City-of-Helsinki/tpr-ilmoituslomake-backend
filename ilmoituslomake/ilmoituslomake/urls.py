@@ -24,9 +24,9 @@ urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-# urlpatterns += [
-#    path("admin/", admin.site.urls),
-# ]
+urlpatterns += [
+    path("admin/", admin.site.urls),
+]
 
 
 # Authentication
@@ -77,6 +77,13 @@ urlpatterns += [
     path(
         "api/moderation/reject/<int:id>/",
         moderation_views.RejectModerationItemView.as_view(),
+    ),
+    path(
+        "api/moderation/approve/", moderation_views.ModerationItemUpdateView.as_view()
+    ),
+    path(
+        "api/moderation/approve/<int:id>/",
+        moderation_views.ModerationItemUpdateView.as_view(),
     ),
 ]
 

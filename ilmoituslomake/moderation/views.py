@@ -21,20 +21,37 @@ from rest_framework import filters
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
+from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+
 #
 # from base.models import Notification
 from notification_form.models import Notification
 from moderation.models import ModeratedNotification
-from base.serializers import NotificationSerializer
+
+# from base.serializers import NotificationSerializer
+# from notification_form.serializers import NotificationSerializer
 
 #
 from moderation.models import ModerationItem
 from moderation.serializers import (
     ModerationItemSerializer,
     ModerationItemDetailSerializer,
+    NotificationSerializer,
 )
 
 # Create your views here.
+
+
+class NotificationRetrieveView(RetrieveAPIView):
+    """
+    Returns a single Notification instance
+    """
+
+    permission_classes = [IsAdminUser]
+    lookup_field = "id"
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
 
 
 class ModerationItemSearchListView(ListAPIView):
@@ -157,7 +174,7 @@ class UnassignModerationItemView(UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_304_NOT_MODIFIED)
 
 
-# Reject ModerationItem
+# Reject ModerationItem, not checked
 class RejectModerationItemView(DestroyAPIView):
     """
     Reject moderation item (close it)
@@ -199,7 +216,7 @@ class RejectModerationItemView(DestroyAPIView):
 #         moderation_item.delete()
 #         pass
 
-# Get or Save in progress
+# Get or Save in progress, not checked -> this will be removed!
 class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
     """
     Save moderation item as a draft
@@ -237,7 +254,7 @@ class ModerationItemUpdateView(UpdateAPIView):
     Save moderation
     """
 
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemDetailSerializer
@@ -259,16 +276,77 @@ class ModerationItemUpdateView(UpdateAPIView):
         else:
             moderation_item.data = request.data["data"]  # TODO: Validate
 
+        moderation_item.save()
+
         #
         try:
-            moderated_notification = ModeratedNotification.objects.get(pk=id)
-            moderated_notification.data = moderation_item.data
+            #
+            moderation_notification = None
+            # TODO: Fetch based on revision?
+            notification = moderation_item.target
+            notification.status = "approved"
+            #
+            if moderation_item.item_type == "created":
+                moderated_notification = ModeratedNotification(
+                    user=notification.user,
+                    data=moderation_item.data,
+                    published=True,
+                    notification_id=notification.pk,
+                )
+                moderated_notification.save()
+                # Update notification
+                notification.moderated_notification_id = moderated_notification.pk
+                notification.save()
+            elif moderation_item.item_type == "modified":
+                moderated_notification = ModeratedNotification.objects.get(
+                    pk=notification.moderated_notification_id
+                )
+                moderation_notification.data = moderation_item.data
+                moderated_notification.save()
+                notification.save()
         except ModeratedNotification.DoesNotExist:
-            moderated_notification = ModeratedNotification(
-                user=None, status="approved", data=moderation_item.data
-            )
+            pass
         finally:
-            moderated_notification.save()
+            pass
 
-        moderation_item.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class NotificationSearchListView(ListAPIView):
+    """
+    Search notifications.
+    """
+
+    permission_classes = [IsAdminUser]
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        lang = "fi"
+        #
+        search = {
+            "search_name__contains": "iip",
+            "address": None,
+            "keyword": None,
+            "comments": None,
+        }
+        keys = search.keys()
+
+        # Delete None search words
+        delete = [key for key in search if search[key] == None]
+        # delete the key
+        for key in delete:
+            del search[key]
+
+        queryset = (
+            ModeratedNotification.objects.annotate(
+                search_name=SearchVector(
+                    KeyTextTransform(lang, KeyTextTransform("name", "data"))
+                )
+            )
+            .annotate(address=SearchVector(KeyTextTransform("address", "data")))
+            .annotate(comments=SearchVector(KeyTextTransform("comments", "data")))
+            .filter(**search)
+        )
+        # keyword?
+
+        return queryset

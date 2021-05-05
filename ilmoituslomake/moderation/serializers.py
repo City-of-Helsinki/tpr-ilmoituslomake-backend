@@ -1,16 +1,21 @@
 from rest_framework import serializers
 from moderation.models import ModerationItem
 
-# from base.models import Notification
+from base.models import NotificationSchema
 from notification_form.models import Notification
 from moderation.models import ModeratedNotification
 
 #
 from users.serializers import ModeratorSerializer
-from base.serializers import NotificationSerializer
 
-# import json
-# from jsonschema import validate
+# from base.serializers import NotificationSerializer
+from notification_form.serializers import NotificationImageSerializer
+
+# from moderation.serializers import NotificationSerializer
+# TODO: ModeratedNotificationImageSerializer
+
+import json
+from jsonschema import validate
 
 
 class JSONSerializerField(serializers.Field):
@@ -66,6 +71,54 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
             "user_comments",
             "user_details",
         )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    # is_notifier = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = (
+            "id",
+            "status",
+            # "is_notifier",
+            "user",
+            "location",
+            "data",
+            "updated_at",
+            "created_at",
+        )
+        read_only_fields = (
+            "id",
+            "status",
+            # "is_notifier",
+            "user",
+            "location",
+            "updated_at",
+            "created_at",
+        )
+
+    def validate_data(self, data):
+        # TODO: Improve
+        schema = NotificationSchema.objects.latest("created_at").schema
+        # Validate
+        try:
+            # Generic JSON-Schema validation
+            validate(instance=data, schema=schema)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        return data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Show geometry as geojson
+        ret["location"] = json.loads(instance.location.json)
+        # images
+        serializer = NotificationImageSerializer(instance.images, many=True)  # TODO
+        ret["data"]["images"] = serializer.data
+        return ret
 
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):

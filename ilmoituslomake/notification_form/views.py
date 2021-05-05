@@ -4,7 +4,7 @@ import io
 import requests
 from PIL import Image
 
-
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -29,12 +29,15 @@ from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
 from base.models import NotificationSchema, OntologyWord
 
+from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
-    NotificationSerializer,
     NotificationSchemaSerializer,
     OntologyWordSerializer,
 )
-from moderation.serializers import PublicModeratedNotificationSerializer
+from moderation.serializers import (
+    PublicModeratedNotificationSerializer,
+    NotificationSerializer,
+)
 
 from django.db.models import Q
 
@@ -238,13 +241,13 @@ class NotificationCreateView(CreateAPIView):
 
 class NotificationRetrieveView(RetrieveAPIView):
     """
-    Returns a single Notification instance
+    Returns a single ModeratedNotification instance
     """
 
     permission_classes = [AllowAny]
     lookup_field = "id"
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
+    serializer_class = PublicModeratedNotificationSerializer
 
 
 class NotificationListView(ListAPIView):
@@ -273,3 +276,11 @@ class OntologyWordListView(ListAPIView):
     # TODO: Create migration which generates indices for JSON data
     # search_fields = ["data__ontologyword__fi"]
     pagination_class = None
+
+
+# def images(request):
+#     if request.user.is_authenticated():
+#         response = HttpResponse()
+#         response['X-Accel-Redirect'] = '/tpr-notification-dev/'
+#         return response
+#     return Response(None, status=status.HTTP_404_NOT_FOUND)
