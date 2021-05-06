@@ -11,10 +11,27 @@ from users.models import User
 # Create your models here.
 
 
+class ModeratedNotification(BaseNotification):
+    # is published
+    published = models.BooleanField(default=False, db_index=True)
+
+    #
+    notification_id = models.IntegerField(default=0)
+
+
+class ModeratedNotificationImage(BaseNotificationImage):
+    notification = models.ForeignKey(
+        ModeratedNotification,
+        null=True,
+        related_name="images",
+        on_delete=models.DO_NOTHING,
+    )
+
+
 class ModerationItem(models.Model):
 
     target = models.ForeignKey(
-        Notification,
+        ModeratedNotificationImage,
         null=True,
         related_name="moderation_items",
         on_delete=models.CASCADE,
@@ -70,20 +87,3 @@ class ModerationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
-
-
-class ModeratedNotification(BaseNotification):
-    # is published
-    published = models.BooleanField(default=False, db_index=True)
-
-    #
-    notification_id = models.IntegerField(default=0)
-
-
-class ModeratedNotificationImage(BaseNotificationImage):
-    notification = models.ForeignKey(
-        ModeratedNotification,
-        null=True,
-        related_name="images",
-        on_delete=models.DO_NOTHING,
-    )

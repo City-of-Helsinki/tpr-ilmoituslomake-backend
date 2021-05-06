@@ -29,7 +29,7 @@ class NotificationTargetSerializer(serializers.ModelSerializer):
     name = JSONSerializerField(source="data")
 
     class Meta:
-        model = Notification
+        model = ModeratedNotification
         fields = (
             "id",
             "name",
@@ -124,9 +124,55 @@ class NotificationSerializer(serializers.ModelSerializer):
         return ret
 
 
+class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
+
+    # is_notifier = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ModeratedNotification
+        fields = (
+            "id",
+            "status",
+            "user",
+            "location",
+            "data",
+            "updated_at",
+            "created_at",
+        )
+        read_only_fields = (
+            "id",
+            "status",
+            "user",
+            "location",
+            "updated_at",
+            "created_at",
+        )
+
+    def validate_data(self, data):
+        # TODO: Improve
+        schema = NotificationSchema.objects.latest("created_at").schema
+        # Validate
+        try:
+            # Generic JSON-Schema validation
+            validate(instance=data, schema=schema)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        return data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Show geometry as geojson
+        ret["location"] = json.loads(instance.location.json)
+        # images
+        serializer = NotificationImageSerializer(instance.images, many=True)  # TODO
+        ret["data"]["images"] = serializer.data
+        return ret
+
+
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
 
-    target = NotificationSerializer(read_only=True)
+    target = PrivateModeratedNotificationSerializer(read_only=True)
     # data = NotificationSerializer() # Does not work because of location = GeomField
     moderator = ModeratorSerializer(read_only=True)
 
