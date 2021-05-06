@@ -295,7 +295,7 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         moderation_item.status = "closed"
 
-        if moderation_item.category == "moderation_task":
+        if moderation_item.category == "change_request":
             moderation_item.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
