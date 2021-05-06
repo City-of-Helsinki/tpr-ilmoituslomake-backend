@@ -306,7 +306,7 @@ class ModerationItemUpdateView(UpdateAPIView):
         #
         try:
             #
-            # moderation_notification = None
+            notification = None
             # TODO: Fetch based on revision?
             if moderation_item.category != "change_request":
                 notification = moderation_item.notification_target
@@ -314,16 +314,33 @@ class ModerationItemUpdateView(UpdateAPIView):
             #
             # if moderation_item.item_type == "created":
             if not moderation_item.target:
-                moderated_notification = ModeratedNotification(
-                    user=notification.user,
-                    data=moderation_item.data,
-                    published=True,
-                    notification_id=notification.pk,
-                )
-                moderated_notification.save()
-                # Update notification
-                notification.moderated_notification_id = moderated_notification.pk
-                notification.save()
+                if notification:
+                    moderated_notification = ModeratedNotification(
+                        user=notification.user,
+                        data=moderation_item.data,
+                        published=True,
+                        notification_id=notification.pk,
+                    )
+                    moderated_notification.save()
+                    # Update notification
+                    notification.moderated_notification_id = moderated_notification.pk
+                    notification.save()
+                else:
+                    # TODO: IMAGES!
+                    notification = Notification(
+                        data=moderation_item.data, user=request.user, status="approved"
+                    )
+                    notification.save()
+                    moderated_notification = ModeratedNotification(
+                        user=notification.user,
+                        data=moderation_item.data,
+                        published=True,
+                        notification_id=notification.pk,
+                    )
+                    moderated_notification.save()
+                    # Update notification
+                    notification.moderated_notification_id = moderated_notification.pk
+                    notification.save()
             # elif moderation_item.item_type == "modified":
             elif moderation_item.target:
                 # moderated_notification = ModeratedNotification.objects.get(
@@ -332,7 +349,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
-                if moderation_item.category != "change_request":
+                if moderation_item.category != "change_request" and notification:
                     notification.save()
         except ModeratedNotification.DoesNotExist:
             pass
