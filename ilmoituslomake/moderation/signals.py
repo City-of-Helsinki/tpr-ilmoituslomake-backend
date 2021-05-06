@@ -22,6 +22,8 @@ def create_moderation_item(sender, instance, **kwargs):
             target_revision=moderated_notification.revision
             if moderated_notification
             else 0,
+            notification_target=instance,
+            notification_target_revision=instance.revision,
             category="moderation_task",
             item_type=instance.status,
             data=instance.data,

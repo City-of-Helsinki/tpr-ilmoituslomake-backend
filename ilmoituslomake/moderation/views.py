@@ -290,8 +290,8 @@ class ModerationItemUpdateView(UpdateAPIView):
         if moderation_item.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        if moderation_item.moderator != request.user:
-            return Response(None, status=status.HTTP_403_FORBIDDEN)
+        # if moderation_item.moderator != request.user:
+        #    return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         moderation_item.status = "closed"
         if type(request.data["data"]) is not dict:
@@ -304,12 +304,13 @@ class ModerationItemUpdateView(UpdateAPIView):
         #
         try:
             #
-            moderation_notification = None
+            # moderation_notification = None
             # TODO: Fetch based on revision?
-            notification = moderation_item.target
+            notification = moderation_item.notification_target
             notification.status = "approved"
             #
-            if moderation_item.item_type == "created":
+            # if moderation_item.item_type == "created":
+            if not moderation_item.target:
                 moderated_notification = ModeratedNotification(
                     user=notification.user,
                     data=moderation_item.data,
@@ -320,10 +321,11 @@ class ModerationItemUpdateView(UpdateAPIView):
                 # Update notification
                 notification.moderated_notification_id = moderated_notification.pk
                 notification.save()
-            elif moderation_item.item_type == "modified":
-                moderated_notification = ModeratedNotification.objects.get(
-                    pk=notification.moderated_notification_id
-                )
+            # elif moderation_item.item_type == "modified":
+            elif moderation_item.target:
+                # moderated_notification = ModeratedNotification.objects.get(
+                #    pk=notification.moderated_notification_id
+                # )
                 moderation_notification.data = moderation_item.data
                 moderated_notification.save()
                 notification.save()

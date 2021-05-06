@@ -103,13 +103,8 @@ class ChangeRequestCreateView(CreateAPIView):
 
         if request.data["item_type"] != "add":
             target_moderated_notification = get_object_or_404(
-                ModeratedNotification, pk=request.data["moderated_notification_id"]
+                ModeratedNotification, pk=request.data["target"]
             )
-            if target_moderated_notification.notification_id > 0:
-                target_notification = get_object_or_404(
-                    Notification, pk=target_moderated_notification.notification_id
-                )
-                # TODO: Add target_notification to target, look info form createnotification
 
         # set revision
         # request.data["target_revision"] = -1

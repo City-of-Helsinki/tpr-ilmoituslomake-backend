@@ -30,8 +30,16 @@ class ModeratedNotificationImage(BaseNotificationImage):
 
 class ModerationItem(models.Model):
 
+    notification_target = models.ForeignKey(
+        Notification,
+        null=True,
+        related_name="moderation_items",
+        on_delete=models.CASCADE,
+    )
+    notification_target_revision = models.IntegerField(default=0)
+
     target = models.ForeignKey(
-        ModeratedNotificationImage,
+        ModeratedNotification,
         null=True,
         related_name="moderation_items",
         on_delete=models.CASCADE,
