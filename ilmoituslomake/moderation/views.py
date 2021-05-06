@@ -212,19 +212,32 @@ class RejectModerationItemView(DestroyAPIView):
 
 
 # Delete Notification
-# class DeleteNotificationView(DestroyAPIView):
+class DeleteNotificationView(DestroyAPIView):
 
-#     permission_classes = [IsAdminUser]
-#     queryset = Notification.objects.all().filter()
-#     serializer_class = NotificationSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "id"
+    queryset = ModerationItem.objects.all()
+    serializer_class = ModerationItemSerializer
 
-#     def delete(self, request, id, *args, **kwargs):
-#         moderation_item = get_object_or_404(ModerationItem, pk=id)
-#         # Only assigned moderator can delete
-#         if moderation_item.moderator != request.user:
-#             pass
-#         moderation_item.delete()
-#         pass
+    def delete(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk=id)
+
+        if moderation_item.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        # Only assigned moderator can delete
+        if moderation_item.moderator != request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+
+        # Has target
+        if moderation_item.target:
+            # Is linked to an ID
+            if moderation_item.target.notification_id > 0:
+                pass
+                # TODO: Implementr
+
+        return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Get or Save in progress, not checked -> this will be removed!
 class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):

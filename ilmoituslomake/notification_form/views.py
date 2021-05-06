@@ -18,7 +18,12 @@ from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import (
+    RetrieveAPIView,
+    ListAPIView,
+    CreateAPIView,
+    UpdateAPIView,
+)
 from rest_framework import filters
 
 #
@@ -41,13 +46,7 @@ from moderation.serializers import (
 
 from django.db.models import Q
 
-#
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-
-
 # TODO: Remove
-
-
 class NotificationSchemaCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -82,6 +81,7 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
+# Handle this!
 class ChangeRequestCreateView(CreateAPIView):
     """
     Create a ModerationItem of type change_request
@@ -100,9 +100,15 @@ class ChangeRequestCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         if request.data["item_type"] != "add":
-            target_notification = get_object_or_404(
-                Notification, pk=request.data["target"]
+            target_moderated_notification = get_object_or_404(
+                ModeratedNotification, pk=request.data["moderated_notification_id"]
             )
+            if target_moderated_notification.notification_id > 0:
+                target_notification = get_object_or_404(
+                    Notification, pk=target_moderated_notification.notification_id
+                )
+                # TODO: Add target_notification to target, look info form createnotification
+
         # set revision
         # request.data["target_revision"] = -1
 
@@ -128,6 +134,19 @@ class ChangeRequestCreateView(CreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
+class NotificationUpdateView(UpdateAPIView):
+    """
+    Create a Notification instance
+    """
+
+    permission_classes = [IsAuthenticated]
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+    def create(self, request, *args, **kwargs):
+        pass
+
+
 class NotificationCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -140,58 +159,47 @@ class NotificationCreateView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         headers = None
         request_images = []
-
         image_uploads = []
 
+        moderated_notification = None
+        target_notification = None
+        item_status = "created"
+        try:
+            # TODO: In the future check permission
+            if request.data["id"]:
+                moderated_notification = ModeratedNotification.objects.get(
+                    pk=request.data["id"]
+                )
+                if moderated_notification.notification_id > 0:
+                    target_notification = Notification.objects.get(
+                        pk=moderated_notification.notification_id
+                    )
+                    item_status = "modified"
+        except Exception as e:
+            target_notification = None
+
         # Serialize
-        serializer = self.get_serializer(data=request.data)
+        serializer = NotificationSerializer(
+            instance=target_notification, data=request.data
+        )  # self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Handle images
-        data_images = request.data["data"]["images"]
-        if "images" in request.data:
-            request_images = request.data["images"]  # validate
-            # del request.data["images"]
-
-        if len(request_images) > 0:
-            # if permission = false?
-            # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
-            # Handle base64 image
-            for i in range(len(request_images)):
-                image_idx = request_images[i]["uuid"]
-                for idx in range(len(data_images)):  # image in data_images:
-                    image = data_images[idx]
-                    if image["uuid"] == image_idx:
-                        data_image = data_images[idx]
-                        #  image = base64.b64decode(str('stringdata'))
-
-                        image_uploads.append(
-                            {
-                                "filename": str(image_idx) + ".jpg",
-                                "base64": request_images[i]["base64"]
-                                if ("base64" in request_images[i])
-                                else "",
-                                "url": request_images[i]["url"]
-                                if ("url" in request_images[i])
-                                else "",
-                                "metadata": data_image,
-                            }
-                        )
-                        break
+        if False:
             # Create
-            self.perform_create(serializer, image_uploads)
+            self.perform_create(serializer, item_status, image_uploads)
             headers = self.get_success_headers(serializer.data)
         else:
             # Create
-            self.perform_create(serializer, [])
+            self.perform_create(serializer, item_status, [])
             headers = self.get_success_headers(serializer.data)
 
+        # TODO: Yhteenveto
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def perform_create(self, serializer, image_uploads):
-        instance = serializer.save(user=self.request.user)
+    def perform_create(self, serializer, item_status, image_uploads):
+        instance = serializer.save(user=self.request.user, status=item_status)
         # TODO: What if not an image
         data = None
         for upload in image_uploads:
