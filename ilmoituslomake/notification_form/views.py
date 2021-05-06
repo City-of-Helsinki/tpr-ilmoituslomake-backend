@@ -46,7 +46,7 @@ from moderation.serializers import (
 
 from django.db.models import Q
 
-from image_utils import preprocess_images, process_images
+# from image_utils import preprocess_images, process_images
 
 # TODO: Remove
 class NotificationSchemaCreateView(CreateAPIView):
@@ -186,7 +186,7 @@ class NotificationCreateView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         # TODO: Preprocess images
-        images = preprocess_images(request)
+        images = []  # preprocess_images(request)
 
         # Create
         self.perform_create(serializer, item_status, images)
@@ -199,7 +199,7 @@ class NotificationCreateView(CreateAPIView):
 
     def perform_create(self, serializer, item_status, images):
         instance = serializer.save(user=self.request.user, status=item_status)
-        process_images(instance, images)
+        # process_images(instance, images)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
