@@ -46,6 +46,8 @@ from moderation.serializers import (
 
 from django.db.models import Q
 
+from image_utils import preprocess_images, process_images
+
 # TODO: Remove
 class NotificationSchemaCreateView(CreateAPIView):
     """
@@ -158,8 +160,7 @@ class NotificationCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        request_images = []
-        image_uploads = []
+        images = []
 
         moderated_notification = None
         target_notification = None
@@ -184,64 +185,21 @@ class NotificationCreateView(CreateAPIView):
         )  # self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if False:
-            # Create
-            self.perform_create(serializer, item_status, image_uploads)
-            headers = self.get_success_headers(serializer.data)
-        else:
-            # Create
-            self.perform_create(serializer, item_status, [])
-            headers = self.get_success_headers(serializer.data)
+        # TODO: Preprocess images
+        images = preprocess_images(request)
+
+        # Create
+        self.perform_create(serializer, item_status, images)
+        headers = self.get_success_headers(serializer.data)
 
         # TODO: Yhteenveto
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def perform_create(self, serializer, item_status, image_uploads):
+    def perform_create(self, serializer, item_status, images):
         instance = serializer.save(user=self.request.user, status=item_status)
-        # TODO: What if not an image
-        data = None
-        for upload in image_uploads:
-            if upload["base64"] != "":
-                data = base64.b64decode(upload["base64"].split(",")[1])
-                # print(upload["base64"][0:64])
-                del upload["base64"]
-            elif upload["url"] != "":
-                response = requests.get(upload["url"], stream=True)
-                if response.status_code == 200:
-                    response.raw.decode_content = True
-                    data = response.raw.read()
-                else:
-                    continue
-            else:
-                continue
-            # TODO: Virus check
-            # check
-            #
-            if data != None:
-                image = Image.open(io.BytesIO(data))
-                with io.BytesIO() as output:
-                    # print(output)
-                    image.save(output, format="JPEG")
-                    upload["data"] = ContentFile(output.getvalue())
-            else:
-                continue
-            #
-            notif_image = NotificationImage(
-                filename=upload["filename"],
-                data=InMemoryUploadedFile(
-                    upload["data"],
-                    None,  # field_name
-                    upload["filename"],  # file name
-                    "image/jpeg",  # content_type
-                    upload["data"].tell,  # size
-                    None,  # content_type_extra
-                ),
-                notification=instance,
-                metadata=upload["metadata"],
-            )
-            notif_image.save()
+        process_images(instance, images)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
