@@ -1,4 +1,5 @@
 from django.contrib import admin
+from simple_history.admin import SimpleHistoryAdmin
 
 # Register your models here.
 from base.models import OntologyWord
@@ -7,7 +8,7 @@ from moderation.models import ModeratedNotification, ModerationItem
 from users.models import Organization
 
 
-class ModeratedNotificationAdmin(admin.ModelAdmin):
+class ModeratedNotificationAdmin(SimpleHistoryAdmin):
     pass
 
 
@@ -15,7 +16,7 @@ class ModerationItemAdmin(admin.ModelAdmin):
     pass
 
 
-class NotificationAdmin(admin.ModelAdmin):
+class NotificationAdmin(SimpleHistoryAdmin):
     pass
 
 

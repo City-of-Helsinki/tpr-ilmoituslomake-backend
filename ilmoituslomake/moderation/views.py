@@ -290,8 +290,8 @@ class ModerationItemUpdateView(UpdateAPIView):
         if moderation_item.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        # if moderation_item.moderator != request.user:
-        #    return Response(None, status=status.HTTP_403_FORBIDDEN)
+        if moderation_item.moderator != request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         moderation_item.status = "closed"
         if type(request.data["data"]) is not dict:
@@ -326,7 +326,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                 # moderated_notification = ModeratedNotification.objects.get(
                 #    pk=notification.moderated_notification_id
                 # )
-                moderation_notification.data = moderation_item.data
+                moderated_notification = moderation_item.target
+                moderated_notification.data = moderation_item.data
                 moderated_notification.save()
                 notification.save()
         except ModeratedNotification.DoesNotExist:
