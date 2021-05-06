@@ -66,7 +66,6 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         model = ModerationItem
         fields = (
             "target",
-            "moderated_notification_id",
             "item_type",
             "user_place_name",
             "user_comments",
