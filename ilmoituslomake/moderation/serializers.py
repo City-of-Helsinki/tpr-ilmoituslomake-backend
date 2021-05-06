@@ -24,7 +24,7 @@ class JSONSerializerField(serializers.Field):
         return obj["name"]
 
 
-class NotificationTargetSerializer(serializers.ModelSerializer):
+class ModeratedNotificationTargetSerializer(serializers.ModelSerializer):
 
     name = JSONSerializerField(source="data")
 
@@ -37,9 +37,23 @@ class NotificationTargetSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class NotificationTargetSerializer(serializers.ModelSerializer):
+
+    name = JSONSerializerField(source="data")
+
+    class Meta:
+        model = Notification
+        fields = (
+            "id",
+            "name",
+        )
+        read_only_fields = fields
+
+
 class ModerationItemSerializer(serializers.ModelSerializer):
 
-    target = NotificationTargetSerializer()
+    target = ModeratedNotificationTargetSerializer()
+    notification_target = NotificationTargetSerializer()
     moderator = ModeratorSerializer()
 
     class Meta:
@@ -47,6 +61,7 @@ class ModerationItemSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "target",
+            "notification_target",
             "category",
             "item_type",
             "status",
