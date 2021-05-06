@@ -295,10 +295,6 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         moderation_item.status = "closed"
 
-        if moderation_item.category == "change_request":
-            moderation_item.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         if type(request.data["data"]) is not dict:
             moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
         else:
@@ -311,8 +307,9 @@ class ModerationItemUpdateView(UpdateAPIView):
             #
             # moderation_notification = None
             # TODO: Fetch based on revision?
-            notification = moderation_item.notification_target
-            notification.status = "approved"
+            if moderation_item.category != "change_request":
+                notification = moderation_item.notification_target
+                notification.status = "approved"
             #
             # if moderation_item.item_type == "created":
             if not moderation_item.target:
@@ -334,7 +331,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
-                notification.save()
+                if moderation_item.category != "change_request":
+                    notification.save()
         except ModeratedNotification.DoesNotExist:
             pass
         finally:
