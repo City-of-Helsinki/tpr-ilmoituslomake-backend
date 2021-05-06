@@ -211,7 +211,7 @@ class RejectModerationItemView(DestroyAPIView):
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 
-# Delete Notification
+# Delete Notification -> Unpublish
 class DeleteNotificationView(DestroyAPIView):
 
     permission_classes = [IsAdminUser]
@@ -231,10 +231,11 @@ class DeleteNotificationView(DestroyAPIView):
 
         # Has target
         if moderation_item.target:
-            # Is linked to an ID
-            if moderation_item.target.notification_id > 0:
-                pass
-                # TODO: Implementr
+            moderaterated_notification = moderation_item.target
+            moderaterated_notification.published = False
+            moderaterated_notification.save()
+            moderation_item.save()
+            return Response(None, status=status.HTTP_201_CREATED)
 
         return Response(None, status=status.HTTP_400_BAD_REQUEST)
 

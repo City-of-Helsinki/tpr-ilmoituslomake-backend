@@ -85,6 +85,11 @@ urlpatterns += [
         "api/moderation/approve/<int:id>/",
         moderation_views.ModerationItemUpdateView.as_view(),
     ),
+    path("api/moderation/delete/", moderation_views.ModerationItemUpdateView.as_view()),
+    path(
+        "api/moderation/delete/<int:id>/",
+        moderation_views.DeleteNotificationView.as_view(),
+    ),
 ]
 
 
