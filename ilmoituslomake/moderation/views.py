@@ -377,6 +377,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         lang = "fi"
+        lang_finland = "fi"
         published = True
         #
         search = {
@@ -401,7 +402,8 @@ class ModeratedNotificationSearchListView(ListAPIView):
 
         # Set the name search language
         if "lang" in search_data:
-            lang = "fi" if lang not in ["fi", "sv"] else search_data["lang"]
+            lang = "fi" if lang not in ["fi", "sv", "en"] else search_data["lang"]
+            lang_finland = "fi" if lang not in ["fi", "sv"] else search_data["lang"]
             del search_data["lang"]
 
         keys = search.keys()
@@ -422,19 +424,25 @@ class ModeratedNotificationSearchListView(ListAPIView):
                 search_address=SearchVector(
                     KeyTextTransform(
                         "street",
-                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                        KeyTextTransform(
+                            lang_finland, KeyTextTransform("address", "data")
+                        ),
                     )
                 )
                 + SearchVector(
                     KeyTextTransform(
                         "postal_code",
-                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                        KeyTextTransform(
+                            lang_finland, KeyTextTransform("address", "data")
+                        ),
                     )
                 )
                 + SearchVector(
                     KeyTextTransform(
                         "post_office",
-                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                        KeyTextTransform(
+                            lang_finland, KeyTextTransform("address", "data")
+                        ),
                     )
                 )
             )
@@ -442,7 +450,9 @@ class ModeratedNotificationSearchListView(ListAPIView):
                 search_neighborhood=SearchVector(
                     KeyTextTransform(
                         "neighborhood",
-                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                        KeyTextTransform(
+                            lang_finland, KeyTextTransform("address", "data")
+                        ),
                     )
                 )
             )
