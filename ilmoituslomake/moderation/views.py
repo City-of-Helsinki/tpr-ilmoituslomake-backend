@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAdminUser
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import (
     UpdateAPIView,
     ListAPIView,
@@ -369,34 +370,44 @@ class ModeratedNotificationSearchListView(ListAPIView):
     Search notifications.
     """
 
+    queryset = ModeratedNotification.objects.all()
     permission_classes = [IsAdminUser]
     serializer_class = PrivateModeratedNotificationSerializer
+    # pagination_class = PageNumberPagination
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
         lang = "fi"
         published = True
         #
         search = {
-            # "search_name__contains": "",
-            # "search_address__contains": "",
-            # "data__ontology_ids__contains": [],
-            # "search_comments__contains": "",
-            # "published": True,
-            # "search_neighborhood": ""
+            "search_name__contains": "",
+            "search_address__contains": "",
+            "data__ontology_ids__contains": [],
+            "search_comments__contains": "",
+            "published": True,
+            "search_neighborhood": "",
         }
 
+        if request.GET.get("q"):
+            try:
+                search_data = json.loads(request.GET.get("q"))
+            except Exception as e:
+                return Response(None, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response([], status=status.HTTP_200_OK)
+
         # Set the name search language
-        if "lang" in search:
-            lang = "fi" if lang not in ["fi", "sv"] else search["lang"]
-            del search["lang"]
+        if "lang" in search_data:
+            lang = "fi" if lang not in ["fi", "sv"] else search_data["lang"]
+            del search_data["lang"]
 
         keys = search.keys()
 
         # Delete None search words
-        delete = [key for key in search if search[key] == None]
+        delete = [key for key in search if key not in search]
         # delete the key
         for key in delete:
-            del search[key]
+            del search_data[key]
 
         queryset = (
             ModeratedNotification.objects.annotate(
@@ -435,7 +446,10 @@ class ModeratedNotificationSearchListView(ListAPIView):
             .annotate(
                 search_comments=SearchVector(KeyTextTransform("comments", "data"))
             )
-            .filter(**search)
+            .filter(**search_data)
         )
 
-        return queryset
+        pagination = PageNumberPagination()
+        qs = pagination.paginate_queryset(queryset, request)
+        serializer = PrivateModeratedNotificationSerializer(qs, many=True)
+        return pagination.get_paginated_response(serializer.data)
