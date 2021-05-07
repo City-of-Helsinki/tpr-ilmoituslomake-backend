@@ -38,6 +38,7 @@ from moderation.serializers import (
     ModerationItemSerializer,
     ModerationItemDetailSerializer,
     NotificationSerializer,
+    PrivateModeratedNotificationSerializer,
 )
 
 # Create your views here.
@@ -363,23 +364,32 @@ class ModerationItemUpdateView(UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class NotificationSearchListView(ListAPIView):
+class ModeratedNotificationSearchListView(ListAPIView):
     """
     Search notifications.
     """
 
     permission_classes = [IsAdminUser]
-    serializer_class = NotificationSerializer
+    serializer_class = PrivateModeratedNotificationSerializer
 
     def get_queryset(self):
         lang = "fi"
+        published = True
         #
         search = {
-            "search_name__contains": "iip",
-            "address": None,
-            "keyword": None,
-            "comments": None,
+            # "search_name__contains": "",
+            # "search_address__contains": "",
+            # "data__ontology_ids__contains": [],
+            # "search_comments__contains": "",
+            # "published": True,
+            # "search_neighborhood": ""
         }
+
+        # Set the name search language
+        if "lang" in search:
+            lang = "fi" if lang not in ["fi", "sv"] else search["lang"]
+            del search["lang"]
+
         keys = search.keys()
 
         # Delete None search words
@@ -394,10 +404,38 @@ class NotificationSearchListView(ListAPIView):
                     KeyTextTransform(lang, KeyTextTransform("name", "data"))
                 )
             )
-            .annotate(address=SearchVector(KeyTextTransform("address", "data")))
-            .annotate(comments=SearchVector(KeyTextTransform("comments", "data")))
+            .annotate(
+                search_address=SearchVector(
+                    KeyTextTransform(
+                        "street",
+                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                    )
+                )
+                + SearchVector(
+                    KeyTextTransform(
+                        "postal_code",
+                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                    )
+                )
+                + SearchVector(
+                    KeyTextTransform(
+                        "post_office",
+                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                    )
+                )
+            )
+            .annotate(
+                search_neighborhood=SearchVector(
+                    KeyTextTransform(
+                        "neighborhood",
+                        KeyTextTransform(lang, KeyTextTransform("address", "data")),
+                    )
+                )
+            )
+            .annotate(
+                search_comments=SearchVector(KeyTextTransform("comments", "data"))
+            )
             .filter(**search)
         )
-        # keyword?
 
         return queryset

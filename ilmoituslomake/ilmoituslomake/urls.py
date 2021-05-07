@@ -90,6 +90,10 @@ urlpatterns += [
         "api/moderation/delete/<int:id>/",
         moderation_views.DeleteNotificationView.as_view(),
     ),
+    path(
+        "api/moderation/search/",
+        moderation_views.ModeratedNotificationSearchListView.as_view(),
+    ),
 ]
 
 
