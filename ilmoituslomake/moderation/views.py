@@ -233,6 +233,7 @@ class DeleteNotificationView(DestroyAPIView):
         if moderation_item.target:
             moderaterated_notification = moderation_item.target
             moderaterated_notification.published = False
+            moderation_item.status = "closed"
             moderaterated_notification.save()
             moderation_item.save()
             return Response(None, status=status.HTTP_201_CREATED)
