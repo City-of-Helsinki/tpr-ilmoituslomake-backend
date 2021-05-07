@@ -295,6 +295,9 @@ class ModerationItemUpdateView(UpdateAPIView):
         if moderation_item.moderator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
+        if moderation_item.item_type == "delete":
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
         moderation_item.status = "closed"
 
         if type(request.data["data"]) is not dict:
