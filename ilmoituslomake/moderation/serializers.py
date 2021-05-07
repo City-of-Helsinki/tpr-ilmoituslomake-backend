@@ -229,7 +229,6 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         model = ModeratedNotification
         fields = (
             "id",
-            "status",
             "is_notifier",
             "location",
             "data",
@@ -238,9 +237,9 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
-            "status",
             "is_notifier",
             "location",
+            "data",
             "updated_at",
             "created_at",
         )
