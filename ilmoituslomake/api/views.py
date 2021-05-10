@@ -1,3 +1,30 @@
-from django.shortcuts import render
+# import json
+# from datetime import datetime, timedelta
 
-# Create your views here.
+from django.shortcuts import render, get_object_or_404
+
+# Permissions
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from rest_framework.response import Response
+
+from rest_framework.pagination import PageNumberPagination
+
+from rest_framework.generics import (
+    ListAPIView,
+    RetrieveAPIView,
+)
+
+from moderation.models import ModeratedNotification
+from api.serializers import ApiModeratedNotificationSerializer
+
+
+class ApiRetrieveView(RetrieveAPIView):
+    """
+    Returns a single ModeratedNotification instance
+    """
+
+    permission_classes = [AllowAny]
+    lookup_field = "id"
+    queryset = ModeratedNotification.objects.all()
+    serializer_class = ApiModeratedNotificationSerializer

@@ -20,6 +20,8 @@ from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
 
+from api import views as api_views
+
 urlpatterns = []
 
 # Django Admin
@@ -125,4 +127,13 @@ urlpatterns += [
     ),
     # ontology words
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
+]
+
+
+# Open API
+urlpatterns += [
+    path(
+        "api/open/notification/<int:id>/",
+        api_views.ApiRetrieveView.as_view(),
+    ),
 ]
