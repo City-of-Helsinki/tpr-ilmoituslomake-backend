@@ -28,3 +28,11 @@ class ApiRetrieveView(RetrieveAPIView):
     lookup_field = "id"
     queryset = ModeratedNotification.objects.all()
     serializer_class = ApiModeratedNotificationSerializer
+
+    def get(self, request, id=None, *args, **kwargs):
+        lang = request.GET.get("language", "fi")
+        moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
+        serializer = ApiModeratedNotificationSerializer(
+            moderated_notification, context={"lang": lang}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
