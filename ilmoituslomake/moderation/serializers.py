@@ -88,7 +88,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         )
 
 
-class NotificationSerializer(serializers.ModelSerializer):
+class ModerationNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = (

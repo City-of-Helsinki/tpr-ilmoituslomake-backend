@@ -38,7 +38,7 @@ from moderation.models import ModerationItem
 from moderation.serializers import (
     ModerationItemSerializer,
     ModerationItemDetailSerializer,
-    NotificationSerializer,
+    ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
 )
 
@@ -53,7 +53,7 @@ class ModerationNotificationRetrieveView(RetrieveAPIView):
     permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = ModerationNotificationSerializer
 
 
 class ModerationItemSearchListView(ListAPIView):
