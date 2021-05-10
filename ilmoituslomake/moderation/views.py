@@ -45,7 +45,7 @@ from moderation.serializers import (
 # Create your views here.
 
 
-class NotificationRetrieveView(RetrieveAPIView):
+class ModerationNotificationRetrieveView(RetrieveAPIView):
     """
     Returns a single Notification instance
     """

@@ -89,29 +89,24 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-
-    # is_notifier = serializers.SerializerMethodField()
-
     class Meta:
         model = Notification
         fields = (
             "id",
             "status",
-            # "is_notifier",
             "user",
             "location",
             "data",
-            # "moderated_notification_id",
+            "moderated_notification_id",
             "updated_at",
             "created_at",
         )
         read_only_fields = (
             "id",
             "status",
-            # "is_notifier",
             "user",
             "location",
-            # "moderated_notification_id",
+            "moderated_notification_id",
             "updated_at",
             "created_at",
         )
