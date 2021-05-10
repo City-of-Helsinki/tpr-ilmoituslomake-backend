@@ -41,7 +41,7 @@ from base.serializers import (
 )
 from moderation.serializers import (
     PublicModeratedNotificationSerializer,
-    NotificationSerializer,
+    ModerationNotificationSerializer,
 )
 
 from django.db.models import Q
@@ -131,19 +131,6 @@ class ChangeRequestCreateView(CreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class NotificationUpdateView(UpdateAPIView):
-    """
-    Create a Notification instance
-    """
-
-    permission_classes = [IsAuthenticated]
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-
-    def create(self, request, *args, **kwargs):
-        pass
-
-
 class NotificationCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -151,7 +138,7 @@ class NotificationCreateView(CreateAPIView):
 
     permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = ModerationNotificationSerializer
 
     def create(self, request, *args, **kwargs):
         headers = None
@@ -175,7 +162,7 @@ class NotificationCreateView(CreateAPIView):
             target_notification = None
 
         # Serialize
-        serializer = NotificationSerializer(
+        serializer = ModerationNotificationSerializer(
             instance=target_notification, data=request.data
         )  # self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
