@@ -97,7 +97,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             "user",
             "location",
             "data",
-            "moderated_notification_id",
+            # "moderated_notification_id",
             "updated_at",
             "created_at",
         )
@@ -106,7 +106,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             "status",
             "user",
             "location",
-            "moderated_notification_id",
+            # "moderated_notification_id",
             "updated_at",
             "created_at",
         )

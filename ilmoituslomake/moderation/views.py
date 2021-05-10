@@ -52,8 +52,8 @@ class ModerationNotificationRetrieveView(RetrieveAPIView):
 
     permission_classes = [IsAdminUser]
     lookup_field = "id"
-    queryset = Notification.objects.all()
-    serializer_class = ModerationNotificationSerializer
+    queryset = ModeratedNotification.objects.all()
+    serializer_class = PrivateModeratedNotificationSerializer
 
 
 class ModerationItemSearchListView(ListAPIView):
