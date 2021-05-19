@@ -44,7 +44,7 @@ from moderation.serializers import (
     PrivateModeratedNotificationSerializer,
 )
 
-from ilmoituslomake.settings import JWT_IMAGE_SECRET
+from ilmoituslomake.settings import JWT_IMAGE_SECRET, PRIVATE_AZURE_READ_KEY
 
 import jwt
 
@@ -58,7 +58,9 @@ def image_proxy(request, id, image):
         decoded_token = jwt.decode(token, JWT_IMAGE_SECRET, algorithms=["HS256"])
         if decoded_token["id"] == id and decoded_token["image"] == image:
             response = HttpResponse()
-            response["X-Accel-Redirect"] = "/proxy/" + id + "/" + image
+            response["X-Accel-Redirect"] = (
+                "/proxy/" + id + "/" + image + PRIVATE_AZURE_READ_KEY
+            )
             return response
     except Exception as e:
         pass
