@@ -39,6 +39,9 @@ urlpatterns += [
     path("api/user/", users_views.UserView.as_view()),
 ]
 
+urlpatterns += [
+    path("api/proxy/<str:id>/<str:image>", moderation_views.image_proxy),
+]
 
 # Moderation App
 urlpatterns += [

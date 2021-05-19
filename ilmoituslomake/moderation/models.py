@@ -8,6 +8,10 @@ from notification_form.models import Notification
 
 from users.models import User
 
+from moderation.storage import PublicAzureStorage
+
+afs = PublicAzureStorage()
+
 # Create your models here.
 
 
@@ -19,7 +23,15 @@ class ModeratedNotification(BaseNotification):
     notification_id = models.IntegerField(default=0)
 
 
+def upload_image_to(instance, filename):
+    #     return "{0}/{1}".format("1", filename)
+    return "{0}/{1}".format(instance.notification.pk, filename)
+
+
 class ModeratedNotificationImage(BaseNotificationImage):
+
+    data = models.ImageField(storage=afs, upload_to=upload_image_to)
+
     notification = models.ForeignKey(
         ModeratedNotification,
         null=True,

@@ -1,14 +1,6 @@
-import base64
-import uuid
-import io
-import requests
-from PIL import Image
-
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.files.base import ContentFile
+from base.image_utils import preprocess_images, process_images
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -34,7 +26,7 @@ from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
 from base.models import NotificationSchema, OntologyWord
 
-from notification_form.serializers import NotificationImageSerializer
+# from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
     NotificationSchemaSerializer,
     OntologyWordSerializer,
@@ -164,8 +156,8 @@ class NotificationCreateView(CreateAPIView):
         )  # self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # TODO: Preprocess images
-        images = []  # preprocess_images(request)
+        # Preprocess images
+        images = preprocess_images(request)
 
         # Create
         self.perform_create(serializer, item_status, images)
@@ -178,7 +170,10 @@ class NotificationCreateView(CreateAPIView):
 
     def perform_create(self, serializer, item_status, images):
         instance = serializer.save(user=self.request.user, status=item_status)
-        # process_images(instance, images)
+        try:
+            process_images(NotificationImage, instance, images)
+        except Exception as e:
+            pass
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -221,11 +216,3 @@ class OntologyWordListView(ListAPIView):
     # TODO: Create migration which generates indices for JSON data
     # search_fields = ["data__ontologyword__fi"]
     pagination_class = None
-
-
-# def images(request):
-#     if request.user.is_authenticated():
-#         response = HttpResponse()
-#         response['X-Accel-Redirect'] = '/tpr-notification-dev/'
-#         return response
-#     return Response(None, status=status.HTTP_404_NOT_FOUND)

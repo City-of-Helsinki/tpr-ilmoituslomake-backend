@@ -126,7 +126,9 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         # Show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(instance.images, many=True)  # TODO
+        serializer = NotificationImageSerializer(
+            instance.images, many=True, context={"id": instance.pk}
+        )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
 
@@ -172,7 +174,9 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
         # Show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(instance.images, many=True)  # TODO
+        serializer = NotificationImageSerializer(
+            instance.images, many=True, context={"id": instance.pk}
+        )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
 
@@ -281,6 +285,8 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(instance.images, many=True)
+        serializer = NotificationImageSerializer(
+            instance.images, many=True, context={"id": instance.pk}
+        )
         ret["data"]["images"] = serializer.data
         return ret

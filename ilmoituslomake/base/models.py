@@ -9,10 +9,6 @@ from django.contrib.gis.db import models
 from simple_history.models import HistoricalRecords
 from users.models import User
 
-from base.storage import PublicAzureStorage
-
-afs = PublicAzureStorage()
-
 
 class OntologyWord(models.Model):
     data = JSONField()
@@ -94,20 +90,15 @@ class BaseNotification(models.Model):
         super().save(*args, **kwargs)
 
 
-def upload_image_to(instance, filename):
-    #     return "{0}/{1}".format("1", filename)
-    return "{0}/{1}".format(instance.notification.pk, filename)
-
-
 class BaseNotificationImage(models.Model):
     class Meta:
         abstract = True
 
     filename = models.TextField(blank=True)
 
-    data = models.ImageField(storage=afs, upload_to=upload_image_to)
-
     metadata = JSONField()
+
+    published = models.BooleanField(default=True)
 
     # auto-fields
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)

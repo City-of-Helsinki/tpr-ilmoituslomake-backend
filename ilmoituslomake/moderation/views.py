@@ -2,6 +2,8 @@ import json
 
 from datetime import datetime, timedelta
 
+from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404
 
 # Permissions
@@ -42,7 +44,25 @@ from moderation.serializers import (
     PrivateModeratedNotificationSerializer,
 )
 
+from ilmoituslomake.settings import JWT_IMAGE_SECRET
+
+import jwt
+
+
 # Create your views here.
+
+
+def image_proxy(request, id, image):
+    token = request.GET.get("token", "")
+    try:
+        decoded_token = jwt.decode(token, JWT_IMAGE_SECRET, algorithms=["HS256"])
+        if decoded_token["id"] == id and decoded_token["image"] == image:
+            response = HttpResponse()
+            response["X-Accel-Redirect"] = "/proxy/" + id + "/" + image
+            return response
+    except Exception as e:
+        pass
+    return HttpResponse(status=status.HTTP_403_FORBIDDEN)
 
 
 class ModerationNotificationRetrieveView(RetrieveAPIView):

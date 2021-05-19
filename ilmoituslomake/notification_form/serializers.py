@@ -1,10 +1,16 @@
 import json
+import jwt
+import datetime
+
 from jsonschema import validate
 
 from rest_framework import serializers
 
 from base.models import NotificationSchema
 from notification_form.models import Notification, NotificationImage
+
+
+from ilmoituslomake.settings import JWT_IMAGE_SECRET
 
 
 class NotificationImageSerializer(serializers.ModelSerializer):
@@ -15,7 +21,27 @@ class NotificationImageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret["metadata"]["url"] = instance.data.url.replace(
-            "tprimages.blob.core.windows.net/", "/"
-        )
+        # ret["metadata"]["url"] = instance.data.url.replace(
+        #     "tprimages.blob.core.windows.net/", "/"
+        # )
+        id = self.context.get("id", None)
+        if id != None:
+            image = ret["metadata"]["uuid"] + ".jpg"
+            token = jwt.encode(
+                {
+                    "id": str(id),
+                    "image": image,
+                    "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=180),
+                },
+                JWT_IMAGE_SECRET,
+                algorithm="HS256",
+            )
+            ret["metadata"]["url"] = (
+                "http://localhost/api/proxy/"
+                + str(id)
+                + "/"
+                + image
+                + "?token="
+                + token.decode("utf-8")
+            )
         return ret["metadata"]
