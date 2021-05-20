@@ -55,62 +55,76 @@ def process_images(model, instance, images):
     # TODO: What if not an image
     data = None
     for upload in images:
-        if upload["base64"] != "":
-            data = base64.b64decode(upload["base64"].split(",")[1])
-            del upload["base64"]
-        elif upload["url"] != "":
-            response = requests.get(upload["url"], stream=True)
-            if response.status_code == 200:
-                response.raw.decode_content = True
-                data = response.raw.read()
+
+        try:
+            if upload["base64"] != "":
+                data = base64.b64decode(upload["base64"].split(",")[1])
+                del upload["base64"]
+            elif upload["url"] != "":
+                # Skip redownloading/uploading a file that already exists.
+                # upload["uuid"]
+                # if not AZURE_STORAGE in upload["url"]:
+                if True:
+                    response = requests.get(upload["url"], stream=True)
+                    if response.status_code == 200:
+                        response.raw.decode_content = True
+                        data = response.raw.read()
+                    else:
+                        continue
+                else:
+                    continue
             else:
                 continue
-        else:
+            # TODO: Virus check
+            #
+            if data != None:
+                image = Image.open(io.BytesIO(data))
+                with io.BytesIO() as output:
+                    # print(output)
+                    image.save(output, format="JPEG")
+                    upload["data"] = ContentFile(output.getvalue())
+            else:
+                continue
+        except Exception as e:
             continue
-        # TODO: Virus check
+
         #
-        if data != None:
-            image = Image.open(io.BytesIO(data))
-            with io.BytesIO() as output:
-                # print(output)
-                image.save(output, format="JPEG")
-                upload["data"] = ContentFile(output.getvalue())
-        else:
-            continue
-        #
-        image = model(
-            # uuid=upload["uuid"],
-            filename=upload["filename"],
-            data=InMemoryUploadedFile(
-                upload["data"],
-                None,  # field_name
-                upload["filename"],  # file name
-                "image/jpeg",  # content_type
-                upload["data"].tell,  # size
-                None,  # content_type_extra
-            ),
-            notification=instance,
-            metadata=upload["metadata"],
-        )
-        image.save()
+        if "data" in upload:
+            image = model(
+                # uuid=upload["uuid"],
+                filename=upload["filename"],
+                data=InMemoryUploadedFile(
+                    upload["data"],
+                    None,  # field_name
+                    upload["filename"],  # file name
+                    "image/jpeg",  # content_type
+                    upload["data"].tell,  # size
+                    None,  # content_type_extra
+                ),
+                notification=instance,
+                metadata=upload["metadata"],
+            )
+            image.save()
 
 
 def update_preprocess_url(notification_id, images):
     for upload in images:
         if upload["base64"] != "":
             pass
-        elif upload["url"] != "" and (FULL_WEB_ADDRESS in upload["url"]):
-            upload["url"] = (
-                "https://"
-                + AZURE_STORAGE
-                + ".blob.core.windows.net/"
-                + PRIVATE_AZURE_CONTAINER
-                + "/"
-                + str(notification_id)
-                + "/"
-                + filename
-                + PRIVATE_AZURE_READ_KEY
-            )
+        elif upload["url"] != "":
+            # Modify proxy urls
+            if FULL_WEB_ADDRESS in upload["url"]:
+                upload["url"] = (
+                    "https://"
+                    + AZURE_STORAGE
+                    + ".blob.core.windows.net/"
+                    + PRIVATE_AZURE_CONTAINER
+                    + "/"
+                    + str(notification_id)
+                    + "/"
+                    + upload["filename"]
+                    + PRIVATE_AZURE_READ_KEY
+                )
     return images
 
 
@@ -126,16 +140,3 @@ def unpublish_images(moderated_instance):
         image.save()
 
     # unpublish notificationimages
-
-    # images
-    # {
-    #     "uuid": str(image_idx),
-    #     "filename": str(image_idx) + ".jpg",
-    #     "base64": request_images[i]["base64"]
-    #     if ("base64" in request_images[i])
-    #     else "",
-    #     "url": request_images[i]["url"]
-    #     if ("url" in request_images[i])
-    #     else "",
-    #     "metadata": data_image,
-    # }
