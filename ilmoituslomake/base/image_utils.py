@@ -15,47 +15,6 @@ import requests
 from PIL import Image
 
 
-# def preprocess_images(request):
-#     try:
-#         images = []
-#         request_images = []
-#         # Handle images
-#         data_images = request.data["data"]["images"]  # DATA, url or base64
-#         if "images" in request.data:
-#             # JSON-info
-#             request_images = request.data["images"]  # validate
-
-#         #
-#         if len(request_images) > 0:
-#             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
-#             # Handle base64 image
-#             for i in range(len(request_images)):
-#                 image_idx = request_images[i]["uuid"]
-#                 for idx in range(len(data_images)):  # image in data_images:
-#                     image = data_images[idx]
-#                     if image["uuid"] == image_idx:
-#                         data_image = data_images[idx]
-#                         # image = base64.b64decode(str('stringdata'))
-#                         images.append(
-#                             {
-#                                 "uuid": str(image_idx),
-#                                 "filename": str(image_idx) + ".jpg",
-#                                 "base64": request_images[i]["base64"]
-#                                 if ("base64" in request_images[i])
-#                                 else "",
-#                                 "url": request_images[i]["url"]
-#                                 if ("url" in request_images[i])
-#                                 else "",
-#                                 "metadata": data_image,
-#                             }
-#                         )
-#                         break
-#         return images
-#     except Exception as e:
-#         print(e)
-#     return []
-
-
 def preprocess_images(request):
     try:
         images = []
