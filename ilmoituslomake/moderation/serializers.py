@@ -110,6 +110,25 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         )
 
 
+class ApproveModeratorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ("data",)
+        read_only_fields = ("data",)
+
+    def validate_data(self, data):
+        # TODO: Improve
+        schema = NotificationSchema.objects.latest("created_at").schema
+        # Validate
+        try:
+            # Generic JSON-Schema validation
+            validate(instance=data, schema=schema)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        return data
+
+
 class ModerationNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification

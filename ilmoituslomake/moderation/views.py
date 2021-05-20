@@ -20,7 +20,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
 )
 
-from rest_framework import filters
+from rest_framework import filters, serializers
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -42,6 +42,7 @@ from moderation.serializers import (
     ModerationItemDetailSerializer,
     ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
+    ApproveModeratorSerializer,
 )
 
 from base.image_utils import (
@@ -171,8 +172,11 @@ class AssignModerationItemView(UpdateAPIView):
         if moderation_item.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        if moderation_item.moderator != None:
+        if moderation_item.moderator == request.user:
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif moderation_item.moderator != None:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
+        #
         moderation_item.moderator = request.user
         moderation_item.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -331,11 +335,15 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         moderation_item.status = "closed"
 
-        if type(request.data["data"]) is not dict:
-            moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
-        else:
-            moderation_item.data = request.data["data"]  # TODO: Validate
+        # if type(request.data["data"]) is not dict:
+        #    moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
+        # else:
 
+        # Validate moderator input
+        notification_serializer = ApproveModeratorSerializer(data=request.data["data"])
+        notification_serializer.is_valid(raise_exception=True)
+
+        moderation_item.data = request.data["data"]
         moderation_item.save()
 
         #
@@ -393,8 +401,10 @@ class ModerationItemUpdateView(UpdateAPIView):
             images = update_preprocess_url(notification.pk, images)
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(moderated_notification)
-        except ModeratedNotification.DoesNotExist:
-            pass
+        except serializers.ValidationError as e:
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             pass
 
