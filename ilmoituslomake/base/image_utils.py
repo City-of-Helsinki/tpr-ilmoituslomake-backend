@@ -1,6 +1,12 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
 
+from ilmoituslomake.settings import (
+    PRIVATE_AZURE_READ_KEY,
+    PRIVATE_AZURE_CONTAINER,
+    AZURE_CONTAINER,
+    FULL_WEB_ADDRESS,
+)
 
 import base64
 import uuid
@@ -78,6 +84,7 @@ def process_images(model, instance, images):
             continue
         #
         image = model(
+            # uuid=upload["uuid"],
             filename=upload["filename"],
             data=InMemoryUploadedFile(
                 upload["data"],
@@ -91,3 +98,49 @@ def process_images(model, instance, images):
             metadata=upload["metadata"],
         )
         image.save()
+
+
+def update_preprocess_url(notification_id, images):
+    for upload in images:
+        if upload["base64"] != "":
+            pass
+        elif upload["url"] != "" and (FULL_WEB_ADDRESS in upload["url"]):
+            upload["url"] = (
+                "https://"
+                + AZURE_CONTAINER
+                + ".blob.core.windows.net/"
+                + PRIVATE_AZURE_CONTAINER
+                + "/"
+                + str(notification_id)
+                + "/"
+                + filename
+                + PRIVATE_AZURE_READ_KEY
+            )
+    return images
+
+
+def unpublish_images(moderated_instance):
+    images = {}  # { mi["uuid"] : mi for mi in moderated_instance.data["images"] }
+    updated_images = []
+    for image in moderated_instance.images:
+        if image.published:
+            if image.metadata["uuid"] in images:
+                image.published = False
+                updated_images.append(image)
+    for image in updated_images:
+        image.save()
+
+    # unpublish notificationimages
+
+    # images
+    # {
+    #     "uuid": str(image_idx),
+    #     "filename": str(image_idx) + ".jpg",
+    #     "base64": request_images[i]["base64"]
+    #     if ("base64" in request_images[i])
+    #     else "",
+    #     "url": request_images[i]["url"]
+    #     if ("url" in request_images[i])
+    #     else "",
+    #     "metadata": data_image,
+    # }

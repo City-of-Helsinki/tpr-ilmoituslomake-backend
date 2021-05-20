@@ -30,7 +30,7 @@ from django.contrib.postgres.fields.jsonb import KeyTextTransform
 #
 # from base.models import Notification
 from notification_form.models import Notification
-from moderation.models import ModeratedNotification
+from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 # from base.serializers import NotificationSerializer
 # from notification_form.serializers import NotificationSerializer
@@ -42,6 +42,13 @@ from moderation.serializers import (
     ModerationItemDetailSerializer,
     ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
+)
+
+from base.image_utils import (
+    preprocess_images,
+    update_preprocess_url,
+    process_images,
+    unpublish_images,
 )
 
 from ilmoituslomake.settings import JWT_IMAGE_SECRET, PRIVATE_AZURE_READ_KEY
@@ -354,10 +361,12 @@ class ModerationItemUpdateView(UpdateAPIView):
                     notification.moderated_notification_id = moderated_notification.pk
                     notification.save()
                 else:
+
                     # TODO: IMAGES!
                     notification = Notification(
                         data=moderation_item.data, user=request.user, status="approved"
                     )
+
                     notification.save()
                     moderated_notification = ModeratedNotification(
                         user=notification.user,
@@ -379,6 +388,11 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.save()
                 if moderation_item.category != "change_request" and notification:
                     notification.save()
+            # process images
+            images = preprocess_images(request)
+            images = update_preprocess_url(notification.pk, images)
+            process_images(ModeratedNotificationImage, moderated_notification, images)
+            unpublish_images(moderated_notification)
         except ModeratedNotification.DoesNotExist:
             pass
         finally:

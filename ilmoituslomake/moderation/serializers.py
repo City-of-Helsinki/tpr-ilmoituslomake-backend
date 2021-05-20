@@ -3,19 +3,43 @@ from moderation.models import ModerationItem
 
 from base.models import NotificationSchema
 from notification_form.models import Notification
-from moderation.models import ModeratedNotification
+from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 #
 from users.serializers import ModeratorSerializer
 
 # from base.serializers import NotificationSerializer
-from notification_form.serializers import NotificationImageSerializer
+from notification_form.serializers import (
+    NotificationImageSerializer,
+    RawNotificationImageSerializer,
+)
 
-# from moderation.serializers import NotificationSerializer
-# TODO: ModeratedNotificationImageSerializer
+from ilmoituslomake.settings import PUBLIC_AZURE_CONTAINER
 
 import json
 from jsonschema import validate
+
+
+class ModeratedNotificationImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModeratedNotificationImage
+        fields = ("metadata",)
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        id = self.context.get("id", None)
+        if id != None:
+            image = ret["metadata"]["uuid"] + ".jpg"
+            ret["metadata"]["url"] = (
+                "https://tprimages.blob.core.windows.net/"
+                + PUBLIC_AZURE_CONTAINER
+                + "/"
+                + str(id)
+                + "/"
+                + image
+            )
+        return ret["metadata"]
 
 
 class JSONSerializerField(serializers.Field):
@@ -126,7 +150,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         # Show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(
+        serializer = RawNotificationImageSerializer(
             instance.images, many=True, context={"id": instance.pk}
         )  # TODO
         ret["data"]["images"] = serializer.data
@@ -174,7 +198,7 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
         # Show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(
+        serializer = ModeratedNotificationImageSerializer(
             instance.images, many=True, context={"id": instance.pk}
         )  # TODO
         ret["data"]["images"] = serializer.data
@@ -183,6 +207,7 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
 
 class ModerationItemDetailSerializer(serializers.ModelSerializer):
 
+    notification_target = ModerationNotificationSerializer(read_only=True)
     target = PrivateModeratedNotificationSerializer(read_only=True)
     # data = NotificationSerializer() # Does not work because of location = GeomField
     moderator = ModeratorSerializer(read_only=True)
@@ -191,6 +216,7 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
         model = ModerationItem
         fields = (
             "id",
+            "notification_target",
             "target",
             "category",
             "item_type",
@@ -205,6 +231,7 @@ class ModerationItemDetailSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
+            "notification_target",
             "target",
             "category",
             "item_type",
@@ -287,7 +314,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = NotificationImageSerializer(
+        serializer = ModeratedNotificationImageSerializer(
             instance.images, many=True, context={"id": instance.pk}
         )
         ret["data"]["images"] = serializer.data

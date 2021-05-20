@@ -79,9 +79,12 @@ class BaseNotification(models.Model):
     def save(self, *args, **kwargs):
         # Auto-update revision and location
         self.revision += 1
+        # leaflet is lat-lon while postgis is lon-lat
+        reversed_xy = self.data["location"].copy()
+        reversed_xy.reverse()
         try:
             self.location = GEOSGeometry(
-                json.dumps({"type": "Point", "coordinates": self.data["location"]})
+                json.dumps({"type": "Point", "coordinates": reversed_xy})
             )
         except Exception as e:
             pass
@@ -93,6 +96,8 @@ class BaseNotification(models.Model):
 class BaseNotificationImage(models.Model):
     class Meta:
         abstract = True
+
+    uuid = models.UUIDField(null=True, db_index=True)
 
     filename = models.TextField(blank=True)
 
@@ -106,4 +111,4 @@ class BaseNotificationImage(models.Model):
     history = HistoricalRecords(inherit=True)
 
     def __str__(self):
-        return self.data.url
+        return self.filename

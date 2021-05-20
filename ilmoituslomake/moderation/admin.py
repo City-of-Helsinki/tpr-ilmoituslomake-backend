@@ -3,7 +3,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 # Register your models here.
 from base.models import OntologyWord
-from notification_form.models import Notification
+from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModerationItem
 from users.models import Organization
 
@@ -20,6 +20,10 @@ class NotificationAdmin(SimpleHistoryAdmin):
     pass
 
 
+class NotificationImageAdmin(SimpleHistoryAdmin):
+    pass
+
+
 class OntologyWordAdmin(admin.ModelAdmin):
     pass
 
@@ -31,5 +35,6 @@ class OrganizationAdmin(admin.ModelAdmin):
 admin.site.register(ModeratedNotification, ModeratedNotificationAdmin)
 admin.site.register(ModerationItem, ModerationItemAdmin)
 admin.site.register(Notification, NotificationAdmin)
+admin.site.register(NotificationImage, NotificationImageAdmin)
 admin.site.register(OntologyWord, OntologyWordAdmin)
 admin.site.register(Organization, OrganizationAdmin)

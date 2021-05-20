@@ -86,12 +86,12 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     latitude = serializers.SerializerMethodField()
 
     def get_latitude(self, obj):
-        return obj.location.x
+        return obj.location.y
 
     longitude = serializers.SerializerMethodField()
 
     def get_longitude(self, obj):
-        return obj.location.y
+        return obj.location.x
 
     street_address = serializers.SerializerMethodField()
 
