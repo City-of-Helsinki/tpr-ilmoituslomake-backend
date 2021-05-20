@@ -11,7 +11,6 @@ from users.serializers import ModeratorSerializer
 # from base.serializers import NotificationSerializer
 from notification_form.serializers import (
     NotificationImageSerializer,
-    RawNotificationImageSerializer,
 )
 
 from ilmoituslomake.settings import PUBLIC_AZURE_CONTAINER

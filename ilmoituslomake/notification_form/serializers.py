@@ -45,10 +45,3 @@ class NotificationImageSerializer(serializers.ModelSerializer):
                 + token.decode("utf-8")
             )
         return ret["metadata"]
-
-
-class RawNotificationImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NotificationImage
-        fields = ("id", "filename", "metadata", "published")
-        read_only_fields = fields
