@@ -124,7 +124,7 @@ def unpublish_images(moderated_instance):
     updated_images = []
     for image in moderated_instance.images:
         if image.published:
-            if image.metadata["uuid"] in images:
+            if not image.metadata["uuid"] in images:
                 image.published = False
                 updated_images.append(image)
     for image in updated_images:
