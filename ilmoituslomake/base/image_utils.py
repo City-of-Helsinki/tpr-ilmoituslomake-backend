@@ -129,14 +129,15 @@ def update_preprocess_url(notification_id, images):
 
 
 def unpublish_images(moderated_instance):
-    images = {}  # { mi["uuid"] : mi for mi in moderated_instance.data["images"] }
-    updated_images = []
-    for image in moderated_instance.images:
-        if image.published:
-            if not image.metadata["uuid"] in images:
-                image.published = False
-                updated_images.append(image)
-    for image in updated_images:
-        image.save()
+    pass
+    # images = {}  # { mi["uuid"] : mi for mi in moderated_instance.data["images"] }
+    # updated_images = []
+    # for image in moderated_instance.images:
+    #     if image.published:
+    #         if not image.metadata["uuid"] in images:
+    #             image.published = False
+    #             updated_images.append(image)
+    # for image in updated_images:
+    #     image.save()
 
-    # unpublish notificationimages
+    # # unpublish notificationimages
