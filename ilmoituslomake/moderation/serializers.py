@@ -150,7 +150,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         # Show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
-        serializer = RawNotificationImageSerializer(
+        serializer = NotificationImageSerializer(
             instance.images, many=True, context={"id": instance.pk}
         )  # TODO
         ret["data"]["images"] = serializer.data

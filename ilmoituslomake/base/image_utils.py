@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from ilmoituslomake.settings import (
     PRIVATE_AZURE_READ_KEY,
     PRIVATE_AZURE_CONTAINER,
-    AZURE_CONTAINER,
+    AZURE_STORAGE,
     FULL_WEB_ADDRESS,
 )
 
@@ -107,7 +107,7 @@ def update_preprocess_url(notification_id, images):
         elif upload["url"] != "" and (FULL_WEB_ADDRESS in upload["url"]):
             upload["url"] = (
                 "https://"
-                + AZURE_CONTAINER
+                + AZURE_STORAGE
                 + ".blob.core.windows.net/"
                 + PRIVATE_AZURE_CONTAINER
                 + "/"
