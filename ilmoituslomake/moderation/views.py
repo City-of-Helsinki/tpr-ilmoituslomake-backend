@@ -347,7 +347,6 @@ class ModerationItemUpdateView(UpdateAPIView):
             return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         moderation_item.data = request.data["data"]
-        moderation_item.save()
 
         #
         try:
@@ -368,6 +367,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                         notification_id=notification.pk,
                     )
                     moderated_notification.save()
+                    moderation_item.target = moderated_notification
                     # Update notification
                     notification.moderated_notification_id = moderated_notification.pk
                     notification.save()
@@ -386,6 +386,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                         notification_id=notification.pk,
                     )
                     moderated_notification.save()
+                    moderation_item.target = moderated_notification
                     # Update notification
                     notification.moderated_notification_id = moderated_notification.pk
                     notification.save()
@@ -397,6 +398,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
+                moderation_item.target = moderated_notification
                 if moderation_item.category != "change_request" and notification:
                     notification.save()
             # process images
@@ -409,7 +411,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             print(e, file=sys.stderr)
             return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
-            pass
+            moderation_item.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
