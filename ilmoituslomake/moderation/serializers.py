@@ -2,7 +2,7 @@ from rest_framework import serializers
 from moderation.models import ModerationItem
 
 from base.models import NotificationSchema
-from notification_form.models import Notification
+from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 #
@@ -169,7 +169,11 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         ret["location"] = json.loads(instance.location.json)
         # images
         serializer = NotificationImageSerializer(
-            instance.images, many=True, context={"id": instance.pk}
+            NotificationImage.objects.all().filter(
+                notification=instance.pk, published=True
+            ),
+            many=True,
+            context={"id": instance.pk},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -217,7 +221,11 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
         ret["location"] = json.loads(instance.location.json)
         # images
         serializer = ModeratedNotificationImageSerializer(
-            instance.images, many=True, context={"id": instance.pk}
+            ModeratedNotificationImage.objects.all().filter(
+                notification=instance.pk, published=True
+            ),
+            many=True,
+            context={"id": instance.pk},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -332,8 +340,13 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         # show geometry as geojson
         ret["location"] = json.loads(instance.location.json)
         # images
+        # instance.images
         serializer = ModeratedNotificationImageSerializer(
-            instance.images, many=True, context={"id": instance.pk}
+            ModeratedNotificationImage.objects.all().filter(
+                notification=instance.pk, published=True
+            ),
+            many=True,
+            context={"id": instance.pk},
         )
         ret["data"]["images"] = serializer.data
         return ret
