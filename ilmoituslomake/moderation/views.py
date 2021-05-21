@@ -1,4 +1,5 @@
 import json
+import sys
 
 from datetime import datetime, timedelta
 
@@ -29,7 +30,7 @@ from django.contrib.postgres.fields.jsonb import KeyTextTransform
 
 #
 # from base.models import Notification
-from notification_form.models import Notification
+from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 # from base.serializers import NotificationSerializer
@@ -50,6 +51,7 @@ from base.image_utils import (
     update_preprocess_url,
     process_images,
     unpublish_images,
+    unpublish_all_images,
 )
 
 from ilmoituslomake.settings import JWT_IMAGE_SECRET, PRIVATE_AZURE_READ_KEY
@@ -335,13 +337,14 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         moderation_item.status = "closed"
 
-        # if type(request.data["data"]) is not dict:
-        #    moderation_item.data = json.loads(request.data["data"])  # TODO: Validate
-        # else:
-
-        # Validate moderator input
-        notification_serializer = ApproveModeratorSerializer(data=request.data["data"])
-        notification_serializer.is_valid(raise_exception=True)
+        try:
+            # Validate moderator input
+            notification_serializer = ApproveModeratorSerializer(
+                data=request.data["data"]
+            )
+            notification_serializer.is_valid(raise_exception=True)
+        except Exception as e:  # except Exception as e:
+            return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         moderation_item.data = request.data["data"]
         moderation_item.save()
@@ -400,10 +403,10 @@ class ModerationItemUpdateView(UpdateAPIView):
             images = preprocess_images(request)
             images = update_preprocess_url(notification.pk, images)
             process_images(ModeratedNotificationImage, moderated_notification, images)
-            unpublish_images(moderated_notification)
-        except serializers.ValidationError as e:
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+            unpublish_images(ModeratedNotificationImage, moderated_notification)
+            unpublish_all_images(NotificationImage, notification)
         except Exception as e:
+            print(e, file=sys.stderr)
             return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             pass

@@ -1,3 +1,5 @@
+import sys
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
 
@@ -5,6 +7,7 @@ from ilmoituslomake.settings import (
     PRIVATE_AZURE_READ_KEY,
     PRIVATE_AZURE_CONTAINER,
     AZURE_STORAGE,
+    PUBLIC_AZURE_CONTAINER,
     FULL_WEB_ADDRESS,
 )
 
@@ -54,6 +57,7 @@ def preprocess_images(request):
 def process_images(model, instance, images):
     # TODO: What if not an image
     data = None
+
     for upload in images:
 
         try:
@@ -61,20 +65,23 @@ def process_images(model, instance, images):
                 data = base64.b64decode(upload["base64"].split(",")[1])
                 del upload["base64"]
             elif upload["url"] != "":
+                # print(upload["url"], file=sys.stderr)
                 # Skip redownloading/uploading a file that already exists.
-                # upload["uuid"]
-                # if not AZURE_STORAGE in upload["url"]:
-                if True:
+                if (
+                    not upload["uuid"] in upload["url"]
+                    or not PUBLIC_AZURE_CONTAINER in upload["url"]
+                ):
+                    # print(upload["url"], file=sys.stderr)
                     response = requests.get(upload["url"], stream=True)
                     if response.status_code == 200:
                         response.raw.decode_content = True
                         data = response.raw.read()
-                    else:
-                        continue
-                else:
-                    continue
-            else:
-                continue
+            #         else:
+            #             continue
+            #     else:
+            #         continue
+            # else:
+            #     continue
             # TODO: Virus check
             #
             if data != None:
@@ -89,9 +96,10 @@ def process_images(model, instance, images):
             continue
 
         #
+        # print(upload, file=sys.stderr)
         if "data" in upload:
             image = model(
-                # uuid=upload["uuid"],
+                uuid=upload["uuid"],
                 filename=upload["filename"],
                 data=InMemoryUploadedFile(
                     upload["data"],
@@ -113,6 +121,7 @@ def update_preprocess_url(notification_id, images):
             pass
         elif upload["url"] != "":
             # Modify proxy urls
+            # print(upload["url"], file=sys.stderr)
             if FULL_WEB_ADDRESS in upload["url"]:
                 upload["url"] = (
                     "https://"
@@ -128,16 +137,25 @@ def update_preprocess_url(notification_id, images):
     return images
 
 
-def unpublish_images(moderated_instance):
-    pass
-    # images = {}  # { mi["uuid"] : mi for mi in moderated_instance.data["images"] }
-    # updated_images = []
-    # for image in moderated_instance.images:
-    #     if image.published:
-    #         if not image.metadata["uuid"] in images:
-    #             image.published = False
-    #             updated_images.append(image)
-    # for image in updated_images:
-    #     image.save()
+def unpublish_images(model, moderated_instance):
+    images = {mi["uuid"]: mi for mi in moderated_instance.data["images"]}
+    updated_images = []
+    qs = model.objects.all().filter(notification=moderated_instance.pk)
+    for image in qs:
+        if image.published:
+            if not str(image.uuid) in images:
+                image.published = False
+                updated_images.append(image)
+    for image in updated_images:
+        image.save()
 
-    # # unpublish notificationimages
+
+def unpublish_all_images(model, instance):
+    updated_images = []
+    qs = model.objects.all().filter(notification=instance.pk)
+    for image in qs:
+        if image.published:
+            image.published = False
+            updated_images.append(image)
+    for image in updated_images:
+        image.save()
