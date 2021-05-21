@@ -50,6 +50,7 @@ def preprocess_images(request):
                     print("Existing data.")
         return images
     except Exception as e:
+        print(e, file=sys.stderr)
         pass
     return []
 
@@ -57,7 +58,7 @@ def preprocess_images(request):
 def process_images(model, instance, images):
     # TODO: What if not an image
     data = None
-
+    print(images, file=sys.stderr)
     for upload in images:
 
         try:
@@ -93,26 +94,30 @@ def process_images(model, instance, images):
             else:
                 continue
         except Exception as e:
+            print(e, file=sys.stderr)
             continue
 
         #
-        # print(upload, file=sys.stderr)
-        if "data" in upload:
-            image = model(
-                uuid=upload["uuid"],
-                filename=upload["filename"],
-                data=InMemoryUploadedFile(
-                    upload["data"],
-                    None,  # field_name
-                    upload["filename"],  # file name
-                    "image/jpeg",  # content_type
-                    upload["data"].tell,  # size
-                    None,  # content_type_extra
-                ),
-                notification=instance,
-                metadata=upload["metadata"],
-            )
-            image.save()
+        try:
+            # print(upload, file=sys.stderr)
+            if "data" in upload:
+                image = model(
+                    uuid=upload["uuid"],
+                    filename=upload["filename"],
+                    data=InMemoryUploadedFile(
+                        upload["data"],
+                        None,  # field_name
+                        upload["filename"],  # file name
+                        "image/jpeg",  # content_type
+                        upload["data"].tell,  # size
+                        None,  # content_type_extra
+                    ),
+                    notification=instance,
+                    metadata=upload["metadata"],
+                )
+                image.save()
+        except Exception as e:
+            print(e, file=sys.stderr)
 
 
 def update_preprocess_url(notification_id, images):
