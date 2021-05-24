@@ -170,7 +170,9 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         # images
         serializer = NotificationImageSerializer(
             NotificationImage.objects.all().filter(
-                notification=instance.pk, published=True
+                notification=instance.pk,
+                published=True,
+                uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
             context={"id": instance.pk},
@@ -222,7 +224,9 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
         # images
         serializer = ModeratedNotificationImageSerializer(
             ModeratedNotificationImage.objects.all().filter(
-                notification=instance.pk, published=True
+                notification=instance.pk,
+                published=True,
+                uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
             context={"id": instance.pk},
@@ -334,7 +338,6 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
             del ret["data"]["notifier"]["email"]
             del ret["data"]["notifier"]["phone"]
         # Remove created_at && user
-        del ret["data"]["images"]
         del ret["created_at"]
         del ret["user"]
         # show geometry as geojson
@@ -343,10 +346,13 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
         # instance.images
         serializer = ModeratedNotificationImageSerializer(
             ModeratedNotificationImage.objects.all().filter(
-                notification=instance.pk, published=True
+                notification=instance.pk,
+                published=True,
+                uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
             context={"id": instance.pk},
         )
+        del ret["data"]["images"]
         ret["data"]["images"] = serializer.data
         return ret
