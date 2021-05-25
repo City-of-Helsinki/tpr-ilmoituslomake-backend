@@ -406,7 +406,9 @@ class ModerationItemUpdateView(UpdateAPIView):
             images = update_preprocess_url(notification.pk, images)
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
-            unpublish_all_images(NotificationImage, notification)
+            #
+            if moderation_item.category != "change_request" and notification:
+                unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
             return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

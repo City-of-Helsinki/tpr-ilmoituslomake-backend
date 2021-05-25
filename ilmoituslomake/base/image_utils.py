@@ -34,17 +34,20 @@ def preprocess_images(request):
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             for key in metadata:
                 if key in data:
-                    images.append(
-                        {
-                            "uuid": str(key),
-                            "filename": str(key) + ".jpg",
-                            "base64": data[key]["base64"]
-                            if ("base64" in data[key])
-                            else "",
-                            "url": data[key]["url"] if ("url" in data[key]) else "",
-                            "metadata": metadata[key],
-                        }
-                    )
+                    if not (key in data[key]["url"]) or not (
+                        PUBLIC_AZURE_CONTAINER in data[key]["url"]
+                    ):
+                        images.append(
+                            {
+                                "uuid": str(key),
+                                "filename": str(key) + ".jpg",
+                                "base64": data[key]["base64"]
+                                if ("base64" in data[key])
+                                else "",
+                                "url": data[key]["url"] if ("url" in data[key]) else "",
+                                "metadata": metadata[key],
+                            }
+                        )
                 else:
                     pass
                     print("Existing data.")
@@ -68,10 +71,11 @@ def process_images(model, instance, images):
             elif upload["url"] != "":
                 # print(upload["url"], file=sys.stderr)
                 # Skip redownloading/uploading a file that already exists.
-                if (
-                    not upload["uuid"] in upload["url"]
-                    or not PUBLIC_AZURE_CONTAINER in upload["url"]
-                ):
+                # if (
+                #    not upload["uuid"] in upload["url"]
+                #    or not PUBLIC_AZURE_CONTAINER in upload["url"]
+                # ):
+                if True:
                     # print(upload["url"], file=sys.stderr)
                     response = requests.get(upload["url"], stream=True)
                     if response.status_code == 200:
@@ -149,7 +153,7 @@ def unpublish_images(model, moderated_instance):
     qs = model.objects.all().filter(notification=moderated_instance.pk)
     for image in qs:
         if image.published:
-            if not str(image.uuid) in images:
+            if not (str(image.uuid) in images):
                 image.published = False
                 updated_images.append(image)
     for image in updated_images:
