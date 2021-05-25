@@ -282,6 +282,18 @@
                 "type": "number"
             }
         },
+        "matko_ids": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "extra_keywords": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "comments": {
             "type": "string"
         },
@@ -316,6 +328,8 @@
         "images",
         "opening_times",
         "ontology_ids",
+        "matko_ids",
+        "extra_keywords",
         "comments",
         "notifier"
     ]
