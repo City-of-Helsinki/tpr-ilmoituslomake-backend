@@ -134,6 +134,8 @@ urlpatterns += [
     ),
     # ontology words
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
+    # matko words
+    path("api/matkowords/", notification_form_views.MatkoWordListView.as_view()),
 ]
 
 

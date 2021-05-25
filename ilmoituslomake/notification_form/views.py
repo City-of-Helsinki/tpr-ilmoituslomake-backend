@@ -24,12 +24,13 @@ from moderation.serializers import ChangeRequestSerializer
 
 from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
-from base.models import NotificationSchema, OntologyWord
+from base.models import NotificationSchema, OntologyWord, MatkoWord
 
 # from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
     NotificationSchemaSerializer,
     OntologyWordSerializer,
+    MatkoWordSerializer,
 )
 from moderation.serializers import (
     PublicModeratedNotificationSerializer,
@@ -205,14 +206,21 @@ class NotificationListView(ListAPIView):
 
 class OntologyWordListView(ListAPIView):
     """
-    Returns a collection of ontology words instances. Search support
+    Returns a collection of ontology words instances.
     """
 
     permission_classes = [AllowAny]
     queryset = OntologyWord.objects.all()
     serializer_class = OntologyWordSerializer
-    # filter_backends = [filters.SearchFilter]
-    # TODO: Add more search fields
-    # TODO: Create migration which generates indices for JSON data
-    # search_fields = ["data__ontologyword__fi"]
+    pagination_class = None
+
+
+class MatkoWordListView(ListAPIView):
+    """
+    Returns a collection of matko words instances.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = MatkoWord.objects.all()
+    serializer_class = MatkoWordSerializer
     pagination_class = None

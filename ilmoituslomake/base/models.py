@@ -10,11 +10,12 @@ from simple_history.models import HistoricalRecords
 from users.models import User
 
 
-class OntologyWord(models.Model):
+class MatkoWord(models.Model):
     data = JSONField()
 
-    # def __str__(self):
-    #    return self.data['ontologyword']['fi']
+
+class OntologyWord(models.Model):
+    data = JSONField()
 
 
 # JsonSchema
