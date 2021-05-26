@@ -34,8 +34,9 @@ def preprocess_images(request):
             # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
             for key in metadata:
                 if key in data:
-                    if not (key in data[key]["url"]) or not (
-                        PUBLIC_AZURE_CONTAINER in data[key]["url"]
+                    if not (
+                        key in data[key]["url"]
+                        and PUBLIC_AZURE_CONTAINER in data[key]["url"]
                     ):
                         images.append(
                             {
