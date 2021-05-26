@@ -164,7 +164,6 @@ class NotificationCreateView(CreateAPIView):
         self.perform_create(serializer, item_status, images)
         headers = self.get_success_headers(serializer.data)
 
-        # TODO: Yhteenveto
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
