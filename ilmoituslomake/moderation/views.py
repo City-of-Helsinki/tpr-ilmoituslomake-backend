@@ -403,7 +403,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                     notification.save()
             # process images
             images = preprocess_images(request)
-            images = update_preprocess_url(notification.pk, images)
+            if notification:
+                images = update_preprocess_url(notification.pk, images)
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #

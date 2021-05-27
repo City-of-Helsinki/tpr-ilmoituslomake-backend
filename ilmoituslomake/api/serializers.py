@@ -71,7 +71,7 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
-        return obj.data["extra_keywords"]
+        return obj.data.get("extra_keywords", [])
 
     tags = serializers.SerializerMethodField()
 
@@ -122,7 +122,9 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     neighborhood = serializers.SerializerMethodField()
 
     def get_neighborhood(self, obj):
-        return None
+        lang = self.context.get("lang", "fi")
+        lang_finland = "fi" if lang not in ["fi", "sv"] else lang
+        return obj.data["address"][lang_finland].get("neighborhood")
 
     phone = serializers.SerializerMethodField()
 
