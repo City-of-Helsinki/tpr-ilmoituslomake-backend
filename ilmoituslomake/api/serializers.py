@@ -71,7 +71,7 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
-        return []  # TODO:
+        return obj.data["extra_keywords"]
 
     tags = serializers.SerializerMethodField()
 

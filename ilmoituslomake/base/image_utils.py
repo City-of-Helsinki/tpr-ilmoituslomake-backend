@@ -131,6 +131,7 @@ def update_preprocess_url(notification_id, images):
         if upload["base64"] != "":
             pass
         elif upload["url"] != "":
+            # print(upload, file=sys.stderr)
             # Modify proxy urls
             # print(upload["url"], file=sys.stderr)
             if FULL_WEB_ADDRESS in upload["url"]:
