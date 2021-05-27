@@ -125,11 +125,14 @@
                         "post_office": {
                             "type": "string"
                         },
+                        "neighborhood_id": {
+                            "type": "string"
+                        },
                         "neighborhood": {
                             "type": "string"
                         }
                     },
-                    "required": ["street", "postal_code", "post_office", "neighborhood"]
+                    "required": ["street", "postal_code", "post_office", "neighborhood_id", "neighborhood"]
                 },
                 "sv": {
                     "type": "object",
@@ -152,11 +155,14 @@
                         "post_office": {
                             "type": "string"
                         },
+                        "neighborhood_id": {
+                            "type": "string"
+                        },
                         "neighborhood": {
                             "type": "string"
                         }
                     },
-                    "required": ["street", "postal_code", "post_office", "neighborhood"]
+                    "required": ["street", "postal_code", "post_office", "neighborhood_id", "neighborhood"]
                 }
             },
             "required": ["fi", "sv"]
