@@ -117,7 +117,9 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     neighborhood_id = serializers.SerializerMethodField()
 
     def get_neighborhood_id(self, obj):
-        return None
+        lang = self.context.get("lang", "fi")
+        lang_finland = "fi" if lang not in ["fi", "sv"] else lang
+        return obj.data["address"][lang_finland].get("neighborhood_id")
 
     neighborhood = serializers.SerializerMethodField()
 
