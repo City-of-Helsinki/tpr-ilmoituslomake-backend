@@ -152,7 +152,20 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
 
     def get_images(self, obj):
-        return []  # TODO:
+        lang = self.context.get("lang", "fi")
+        return list(
+            map(
+                lambda i: {
+                    "url": i["url"],
+                    "uuid": i["uuid"],
+                    "source": i["source"],
+                    "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
+                    "permission": i["permission"],
+                    "source_type": i["source_type"],
+                },
+                obj.data.get("images", []),
+            )
+        )
 
     created_time = serializers.SerializerMethodField()
 
