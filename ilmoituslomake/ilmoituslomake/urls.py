@@ -20,13 +20,15 @@ from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
 
+from api import views as api_views
+
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-# urlpatterns += [
-#    path("admin/", admin.site.urls),
-# ]
+urlpatterns += [
+    path("admin/", admin.site.urls),
+]
 
 
 # Authentication
@@ -37,6 +39,9 @@ urlpatterns += [
     path("api/user/", users_views.UserView.as_view()),
 ]
 
+urlpatterns += [
+    path("api/proxy/<str:id>/<str:image>", moderation_views.image_proxy),
+]
 
 # Moderation App
 urlpatterns += [
@@ -60,6 +65,10 @@ urlpatterns += [
         "api/moderation/todos/<int:id>/",
         moderation_views.ModerationItemRetrieveUpdateView.as_view(),
     ),
+    path(
+        "api/moderation/get/<int:id>/",
+        moderation_views.ModerationNotificationRetrieveView.as_view(),
+    ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
     path(
         "api/moderation/assign/<int:id>/",
@@ -77,6 +86,22 @@ urlpatterns += [
     path(
         "api/moderation/reject/<int:id>/",
         moderation_views.RejectModerationItemView.as_view(),
+    ),
+    path(
+        "api/moderation/approve/", moderation_views.ModerationItemUpdateView.as_view()
+    ),
+    path(
+        "api/moderation/approve/<int:id>/",
+        moderation_views.ModerationItemUpdateView.as_view(),
+    ),
+    path("api/moderation/delete/", moderation_views.ModerationItemUpdateView.as_view()),
+    path(
+        "api/moderation/delete/<int:id>/",
+        moderation_views.DeleteNotificationView.as_view(),
+    ),
+    path(
+        "api/moderation/search/",
+        moderation_views.ModeratedNotificationSearchListView.as_view(),
     ),
 ]
 
@@ -109,4 +134,15 @@ urlpatterns += [
     ),
     # ontology words
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
+    # matko words
+    path("api/matkowords/", notification_form_views.MatkoWordListView.as_view()),
+]
+
+
+# Open API
+urlpatterns += [
+    path(
+        "api/open/notification/<int:id>/",
+        api_views.ApiRetrieveView.as_view(),
+    ),
 ]

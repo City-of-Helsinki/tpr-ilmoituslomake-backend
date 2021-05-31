@@ -1,24 +1,47 @@
+import json
+import jwt
+import datetime
+
+from jsonschema import validate
+
 from rest_framework import serializers
-from base.models import Notification
+
+from base.models import NotificationSchema
+from notification_form.models import Notification, NotificationImage
 
 
-class ToimipisterekisteriNotificationAPISerializer(serializers.ModelSerializer):
-    """
-    Serializes Notification Model for Toimipisterekisteri API
-    """
+from ilmoituslomake.settings import JWT_IMAGE_SECRET, FULL_WEB_ADDRESS
 
+# TODO: Create settings variable that contains localhost/api per domain
+
+
+class NotificationImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Notification
-        fields = ("id", "published", "location", "data", "updated_at", "created_at")
+        model = NotificationImage
+        fields = ("metadata",)
+        read_only_fields = fields
 
-    # def to_representation(self, instance):
-    #     notif = super().to_representation(instance)
-
-    #     # Location as coordinates [12,34]
-    #     notif["location"] = instance.location.coordinates
-
-    #     # Merge data property to root and delete it afterwards
-    #     notif.update(notif["data"])
-    #     del notif["data"]
-
-    #     return notif
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        id = self.context.get("id", None)
+        if id != None:
+            image = ret["metadata"]["uuid"] + ".jpg"
+            token = jwt.encode(
+                {
+                    "id": str(id),
+                    "image": image,
+                    "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=180),
+                },
+                JWT_IMAGE_SECRET,
+                algorithm="HS256",
+            )
+            ret["metadata"]["url"] = (
+                FULL_WEB_ADDRESS
+                + "/api/proxy/"
+                + str(id)
+                + "/"
+                + image
+                + "?token="
+                + token.decode("utf-8")
+            )
+        return ret["metadata"]

@@ -45,7 +45,21 @@ Backend is based on Django 2.2 LTS and Python 3.7.
 * /api/moderation/assign/<int:id>/, PUT assign moderation item to current user
 * /api/moderation/unassign/<int:id>/, PUT unassign moderation
 * /api/moderation/reject/<int:id>/, DELETE reject moderation task
+* /api/moderation/approve/<int:id>/, POST approve moderation task
+* /api/moderation/search/?q=encodeURIComponent(JSON.stringify(search_object)) GET
 
+search_object, all keys are optional and leave those out you dont want to use or defaults
+```
+{
+    "search_name__contains": "",
+    "search_address__contains": "",
+    "data__ontology_ids__contains": [],
+    "search_comments__contains": "",
+    "published": True,
+    "search_neighborhood": "",
+    "lang": "fi"
+}
+```
 
 
 # Notification Form App

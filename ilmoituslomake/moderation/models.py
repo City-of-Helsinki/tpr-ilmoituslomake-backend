@@ -1,20 +1,60 @@
-# from django.contrib.gis.db import models
-from django.db import models
+from django.contrib.gis.db import models
 
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField
 
-from base.models import Notification
+from base.models import BaseNotification, BaseNotificationImage
+from notification_form.models import Notification
 
 from users.models import User
+
+from moderation.storage import PublicAzureStorage
+
+afs = PublicAzureStorage()
 
 # Create your models here.
 
 
+class ModeratedNotification(BaseNotification):
+    # is published
+    published = models.BooleanField(default=False, db_index=True)
+
+    #
+    notification_id = models.IntegerField(default=0)
+
+
+def upload_image_to(instance, filename):
+    #     return "{0}/{1}".format("1", filename)
+    return "{0}/{1}".format(instance.notification.pk, filename)
+
+
+class ModeratedNotificationImage(BaseNotificationImage):
+
+    data = models.ImageField(storage=afs, upload_to=upload_image_to)
+
+    notification = models.ForeignKey(
+        ModeratedNotification,
+        null=True,
+        related_name="images",
+        on_delete=models.DO_NOTHING,
+    )
+
+
 class ModerationItem(models.Model):
 
+    notification_target = models.ForeignKey(
+        Notification,
+        null=True,
+        related_name="moderation_items",
+        on_delete=models.CASCADE,
+    )
+    notification_target_revision = models.IntegerField(default=0)
+
     target = models.ForeignKey(
-        Notification, null=True, related_name="moderation_items", on_delete=models.CASCADE
+        ModeratedNotification,
+        null=True,
+        related_name="moderation_items",
+        on_delete=models.CASCADE,
     )
     target_revision = models.IntegerField(default=0)
 

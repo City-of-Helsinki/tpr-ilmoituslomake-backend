@@ -1,14 +1,6 @@
-import base64
-import uuid
-import io
-import requests
-from PIL import Image
-
-
 from django.shortcuts import render, get_object_or_404
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.files.base import ContentFile
+from base.image_utils import preprocess_images, process_images
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -18,33 +10,38 @@ from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import (
+    RetrieveAPIView,
+    ListAPIView,
+    CreateAPIView,
+    UpdateAPIView,
+)
 from rest_framework import filters
 
 #
 from moderation.models import ModerationItem
 from moderation.serializers import ChangeRequestSerializer
 
-from base.models import (
-    Notification,
-    NotificationSchema,
-    OntologyWord,
-    NotificationImage,
-)
+from notification_form.models import Notification, NotificationImage
+from moderation.models import ModeratedNotification
+from base.models import NotificationSchema, OntologyWord, MatkoWord
+
+# from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
-    NotificationSerializer,
     NotificationSchemaSerializer,
     OntologyWordSerializer,
+    MatkoWordSerializer,
 )
-from notification_form.serializers import ToimipisterekisteriNotificationAPISerializer
+from moderation.serializers import (
+    PublicModeratedNotificationSerializer,
+    ModerationNotificationSerializer,
+)
 
-#
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from django.db.models import Q
 
+# from image_utils import preprocess_images, process_images
 
 # TODO: Remove
-
-
 class NotificationSchemaCreateView(CreateAPIView):
     """
     Create a Notification instance
@@ -79,6 +76,7 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
+# Handle this!
 class ChangeRequestCreateView(CreateAPIView):
     """
     Create a ModerationItem of type change_request
@@ -90,16 +88,16 @@ class ChangeRequestCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        # Serialize
-        # request.data["target_revision"] = -1
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         if request.data["item_type"] != "add":
-            target_notification = get_object_or_404(Notification, pk=request.data["target"])
+            target_moderated_notification = get_object_or_404(
+                ModeratedNotification, pk=request.data["target"]
+            )
+
         # set revision
-        # request.data["target_revision"] = -1
 
         if request.data["item_type"] not in ["change", "add", "delete"]:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
@@ -130,105 +128,52 @@ class NotificationCreateView(CreateAPIView):
 
     permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = ModerationNotificationSerializer
 
     def create(self, request, *args, **kwargs):
         headers = None
-        request_images = []
+        images = []
 
-        image_uploads = []
+        moderated_notification = None
+        target_notification = None
+        item_status = "created"
+        try:
+            # TODO: In the future check permission
+            if request.data["id"]:
+                moderated_notification = ModeratedNotification.objects.get(
+                    pk=request.data["id"]
+                )
+                if moderated_notification.notification_id > 0:
+                    target_notification = Notification.objects.get(
+                        pk=moderated_notification.notification_id
+                    )
+                    item_status = "modified"
+        except Exception as e:
+            target_notification = None
 
         # Serialize
-        serializer = self.get_serializer(data=request.data)
+        serializer = ModerationNotificationSerializer(
+            instance=target_notification, data=request.data
+        )  # self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Handle images
-        data_images = request.data["data"]["images"]
-        if "images" in request.data:
-            request_images = request.data["images"]  # validate
-            # del request.data["images"]
+        # Preprocess images
+        images = preprocess_images(request)
 
-        if len(request_images) > 0:
-            # if permission = false?
-            # images: [{ index: <some number>, base64: "data:image/jpeg;base64,<blah...>"}]
-            # Handle base64 image
-            for i in range(len(request_images)):
-                image_idx = request_images[i]["uuid"]
-                for idx in range(len(data_images)):  # image in data_images:
-                    image = data_images[idx]
-                    if image["uuid"] == image_idx:
-                        data_image = data_images[idx]
-                        #  image = base64.b64decode(str('stringdata'))
-
-                        image_uploads.append(
-                            {
-                                "filename": str(image_idx) + ".jpg",
-                                "base64": request_images[i]["base64"]
-                                if ("base64" in request_images[i])
-                                else "",
-                                "url": request_images[i]["url"]
-                                if ("url" in request_images[i])
-                                else "",
-                                "metadata": data_image,
-                            }
-                        )
-                        break
-            # Create
-            self.perform_create(serializer, image_uploads)
-            headers = self.get_success_headers(serializer.data)
-        else:
-            # Create
-            self.perform_create(serializer, [])
-            headers = self.get_success_headers(serializer.data)
+        # Create
+        self.perform_create(serializer, item_status, images)
+        headers = self.get_success_headers(serializer.data)
 
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def perform_create(self, serializer, image_uploads):
-        instance = serializer.save(user=self.request.user)
-        # TODO: What if not an image
-        data = None
-        for upload in image_uploads:
-            if upload["base64"] != "":
-                data = base64.b64decode(upload["base64"].split(",")[1])
-                # print(upload["base64"][0:64])
-                del upload["base64"]
-            elif upload["url"] != "":
-                response = requests.get(upload["url"], stream=True)
-                if response.status_code == 200:
-                    response.raw.decode_content = True
-                    data = response.raw.read()
-                else:
-                    continue
-            else:
-                continue
-            # TODO: Virus check
-            # check
-            #
-            if data != None:
-                image = Image.open(io.BytesIO(data))
-                with io.BytesIO() as output:
-                    # print(output)
-                    image.save(output, format="JPEG")
-                    upload["data"] = ContentFile(output.getvalue())
-            else:
-                continue
-            #
-            notif_image = NotificationImage(
-                filename=upload["filename"],
-                data=InMemoryUploadedFile(
-                    upload["data"],
-                    None,  # field_name
-                    upload["filename"],  # file name
-                    "image/jpeg",  # content_type
-                    upload["data"].tell,  # size
-                    None,  # content_type_extra
-                ),
-                notification=instance,
-                metadata=upload["metadata"],
-            )
-            notif_image.save()
+    def perform_create(self, serializer, item_status, images):
+        instance = serializer.save(user=self.request.user, status=item_status)
+        try:
+            process_images(NotificationImage, instance, images)
+        except Exception as e:
+            pass
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -236,23 +181,23 @@ class NotificationCreateView(CreateAPIView):
 
 class NotificationRetrieveView(RetrieveAPIView):
     """
-    Returns a single Notification instance
+    Returns a single ModeratedNotification instance
     """
 
     permission_classes = [AllowAny]
     lookup_field = "id"
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
+    serializer_class = PublicModeratedNotificationSerializer
 
 
 class NotificationListView(ListAPIView):
     """
-    Returns a collection of Notification instances. Search support
+    Returns a collection of ModeratedNotification instances. Search support
     """
 
     permission_classes = [AllowAny]
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
+    serializer_class = PublicModeratedNotificationSerializer
     filter_backends = [filters.SearchFilter]
     # TODO: Create migration which generates indices for JSON data
     search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
@@ -260,38 +205,21 @@ class NotificationListView(ListAPIView):
 
 class OntologyWordListView(ListAPIView):
     """
-    Returns a collection of ontology words instances. Search support
+    Returns a collection of ontology words instances.
     """
 
     permission_classes = [AllowAny]
     queryset = OntologyWord.objects.all()
     serializer_class = OntologyWordSerializer
-    # filter_backends = [filters.SearchFilter]
-    # TODO: Add more search fields
-    # TODO: Create migration which generates indices for JSON data
-    # search_fields = ["data__ontologyword__fi"]
     pagination_class = None
 
 
-## ToimipisterekisteriAPI views
-
-
-class ToimipisterekisteriNotificationAPIRetrieveView(RetrieveAPIView):
+class MatkoWordListView(ListAPIView):
     """
-    Returns a single Notification for ToimipisterekisteriAPI
+    Returns a collection of matko words instances.
     """
 
-    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
-    lookup_field = "id"
-    queryset = Notification.objects.all()
-    serializer_class = ToimipisterekisteriNotificationAPISerializer
-
-
-class ToimipisterekisteriNotificationAPIListView(ListAPIView):
-    """
-    Returns a collection of Notification instances for ToimipisterekisteriAPI
-    """
-
-    permission_classes = [AllowAny]  # TODO: Require authentication & authorization
-    queryset = Notification.objects.all()
-    serializer_class = ToimipisterekisteriNotificationAPISerializer
+    permission_classes = [AllowAny]
+    queryset = MatkoWord.objects.all()
+    serializer_class = MatkoWordSerializer
+    pagination_class = None

@@ -51,15 +51,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # GIS
-    # "django.contrib.gis",
+    "django.contrib.gis",
     # Third-party apps
     "django_filters",
     "simple_history",
     "storages",
     # Our apps
     "base",
-    "notification_form",
     "moderation",
+    "notification_form",
+    "api",
     "social_django",
     # "huey.contrib.djhuey",
 ]
@@ -104,12 +105,12 @@ WSGI_APPLICATION = "ilmoituslomake.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": env("DB_ENV_DB"),
         "USER": env("DB_ENV_POSTGRES_USER"),
         "PASSWORD": env("DB_ENV_POSTGRES_PASSWORD"),
         "HOST": env("DB_PORT_5432_TCP_ADDR"),
-        "PORT": "5433",  # env("DB_PORT_5432_TCP_PORT"),
+        "PORT": env("DB_PORT_5432_TCP_PORT"),
     }
 }
 
@@ -208,14 +209,23 @@ HUEY = {
 
 
 # Azure storage
-AZURE_CONTAINER = env("AZURE_CONTAINER")
-AZURE_CONNECTION_STRING = env("AZURE_CONNECTION_STRING")
-# AZURE_READ_KEY = env("AZURE_READ_KEY")
+AZURE_STORAGE = env("AZURE_STORAGE")
+PRIVATE_AZURE_CONTAINER = env("PRIVATE_AZURE_CONTAINER")
+PRIVATE_AZURE_CONNECTION_STRING = env("PRIVATE_AZURE_CONNECTION_STRING")
+PRIVATE_AZURE_READ_KEY = env("PRIVATE_AZURE_READ_KEY")
+PUBLIC_AZURE_CONTAINER = env("PUBLIC_AZURE_CONTAINER")
+PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
+PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# FORCE_SCRIPT_NAME = "/TPRalusta_testi"
+FORCE_SCRIPT_NAME = ""
 
-FORCE_SCRIPT_NAME = "/TPRalusta_testi"
+FULL_WEB_ADDRESS = "http://localhost" + FORCE_SCRIPT_NAME
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10
+
+
+JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
