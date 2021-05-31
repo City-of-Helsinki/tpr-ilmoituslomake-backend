@@ -68,6 +68,11 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
     def get_ontologyword_ids(self, obj):
         return obj.data["ontology_ids"]
 
+    auxiliary_tourism_codes = serializers.SerializerMethodField()
+
+    def get_auxiliary_tourism_codes(self, obj):
+        return obj.data["matko_ids"]
+
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
@@ -178,6 +183,7 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
             "short_description",
             "description",
             "ontologyword_ids",
+            "auxiliary_tourism_codes",
             "extra_searchwords",
             "tags",
             "sources",
