@@ -1,4 +1,7 @@
 import requests
+
+import csv
+
 from itertools import islice
 
 from jsonschema import validate
@@ -80,26 +83,29 @@ class Command(BaseCommand):
             # json
             # # transformed_word =
             # validate(instance=transformed_word, schema=ontology_save_schema)
-            save_array = [
-                {
-                    "id": 1,
-                    "type_name": "ACCOMMODATION",
-                    "matkoword": {
-                        "fi": "Majoitus",
-                        "sv": "Bostad",
-                        "en": "Accommodation",
-                    },
-                },
-                {
-                    "id": 2,
-                    "type_name": "SHOPPING",
-                    "matkoword": {
-                        "fi": "Ostokset",
-                        "sv": "Handlande",
-                        "en": "Shopping",
-                    },
-                },
-            ]
+            save_array = []
+
+            with open("/app/base/management/commands/matko_ids.csv") as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=";")
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:
+                        pass
+                        # print(f'Column names are {", ".join(row)}')
+                    else:
+                        # print(f'\t{row[0]} works in the {row[1]} department, and was born in {row[2]}.')
+                        save_array.append(
+                            {
+                                "id": int(row[0]),
+                                "type_name": str(row[1]),
+                                "matkoword": {
+                                    "fi": str(row[2]),
+                                    "sv": "",
+                                    "en": "n",
+                                },
+                            }
+                        )
+                    line_count += 1
 
             # Delete
             MatkoWord.objects.all().delete()
