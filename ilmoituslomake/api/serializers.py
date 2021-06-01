@@ -4,6 +4,8 @@ from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
 
+from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
+
 
 class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
 
@@ -156,7 +158,15 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
         return list(
             map(
                 lambda i: {
-                    "url": i["url"],
+                    "url": "https://"
+                    + AZURE_STORAGE
+                    + ".blob.core.windows.net/"
+                    + PUBLIC_AZURE_CONTAINER
+                    + "/"
+                    + str(obj.id)
+                    + "/"
+                    + i["uuid"]
+                    + ".jpg",
                     "uuid": i["uuid"],
                     "source": i["source"],
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
