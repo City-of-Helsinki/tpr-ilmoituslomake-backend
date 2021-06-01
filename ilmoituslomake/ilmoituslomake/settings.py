@@ -16,7 +16,9 @@ import environ
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    FORCE_SCRIPT_NAME=(str, ""),
+    FULL_WEB_ADDRESS=(str, "http://localhost"),
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -221,9 +223,9 @@ PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 # USE_X_FORWARDED_HOST = True
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # FORCE_SCRIPT_NAME = "/TPRalusta_testi"
-FORCE_SCRIPT_NAME = ""
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
-FULL_WEB_ADDRESS = "http://localhost" + FORCE_SCRIPT_NAME
+FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10
 
