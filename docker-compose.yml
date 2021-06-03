@@ -1,24 +1,9 @@
 version: "3"
 services: 
-    tpr-ilmoituslomake-db:
-        hostname: tpr-ilmoituslomake-db
-        build:
-            context: ./local_dev
-            dockerfile: Dockerfile.database
-        restart: always
-        environment: 
-            - POSTGRES_PASSWORD=plop123
-            - PGDATA=/pgdata
-        ports:
-            - 5432:5432
-        volumes:
-            - ./pgdata:/pgdata
-        networks:
-            - default
 
     # tpr-ilmoituslomake
-    tpr-ilmoituslomake:
-        hostname: tpr-ilmoituslomake
+    tpr-ilmoituslomake-admin:
+        hostname: tpr-ilmoituslomake-admin
         build:
             context: .
             dockerfile: Dockerfile
@@ -33,34 +18,5 @@ services:
         volumes:
             - ./ilmoituslomake:/app
             - ./local_dev/run_web.sh:/app/run_web.sh
-        networks:
-            - default
-
-    # tpr-ilmoituslomake-ui
-    # tpr-ilmoituslomake-ui:
-    #    hostname: tpr-ilmoituslomake-ui
-    #    image: tpr-ilmoituslomake-ui
-    #    restart: always
-    #    depends_on:
-    #        - tpr-ilmoituslomake
-    #    ports:
-    #        - 3000:3000
-    #    networks:
-    #        - default
-
-    # tpr-reverse-proxy
-    tpr-reverse-proxy:
-        hostname: tpr-reverse-proxy
-        build:
-            context: ./nginx
-            dockerfile: Dockerfile.nginx
-        environment:
-            - HOSTIP=$HOSTIP
-        restart: always
-        depends_on:
-            - tpr-ilmoituslomake
-            - tpr-ilmoituslomake-db
-        ports:
-            - 80:80
         networks:
             - default
