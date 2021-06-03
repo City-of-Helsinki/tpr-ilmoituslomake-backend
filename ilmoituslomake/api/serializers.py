@@ -171,7 +171,6 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
                     "source": i["source"],
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
-                    "source_type": i["source_type"],
                 },
                 obj.data.get("images", []),
             )
