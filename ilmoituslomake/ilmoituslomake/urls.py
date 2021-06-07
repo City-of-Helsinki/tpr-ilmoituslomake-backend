@@ -22,13 +22,24 @@ from moderation import views as moderation_views
 
 from api import views as api_views
 
+from ilmoituslomake.settings import DEBUG
+
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-urlpatterns += [
-    path("admin/", admin.site.urls),
-]
+if DEBUG:
+    urlpatterns += [
+        path("admin/", admin.site.urls),
+        path(
+            "api/schema/get/<int:id>/",
+            notification_form_views.NotificationSchemaRetrieveView.as_view(),
+        ),
+        path(
+            "api/schema/create/",
+            notification_form_views.NotificationSchemaCreateView.as_view(),
+        ),
+    ]
 
 
 # Authentication
@@ -111,14 +122,6 @@ urlpatterns += [
     path(
         "api/change_request/",
         notification_form_views.ChangeRequestCreateView.as_view(),
-    ),
-    path(
-        "api/schema/get/<int:id>/",
-        notification_form_views.NotificationSchemaRetrieveView.as_view(),
-    ),
-    path(
-        "api/schema/create/",
-        notification_form_views.NotificationSchemaCreateView.as_view(),
     ),
     # notifications
     path(
