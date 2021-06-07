@@ -145,7 +145,11 @@ urlpatterns += [
 # Open API
 urlpatterns += [
     path(
-        "api/open/notification/<int:id>/",
-        api_views.ApiRetrieveView.as_view(),
+        "api/open/v1/target/",
+        api_views.ApiListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/target/<int:id>/",
+        api_views.ApiRetrieveViewV1.as_view(),
     ),
 ]
