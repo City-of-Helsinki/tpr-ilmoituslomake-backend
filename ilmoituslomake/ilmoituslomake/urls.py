@@ -80,6 +80,10 @@ urlpatterns += [
         "api/moderation/get/<int:id>/",
         moderation_views.ModerationNotificationRetrieveView.as_view(),
     ),
+    path(
+        "api/moderator_edit/",
+        moderation_views.ModeratorEditCreateView.as_view(),
+    ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
     path(
         "api/moderation/assign/<int:id>/",

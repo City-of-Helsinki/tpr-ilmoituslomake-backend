@@ -76,7 +76,6 @@ class NotificationSchemaRetrieveView(RetrieveAPIView):
     serializer_class = NotificationSchemaSerializer
 
 
-# Handle this!
 class ChangeRequestCreateView(CreateAPIView):
     """
     Create a ModerationItem of type change_request
@@ -91,6 +90,9 @@ class ChangeRequestCreateView(CreateAPIView):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if moderation_item.category != "change_request":
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         if request.data["item_type"] != "add":
             target_moderated_notification = get_object_or_404(

@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import (
     UpdateAPIView,
+    CreateAPIView,
     ListAPIView,
     DestroyAPIView,
     RetrieveAPIView,
@@ -44,6 +45,7 @@ from moderation.serializers import (
     ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
     ApproveModeratorSerializer,
+    ChangeRequestSerializer,
 )
 
 from base.image_utils import (
@@ -154,6 +156,53 @@ class MyModerationItemListView(ListAPIView):
         return ModerationItem.objects.all().filter(
             Q(moderator=self.request.user), ~Q(status="closed")
         )
+
+
+# Moderator Edit
+class ModeratorEditCreateView(CreateAPIView):
+    """
+    Create a ModerationTask of type moderator_edit
+    """
+
+    permission_classes = [IsAdminUser]
+    queryset = ModerationItem.objects.all()
+    serializer_class = ChangeRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        headers = None
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if moderation_item.category != "moderator_edit":
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.data["item_type"] != "add":
+            target_moderated_notification = get_object_or_404(
+                ModeratedNotification, pk=request.data["target"]
+            )
+
+        # set revision
+        if request.data["item_type"] not in ["change", "add", "delete"]:
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+        # request.data[]
+        request.data["status"] = "open"
+
+        # Revalidate
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 # Assign
@@ -316,7 +365,7 @@ class ModerationItemUpdateView(UpdateAPIView):
     Save moderation
     """
 
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemDetailSerializer

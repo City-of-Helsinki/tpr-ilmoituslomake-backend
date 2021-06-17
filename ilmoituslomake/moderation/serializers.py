@@ -6,7 +6,7 @@ from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 #
-from users.serializers import ModeratorSerializer
+from users.serializers import ModeratorSerializer, UserSerializer
 
 # from base.serializers import NotificationSerializer
 from notification_form.serializers import (
@@ -183,7 +183,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
 
 class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
 
-    # is_notifier = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = ModeratedNotification
