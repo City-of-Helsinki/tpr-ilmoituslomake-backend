@@ -438,6 +438,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
             "search_name__contains": "",
             "search_address__contains": "",
             "data__ontology_ids__contains": [],
+            "data__matko_ids__contains": [],
             "search_comments__contains": "",
             "published": True,
             "search_neighborhood": "",
