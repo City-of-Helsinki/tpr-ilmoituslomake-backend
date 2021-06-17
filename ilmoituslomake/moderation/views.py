@@ -452,7 +452,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
                 return Response(None, status=status.HTTP_400_BAD_REQUEST)
         else:
             # return Response([], status=status.HTTP_200_OK)
-            # Empty should redturn all
+            # Empty should return all
             pass
 
         # Set the name search language
