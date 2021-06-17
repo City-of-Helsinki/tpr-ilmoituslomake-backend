@@ -81,7 +81,7 @@ urlpatterns += [
         moderation_views.ModerationNotificationRetrieveView.as_view(),
     ),
     path(
-        "api/moderator_edit/",
+        "api/moderation/moderator_edit/",
         moderation_views.ModeratorEditCreateView.as_view(),
     ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
