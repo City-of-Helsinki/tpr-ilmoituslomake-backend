@@ -42,7 +42,6 @@ from moderation.models import ModerationItem
 from moderation.serializers import (
     ModerationItemSerializer,
     ModerationItemDetailSerializer,
-    ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
     ApproveModeratorSerializer,
     ChangeRequestSerializer,

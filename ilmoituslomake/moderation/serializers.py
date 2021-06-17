@@ -129,6 +129,9 @@ class ApproveModeratorSerializer(serializers.ModelSerializer):
 
 
 class ModerationNotificationSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Notification
         fields = (
