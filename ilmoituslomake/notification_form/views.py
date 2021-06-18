@@ -88,11 +88,11 @@ class ChangeRequestCreateView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         headers = None
 
-        serializer = self.get_serializer(data=request.data)
+        copy_data = request.data.copy()
+        copy_data["category"] = "change_request"
+        
+        serializer = self.get_serializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
-
-        if request.data["category"] != "change_request":
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         if request.data["item_type"] != "add":
             target_moderated_notification = get_object_or_404(
