@@ -91,7 +91,7 @@ class ChangeRequestCreateView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if moderation_item.category != "change_request":
+        if request.data["category"] != "change_request":
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         if request.data["item_type"] != "add":
