@@ -401,7 +401,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             #
             notification = None
             # TODO: Fetch based on revision?
-            if moderation_item.category != "change_request":
+            if moderation_item.category not in ["change_request", "moderator_edit"]:
                 notification = moderation_item.notification_target
                 notification.status = "approved"
             #
@@ -447,7 +447,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category != "change_request" and notification:
+                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -456,7 +456,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category != "change_request" and notification:
+            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
