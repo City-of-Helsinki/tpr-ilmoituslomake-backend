@@ -173,7 +173,7 @@ class ModeratorEditCreateView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if moderation_item.category != "moderator_edit":
+        if request.data["category"] != "moderator_edit":
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         if request.data["item_type"] != "add":
