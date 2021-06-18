@@ -102,6 +102,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "target",
+            "category",
             "item_type",
             "user_place_name",
             "user_comments",
