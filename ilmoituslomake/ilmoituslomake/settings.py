@@ -34,7 +34,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi"]
+ALLOWED_HOSTS = ["137.163.56.7", "localhost", "tpr-ilmoituslomake", "asiointi.hel.fi"]
 
 
 # Application definition
@@ -153,7 +153,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "/TPRalusta_testi/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Authentication
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
@@ -220,8 +221,8 @@ PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
 PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
-# USE_X_FORWARDED_HOST = True
-# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # FORCE_SCRIPT_NAME = "/TPRalusta_testi"
 FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
@@ -231,3 +232,5 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10
 
 
 JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
+
+# STATIC_ROOT = "/"
