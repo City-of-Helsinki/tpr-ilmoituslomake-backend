@@ -7,7 +7,7 @@ from moderation.models import ModeratedNotification
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
 
-class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
+class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
 
@@ -171,7 +171,6 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
                     "source": i["source"],
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
-                    "source_type": i["source_type"],
                 },
                 obj.data.get("images", []),
             )

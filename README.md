@@ -37,7 +37,7 @@ Backend is based on Django 2.2 LTS and Python 3.7.
 * /api/user/, GET current user info
 
 # Moderation App
-* /api/moderation/todos/find/?category=moderation_task&search=lol, GET category=moderation_task or change_request
+* /api/moderation/todos/find/?category=moderation_task&search=lol, GET category=moderation_task or change_request or moderator_edit
 * /api/moderation/todos/, GET show all moderation items (ones with moderator are shown last)
 * /api/moderation/todos/<int:id>/, GET or PUT data
 * /api/moderation/todos/my/, GET show all current user's moderation items

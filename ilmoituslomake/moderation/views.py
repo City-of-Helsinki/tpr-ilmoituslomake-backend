@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import (
     UpdateAPIView,
+    CreateAPIView,
     ListAPIView,
     DestroyAPIView,
     RetrieveAPIView,
@@ -41,9 +42,9 @@ from moderation.models import ModerationItem
 from moderation.serializers import (
     ModerationItemSerializer,
     ModerationItemDetailSerializer,
-    ModerationNotificationSerializer,
     PrivateModeratedNotificationSerializer,
     ApproveModeratorSerializer,
+    ChangeRequestSerializer,
 )
 
 from base.image_utils import (
@@ -154,6 +155,53 @@ class MyModerationItemListView(ListAPIView):
         return ModerationItem.objects.all().filter(
             Q(moderator=self.request.user), ~Q(status="closed")
         )
+
+
+# Moderator Edit
+class ModeratorEditCreateView(CreateAPIView):
+    """
+    Create a ModerationTask of type moderator_edit
+    """
+
+    permission_classes = [IsAdminUser]
+    queryset = ModerationItem.objects.all()
+    serializer_class = ChangeRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        headers = None
+        
+        copy_data = request.data.copy()
+        copy_data["category"] = "moderator_edit"
+
+        serializer = self.get_serializer(data=copy_data)
+        serializer.is_valid(raise_exception=True)
+
+        if copy_data["item_type"] != "add":
+            target_moderated_notification = get_object_or_404(
+                ModeratedNotification, pk=copy_data["target"]
+            )
+
+        # set revision
+        if copy_data["item_type"] not in ["change", "add", "delete"]:
+            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+        # request.data[]
+        copy_data["status"] = "open"
+
+        # Revalidate
+        serializer = self.get_serializer(data=copy_data)
+        serializer.is_valid(raise_exception=True)
+
+        # Create
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 # Assign
@@ -316,7 +364,7 @@ class ModerationItemUpdateView(UpdateAPIView):
     Save moderation
     """
 
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     lookup_field = "id"
     queryset = ModerationItem.objects.all()
     serializer_class = ModerationItemDetailSerializer
@@ -353,7 +401,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             #
             notification = None
             # TODO: Fetch based on revision?
-            if moderation_item.category != "change_request":
+            if moderation_item.category not in ["change_request", "moderator_edit"]:
                 notification = moderation_item.notification_target
                 notification.status = "approved"
             #
@@ -399,7 +447,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category != "change_request" and notification:
+                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -408,7 +456,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category != "change_request" and notification:
+            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
@@ -438,6 +486,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
             "search_name__contains": "",
             "search_address__contains": "",
             "data__ontology_ids__contains": [],
+            "data__matko_ids__contains": [],
             "search_comments__contains": "",
             "published": True,
             "search_neighborhood": "",
@@ -451,7 +500,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
                 return Response(None, status=status.HTTP_400_BAD_REQUEST)
         else:
             # return Response([], status=status.HTTP_200_OK)
-            # Empty should redturn all
+            # Empty should return all
             pass
 
         # Set the name search language

@@ -6,7 +6,7 @@ from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 #
-from users.serializers import ModeratorSerializer
+from users.serializers import ModeratorSerializer, UserSerializer
 
 # from base.serializers import NotificationSerializer
 from notification_form.serializers import (
@@ -102,6 +102,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "target",
+            "category",
             "item_type",
             "user_place_name",
             "user_comments",
@@ -129,6 +130,9 @@ class ApproveModeratorSerializer(serializers.ModelSerializer):
 
 
 class ModerationNotificationSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Notification
         fields = (
@@ -183,7 +187,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
 
 class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
 
-    # is_notifier = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = ModeratedNotification

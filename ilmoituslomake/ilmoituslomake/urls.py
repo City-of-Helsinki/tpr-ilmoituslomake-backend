@@ -22,13 +22,24 @@ from moderation import views as moderation_views
 
 from api import views as api_views
 
+from ilmoituslomake.settings import DEBUG
+
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-urlpatterns += [
-    path("admin/", admin.site.urls),
-]
+if DEBUG:
+    urlpatterns += [
+        path("admin/", admin.site.urls),
+        path(
+            "api/schema/get/<int:id>/",
+            notification_form_views.NotificationSchemaRetrieveView.as_view(),
+        ),
+        path(
+            "api/schema/create/",
+            notification_form_views.NotificationSchemaCreateView.as_view(),
+        ),
+    ]
 
 
 # Authentication
@@ -68,6 +79,10 @@ urlpatterns += [
     path(
         "api/moderation/get/<int:id>/",
         moderation_views.ModerationNotificationRetrieveView.as_view(),
+    ),
+    path(
+        "api/moderation/moderator_edit/",
+        moderation_views.ModeratorEditCreateView.as_view(),
     ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
     path(
@@ -112,14 +127,6 @@ urlpatterns += [
         "api/change_request/",
         notification_form_views.ChangeRequestCreateView.as_view(),
     ),
-    path(
-        "api/schema/get/<int:id>/",
-        notification_form_views.NotificationSchemaRetrieveView.as_view(),
-    ),
-    path(
-        "api/schema/create/",
-        notification_form_views.NotificationSchemaCreateView.as_view(),
-    ),
     # notifications
     path(
         "api/notification/create/",
@@ -142,7 +149,11 @@ urlpatterns += [
 # Open API
 urlpatterns += [
     path(
-        "api/open/notification/<int:id>/",
-        api_views.ApiRetrieveView.as_view(),
+        "api/open/v1/target/",
+        api_views.ApiListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/target/<int:id>/",
+        api_views.ApiRetrieveViewV1.as_view(),
     ),
 ]

@@ -60,6 +60,7 @@ class ModerationItem(models.Model):
 
     CATEGORY_CHOICES = [
         ("change_request", "change_request"),
+        ("moderator_edit", "moderator_edit"),
         ("moderation_task", "moderation_task"),
     ]
     category = models.CharField(
