@@ -6,6 +6,7 @@ from moderation.models import ModeratedNotification
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
+
 class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
