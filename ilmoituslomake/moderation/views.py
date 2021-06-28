@@ -169,27 +169,27 @@ class ModeratorEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
+        
+        copy_data = request.data.copy()
+        copy_data["category"] = "moderator_edit"
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
 
-        if moderation_item.category != "moderator_edit":
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.data["item_type"] != "add":
+        if copy_data["item_type"] != "add":
             target_moderated_notification = get_object_or_404(
-                ModeratedNotification, pk=request.data["target"]
+                ModeratedNotification, pk=copy_data["target"]
             )
 
         # set revision
-        if request.data["item_type"] not in ["change", "add", "delete"]:
+        if copy_data["item_type"] not in ["change", "add", "delete"]:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
         # request.data[]
-        request.data["status"] = "open"
+        copy_data["status"] = "open"
 
         # Revalidate
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
 
         # Create
@@ -401,7 +401,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             #
             notification = None
             # TODO: Fetch based on revision?
-            if moderation_item.category != "change_request":
+            if moderation_item.category not in ["change_request", "moderator_edit"]:
                 notification = moderation_item.notification_target
                 notification.status = "approved"
             #
@@ -447,7 +447,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.data = moderation_item.data
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category != "change_request" and notification:
+                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -456,7 +456,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category != "change_request" and notification:
+            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
