@@ -6,6 +6,7 @@ from moderation.models import ModeratedNotification
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
+from . models import *
 
 class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
@@ -229,3 +230,9 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ret
+
+
+class TranslationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TranslationTodo
+        fields = "__all__"

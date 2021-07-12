@@ -109,3 +109,6 @@ media/
 
 # pgdata
 pgdata/
+
+
+*migrations

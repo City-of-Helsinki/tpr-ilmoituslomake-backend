@@ -19,6 +19,8 @@ from rest_framework.generics import (
 
 from moderation.models import ModeratedNotification
 from api.serializers import ApiModeratedNotificationSerializerV1
+from api.serializers import TranslationSerializer
+from api.models import TranslationTodo
 
 from django.db.models import Q
 
@@ -53,3 +55,15 @@ class ApiListViewV1(ListAPIView):
     filter_backends = [filters.SearchFilter]
     # TODO: Create migration which generates indices for JSON data
     search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
+
+
+class TranslationTodoView(ListAPIView):
+    """
+    Returns translations
+    """
+
+    permission_classes = [AllowAny]
+    queryset = TranslationTodo.objects.all()
+    serializer_class = TranslationSerializer
+    lookup_field = "id"
+    pagination_class = None

@@ -157,3 +157,11 @@ urlpatterns += [
         api_views.ApiRetrieveViewV1.as_view(),
     ),
 ]
+
+# Translations
+urlpatterns += [
+    path(
+        "api/translation/todos/<int:id>/",
+        api_views.TranslationTodoView.as_view(),
+    )
+]
