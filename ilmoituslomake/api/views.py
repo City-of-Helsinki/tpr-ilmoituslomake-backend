@@ -65,5 +65,13 @@ class TranslationTodoView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = TranslationTodo.objects.all()
     serializer_class = TranslationSerializer
-    lookup_field = "id"
     pagination_class = None
+    lookup_field = "id"
+
+    def get(self, request, id=None, *args, **kwargs):
+        lang = request.GET.get("language", "fi")
+        todo = get_object_or_404(TranslationTodo, pk=id)
+        serializer = TranslationSerializer(
+            todo, context={"lang": lang}
+        )
+        return Response(serializer.data["data"], status=status.HTTP_200_OK)
