@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.utils import translation
 
 from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
+from translation import views as translation_views
 
 from api import views as api_views
 
@@ -156,4 +158,11 @@ urlpatterns += [
         "api/open/v1/target/<int:id>/",
         api_views.ApiRetrieveViewV1.as_view(),
     ),
+]
+
+
+# Translation
+urlpatterns += [
+    path("api/moderation/translation/task/<int:id>/", 
+         translation_views.TranslationTaskListView.as_view())
 ]
