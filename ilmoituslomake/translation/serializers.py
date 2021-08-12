@@ -13,8 +13,10 @@ class TranslationTaskSerializer(serializers.ModelSerializer):
         model = TranslationTask
         fields = (
             "id",
-            "requestId"
+            "request_id"
             "target",
+            "language_from",
+            "language_to",
             "category",
             "item_type",
             "status",
@@ -31,9 +33,10 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         model = TranslationTask
         fields = (
             "id",
-            "requestId",
+            "request_id",
             "target",
-            "language",
+            "language_from",
+            "language_to",
             "category",
             "item_type",
             "translator",

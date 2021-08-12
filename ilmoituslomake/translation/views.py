@@ -47,9 +47,11 @@ class TranslationEditCreateView(CreateAPIView):
             copy_data = {}
             copy_data["id"] = request_data["id"]
             copy_data["category"] = "translation_edit"
-            copy_data["requestId"] = 1
+            # TODO: Logic for request_id
+            copy_data["request_id"] = 1
             copy_data["target"] = item
-            copy_data["language"] = request_data["language"]
+            copy_data["language_from"] = request_data["language"]["from"]
+            copy_data["language_to"] = request_data["language"]["to"]
             copy_data["translator"] = request_data["translator"]
             
             serializer = self.get_serializer(data=copy_data)

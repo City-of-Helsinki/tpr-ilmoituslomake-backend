@@ -8,7 +8,7 @@ from users.models import User
 
 class TranslationTask(models.Model):
 
-    requestId = models.IntegerField()
+    request_id = models.IntegerField()
     
     target = models.ForeignKey(
         ModeratedNotification,
@@ -17,7 +17,8 @@ class TranslationTask(models.Model):
         on_delete=models.CASCADE,
     )
 
-    language = JSONField(default=dict)
+    language_from = models.TextField()
+    language_to = models.TextField()
 
     CATEGORY_CHOICES = [
         ("change_request", "change_request"),
@@ -28,7 +29,6 @@ class TranslationTask(models.Model):
     category = models.CharField(
         max_length=16, choices=CATEGORY_CHOICES, default="change_request", db_index=True
     )
-
 
     CHANGE_TYPE_CHOICES = [
         ("change", "change"),
@@ -55,7 +55,7 @@ class TranslationTask(models.Model):
 
     data = JSONField(default=dict)
 
-    message = models.CharField(max_length=100)
+    message = models.TextField()
 
     translator = JSONField(default=dict)
 
