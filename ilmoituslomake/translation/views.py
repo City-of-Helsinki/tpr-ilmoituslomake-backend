@@ -38,34 +38,36 @@ class TranslationEditCreateView(CreateAPIView):
     serializer_class = ChangeRequestSerializer
 
     def create(self, request, *args, **kwargs):
-        # targets: selectedPlaces.map((place) => place.id),
-        # language,
-        # message,
-        # translator,
-        headers = None
-        
-        copy_data = request.data.copy()
-        copy_data["category"] = "translation_edit"
-        copy_data["requestId"] = 1
-        serializer = self.get_serializer(data=copy_data)
-        serializer.is_valid(raise_exception=True)
-        
-        
-    
-        # request.data[]
-        copy_data["status"] = "open"
-        print(copy_data)
-        # Revalidate
-        serializer = self.get_serializer(data=copy_data)
-        serializer.is_valid(raise_exception=True)
 
-        # Create
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        headers = None        
+        # Creates a new translation task entry 
+        # for every target in the request
+        request_data = request.data.copy()
+        for item in request_data["targets"]:
+            copy_data = {}
+            copy_data["id"] = request_data["id"]
+            copy_data["category"] = "translation_edit"
+            copy_data["requestId"] = 1
+            copy_data["target"] = item
+            copy_data["language"] = request_data["language"]
+            copy_data["translator"] = request_data["translator"]
+            
+            serializer = self.get_serializer(data=copy_data)
+            serializer.is_valid(raise_exception=True)
+            
+            copy_data["status"] = "open"
 
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+            # Revalidate
+            serializer = self.get_serializer(data=copy_data)
+            serializer.is_valid(raise_exception=True)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+            # Create
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+
+    # def post(self, request, *args, **kwargs):
+    #     return self.create(request, *args, **kwargs)

@@ -18,7 +18,7 @@ class TranslationTask(models.Model):
     )
 
     language = JSONField(default=dict)
-    
+
     CATEGORY_CHOICES = [
         ("change_request", "change_request"),
         ("translation_edit", "translation_edit"),
