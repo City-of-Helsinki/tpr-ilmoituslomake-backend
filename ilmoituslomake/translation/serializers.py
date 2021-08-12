@@ -24,3 +24,17 @@ class TranslationTaskSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = fields
+
+
+class ChangeRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TranslationTask
+        fields = (
+            "id",
+            "requestId",
+            "target",
+            "language",
+            "category",
+            "item_type",
+            "translator",
+        )

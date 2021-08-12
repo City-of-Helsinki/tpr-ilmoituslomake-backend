@@ -1,6 +1,8 @@
+from typing import Dict
 from django.db import models
 from moderation.models import ModeratedNotification
 from simple_history.models import HistoricalRecords
+from django.contrib.postgres.fields import JSONField
 
 from users.models import User
 
@@ -15,6 +17,8 @@ class TranslationTask(models.Model):
         on_delete=models.CASCADE,
     )
 
+    language = JSONField(default=dict)
+    
     CATEGORY_CHOICES = [
         ("change_request", "change_request"),
         ("translation_edit", "translation_edit"),
@@ -49,11 +53,11 @@ class TranslationTask(models.Model):
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
     )
 
-    # data = models.JSONField()
+    data = JSONField(default=dict)
 
-    translator = models.ForeignKey(
-        User, null=True, related_name="translation_translator", on_delete=models.DO_NOTHING
-    )
+    message = models.CharField(max_length=100)
+
+    translator = JSONField(default=dict)
 
     moderator = models.ForeignKey(
         User, null=True, related_name="translation_moderator", on_delete=models.DO_NOTHING
