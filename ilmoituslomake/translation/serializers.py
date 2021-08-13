@@ -7,13 +7,12 @@ class TranslationTaskSerializer(serializers.ModelSerializer):
 
     target = ModeratedNotificationTargetSerializer()
     moderator = ModeratorSerializer()
-    translator = UserSerializer()
 
     class Meta:
         model = TranslationTask
         fields = (
             "id",
-            "request_id"
+            "request_id",
             "target",
             "language_from",
             "language_to",
@@ -21,6 +20,7 @@ class TranslationTaskSerializer(serializers.ModelSerializer):
             "item_type",
             "status",
             "moderator",
+            "message",
             "translator",
             "created_at",
             "updated_at",
@@ -40,4 +40,5 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
             "category",
             "item_type",
             "translator",
+            "message",
         )

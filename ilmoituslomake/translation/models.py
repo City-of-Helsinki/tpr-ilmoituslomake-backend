@@ -16,6 +16,7 @@ class TranslationTask(models.Model):
         related_name="translation_items",
         on_delete=models.CASCADE,
     )
+    target_revision = models.IntegerField(default=0)
 
     language_from = models.TextField()
     language_to = models.TextField()

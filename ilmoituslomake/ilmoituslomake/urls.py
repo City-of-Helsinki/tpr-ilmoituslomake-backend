@@ -163,8 +163,10 @@ urlpatterns += [
 
 # Translation
 urlpatterns += [
-    path("api/moderation/translation/task/<int:id>/", 
+    path("api/moderation/translation/task/", 
          translation_views.TranslationTaskListView.as_view()),
     path("api/moderation_translation/save_request/",
-         translation_views.TranslationEditCreateView.as_view())
+         translation_views.TranslationEditCreateView.as_view()),
+    path("api/moderation/translation/request/<int:request_id>/",
+         translation_views.TranslationRequestRetrieveView.as_view())
 ]
