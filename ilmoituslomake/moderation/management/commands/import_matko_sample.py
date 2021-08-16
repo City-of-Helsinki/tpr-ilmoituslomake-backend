@@ -91,7 +91,7 @@ class Command(BaseCommand):
                                 "phone": "",
                             },
                         }
-                        new = ModeratedNotification(id=id, data=data)
+                        new = ModeratedNotification(id=id, data=data, published=True)
                         new.save()
                     line_count += 1
 
