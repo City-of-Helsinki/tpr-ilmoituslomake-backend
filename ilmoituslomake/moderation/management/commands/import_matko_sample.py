@@ -8,6 +8,7 @@ from jsonschema import validate
 
 from django.core.management.base import BaseCommand, CommandError
 from moderation.models import ModeratedNotification
+from notification_form.models import Notification
 
 
 class Command(BaseCommand):
@@ -91,8 +92,10 @@ class Command(BaseCommand):
                                 "phone": "",
                             },
                         }
-                        new = ModeratedNotification(id=id, data=data, published=True)
-                        new.save()
+                        new_notification = Notification(data=data, moderated_notification_id=id, status="approved")
+                        new_notification.save()
+                        new_moderated_notification = ModeratedNotification(id=id, notification_id=new_notification.pk, data=data, published=True)
+                        new_moderated_notification.save()
                     line_count += 1
 
             # Create instances and load data
