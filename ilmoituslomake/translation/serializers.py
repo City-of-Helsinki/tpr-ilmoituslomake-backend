@@ -41,4 +41,5 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
             "item_type",
             "translator",
             "message",
+            "moderator"
         )

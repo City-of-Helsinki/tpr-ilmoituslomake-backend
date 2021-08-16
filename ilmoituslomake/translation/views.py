@@ -43,6 +43,10 @@ class TranslationEditCreateView(CreateAPIView):
     serializer_class = ChangeRequestSerializer
 
     def create(self, request, *args, **kwargs):
+        
+        # new_request_id = 0
+        # if len(TranslationTask.objects.all()) > 0:
+        #     new_request_id = TranslationTask.objects.all().order_by("-request_id")[0] + 1
 
         headers = None        
         # Creates a new translation task entry 
@@ -50,28 +54,26 @@ class TranslationEditCreateView(CreateAPIView):
         request_data = request.data.copy()
         for item in request_data["targets"]:
             copy_data = {}
-            copy_data["id"] = request_data["id"]
-            copy_data["category"] = "translation_edit"
-            # TODO: Logic for request_id
-            copy_data["request_id"] = 1
+            copy_data["category"] = "translation_task"
+            copy_data["request_id"] = request_data["id"]
             copy_data["target"] = item
             copy_data["language_from"] = request_data["language"]["from"]
             copy_data["language_to"] = request_data["language"]["to"]
             copy_data["translator"] = request_data["translator"]
-            
+            copy_data["message"] = request_data["message"]
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
             
             copy_data["status"] = "open"
-
             # Revalidate
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
 
             # Create
-            self.perform_create(serializer)
+            translation_task = serializer.save()
+            translation_task.moderator = request.user
+            translation_task.save()
             headers = self.get_success_headers(serializer.data)
-
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED, headers=headers
             )
@@ -125,7 +127,7 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
 
         first_task = data[0]
         base = {
-            "id": first_task["id"],
+            "id": first_task["request_id"],
             "request": first_task["request_id"],
             "language": {
                 "from": first_task["language_from"],
