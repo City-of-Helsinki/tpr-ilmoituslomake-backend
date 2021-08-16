@@ -43,7 +43,8 @@ class TranslationEditCreateView(CreateAPIView):
     serializer_class = ChangeRequestSerializer
 
     def create(self, request, *args, **kwargs):
-        
+
+        request_id = 0
         new_request_id = 0
         if len(TranslationTask.objects.all()) > 0:
             new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
@@ -78,9 +79,11 @@ class TranslationEditCreateView(CreateAPIView):
             translation_task.moderator = request.user
             translation_task.save()
             headers = self.get_success_headers(serializer.data)
-            response_data = serializer.data
+
+            request_id = copy_data["request_id"]
+
         return Response(
-            response_data, status=status.HTTP_201_CREATED, headers=headers
+            {"id": request_id}, status=status.HTTP_201_CREATED, headers=headers
         )
 
     # def post(self, request, *args, **kwargs):
@@ -154,7 +157,7 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
             single_task = {
                 "id": item["id"],
                 "target": {
-                    "id": item["id"],
+                    "id": item["target"]["id"],
                     "name": item["target"]["name"]
                 }
             }
