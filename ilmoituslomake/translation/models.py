@@ -22,8 +22,6 @@ class TranslationTask(models.Model):
     language_to = models.TextField()
 
     CATEGORY_CHOICES = [
-        ("change_request", "change_request"),
-        ("translation_edit", "translation_edit"),
         ("translation_task", "translation_task"),
     ]
 

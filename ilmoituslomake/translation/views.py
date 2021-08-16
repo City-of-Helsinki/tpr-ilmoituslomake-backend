@@ -44,18 +44,22 @@ class TranslationEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         
-        # new_request_id = 0
-        # if len(TranslationTask.objects.all()) > 0:
-        #     new_request_id = TranslationTask.objects.all().order_by("-request_id")[0] + 1
+        new_request_id = 0
+        if len(TranslationTask.objects.all()) > 0:
+            new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
 
-        headers = None        
+        headers = None      
+        response_data = None  
         # Creates a new translation task entry 
         # for every target in the request
         request_data = request.data.copy()
         for item in request_data["targets"]:
             copy_data = {}
             copy_data["category"] = "translation_task"
-            copy_data["request_id"] = request_data["id"]
+            if "id" in request_data.keys():
+                copy_data["request_id"] = request_data["id"]
+            else: 
+                copy_data["request_id"] = new_request_id
             copy_data["target"] = item
             copy_data["language_from"] = request_data["language"]["from"]
             copy_data["language_to"] = request_data["language"]["to"]
@@ -74,9 +78,10 @@ class TranslationEditCreateView(CreateAPIView):
             translation_task.moderator = request.user
             translation_task.save()
             headers = self.get_success_headers(serializer.data)
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED, headers=headers
-            )
+            response_data = serializer.data
+        return Response(
+            response_data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     # def post(self, request, *args, **kwargs):
     #     return self.create(request, *args, **kwargs)
