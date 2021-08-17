@@ -59,6 +59,8 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
 
 
 class TranslationRequestSerializer(serializers.ModelSerializer):
+    moderator = ModeratorSerializer()
+
     class Meta:
         model = TranslationTask
         fields = (

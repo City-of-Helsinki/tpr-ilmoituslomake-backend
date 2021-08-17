@@ -51,7 +51,6 @@ class TranslationEditCreateView(CreateAPIView):
             new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
 
         headers = None      
-        response_data = None  
         # Creates a new translation task entry 
         # for every target in the request
         request_data = request.data.copy()
