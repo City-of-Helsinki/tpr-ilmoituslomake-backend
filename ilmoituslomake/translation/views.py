@@ -1,6 +1,6 @@
 from copy import error
 import json
-from translation.serializers import TranslationTaskSerializer, ChangeRequestSerializer
+from translation.serializers import TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
 from translation.models import TranslationTask
 from django.shortcuts import get_object_or_404, render
 from rest_framework.generics import (
@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import status
 from moderation.models import ModeratedNotification
 from django.http import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
 class TranslationTaskListView(ListAPIView):
@@ -135,12 +136,9 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
 
         first_task = data[0]
         base = {
-            "id": first_task["request_id"],
-            "request": first_task["request_id"],
-            "language": {
-                "from": first_task["language_from"],
-                "to": first_task["language_to"],
-            },
+            "id": first_task["requestId"],
+            "request": first_task["created_at"],
+            "language": first_task["language"],
             "message": first_task["message"],
             "tasks": [],
             "category": first_task["category"],
@@ -165,3 +163,41 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
 
         
         return Response(base, status=status.HTTP_200_OK)
+
+
+class TranslationTaskSearchListView(ListAPIView):
+    """
+    Search all closed moderation items
+
+    """
+
+    permission_classes = [IsAdminUser]
+    queryset = TranslationTask.objects.all()
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    search_fields = (
+        "target__data__name__fi",
+        "target__data__name__sv",
+        "target__data__name__en",
+        "target__id",
+    )
+    filter_fields = ("category",)
+    serializer_class = TranslationTaskSerializer
+
+
+class TranslationRequestSearchListView(ListAPIView):
+    """
+    Search all closed moderation items
+
+    """
+
+    permission_classes = [IsAdminUser]
+    queryset = TranslationTask.objects.all() #values_list('request_id', flat=True).distinct()
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    search_fields = (
+        "target__data__name__fi",
+        "target__data__name__sv",
+        "target__data__name__en",
+        "target__id",
+    )
+    filter_fields = ("category",)
+    serializer_class = TranslationRequestSerializer
