@@ -1,6 +1,6 @@
 from copy import error
 import json
-from translation.serializers import TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
+from translation.serializers import TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
 from translation.models import TranslationTask
 from django.shortcuts import get_object_or_404, render
 from rest_framework.generics import (
@@ -108,17 +108,22 @@ class TranslationTaskRetrieveByRequestIdView(RetrieveAPIView):
 class TranslationTaskRetrieveView(RetrieveAPIView):
     lookup_field = "id"
     queryset = TranslationTask.objects.all()
-    serializer_class = TranslationTaskSerializer
+    serializer_class = TranslationTaskWithDataSerializer
 
     def get(self, request, id=None, *args, **kwargs):  
         '''
         Returns all translation task objects with some id
         '''      
         translation_task = get_object_or_404(TranslationTask, id=id)
-        serializer = TranslationTaskSerializer(
+        serializer = TranslationTaskWithDataSerializer(
             translation_task, context={"id": id}
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        ret = serializer.data
+        target = serializer.data["target"]["data"]
+        
+        # TODO: Figure out how data works.
+        ret["data"] = {}
+        return Response(ret, status=status.HTTP_200_OK)
 
 
 class TranslationRequestRetrieveView(RetrieveAPIView):
@@ -190,7 +195,20 @@ class TranslationRequestSearchListView(ListAPIView):
     """
 
     permission_classes = [IsAdminUser]
-    queryset = TranslationTask.objects.all() #values_list('request_id', flat=True).distinct()
+
+    # Creates a queryset of TranslationTasks with unique request_ids i.e. 
+    # always the first TranslationTask of the request.
+    # values_list = TranslationTask.objects.values_list('request_id', 'id').distinct()
+    # ids_list = []
+    # requirement_id_list = [] 
+    # for value in values_list:
+    #     if value[0] not in requirement_id_list:
+    #         ids_list.append(value[1])
+    #         requirement_id_list.append(value[0])
+
+    # queryset = TranslationTask.objects.filter(pk__in=ids_list)
+    queryset = TranslationTask.objects.all()
+
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",

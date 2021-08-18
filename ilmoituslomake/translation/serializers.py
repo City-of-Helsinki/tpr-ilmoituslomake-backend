@@ -1,11 +1,49 @@
 from rest_framework import serializers
-from moderation.serializers import ModeratedNotificationTargetSerializer
+from moderation.serializers import PrivateModeratedNotificationSerializer, ModeratedNotificationTargetSerializer
 from users.serializers import ModeratorSerializer, UserSerializer
 from translation.models import TranslationTask
 
 class TranslationTaskSerializer(serializers.ModelSerializer):
 
     target = ModeratedNotificationTargetSerializer()
+    moderator = ModeratorSerializer()
+
+    class Meta:
+        model = TranslationTask
+        fields = (
+            "id",
+            "request_id",
+            "target",
+            "language_from",
+            "language_to",
+            "category",
+            "item_type",
+            "status",
+            "moderator",
+            "message",
+            "translator",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret["requestId"] = ret["request_id"]
+        ret["language"] = {}
+        ret["language"]["from"] = ret["language_from"]
+        ret["language"]["to"] = ret["language_to"]
+        ret["request"] = ret["created_at"]
+        del ret["request_id"]
+        del ret["language_to"]
+        del ret["language_from"]
+
+        return ret
+
+
+class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
+
+    target = PrivateModeratedNotificationSerializer()
     moderator = ModeratorSerializer()
 
     class Meta:
