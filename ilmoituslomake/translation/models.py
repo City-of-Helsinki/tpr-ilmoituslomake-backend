@@ -66,3 +66,20 @@ class TranslationTask(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+
+class TranslationData(models.Model):
+    
+    task_id = models.ForeignKey(
+        TranslationTask,
+        null=True,
+        related_name="translation_items",
+        on_delete=models.CASCADE,
+    )
+
+    language = models.TextField()
+    name = models.TextField()
+    description_long = models.TextField()
+    description_short = models.TextField()
+    images = JSONField(default=dict)
+    website = models.TextField()

@@ -45,8 +45,8 @@ class TranslationEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
 
-        request_id = 0
-        new_request_id = 0
+        request_id = 1
+        new_request_id = 1
         if len(TranslationTask.objects.all()) > 0:
             new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
 
@@ -122,7 +122,7 @@ class TranslationTaskRetrieveView(RetrieveAPIView):
         target = serializer.data["target"]["data"]
         
         # TODO: Figure out how data works.
-        ret["data"] = {}
+
         return Response(ret, status=status.HTTP_200_OK)
 
 
