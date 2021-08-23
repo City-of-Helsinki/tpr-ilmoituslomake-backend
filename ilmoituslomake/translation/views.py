@@ -252,15 +252,15 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
         new_data["website"] = translation_task_data["website"]["lang"]
 
-        old_translation_data = get_object_or_404(TranslationData, task_id = id)
-        if old_translation_data:
-            old_translation_data.images = translation_task_data["images"]
-            old_translation_data.name = translation_task_data["name"]["lang"]
-            old_translation_data.language = translation_task_data["language"]
-            old_translation_data.description_short = translation_task_data["description"]["short"]["lang"]
-            old_translation_data.description_long = translation_task_data["description"]["long"]["lang"]
-            old_translation_data.website = translation_task_data["website"]["lang"]
-            old_translation_data.save()
+        old_translation_data = TranslationData.objects.filter(task_id = id)
+        if len(old_translation_data) > 0:
+            old_translation_data[0].images = translation_task_data["images"]
+            old_translation_data[0].name = translation_task_data["name"]["lang"]
+            old_translation_data[0].language = translation_task_data["language"]
+            old_translation_data[0].description_short = translation_task_data["description"]["short"]["lang"]
+            old_translation_data[0].description_long = translation_task_data["description"]["long"]["lang"]
+            old_translation_data[0].website = translation_task_data["website"]["lang"]
+            old_translation_data[0].save()
         else:
             translation_data = TranslationData(**new_data)
             translation_data.save()
