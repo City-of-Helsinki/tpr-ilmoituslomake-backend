@@ -1,12 +1,13 @@
 from copy import error
 import json
-from translation.serializers import TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
-from translation.models import TranslationTask
+from translation.serializers import TranslationDataSerializer, TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
+from translation.models import TranslationData, TranslationTask
 from django.shortcuts import get_object_or_404, render
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
-    RetrieveAPIView
+    RetrieveAPIView,
+    UpdateAPIView,
 )
 from rest_framework import filters, serializers
 from django.shortcuts import render, get_list_or_404
@@ -34,7 +35,7 @@ class TranslationTaskListView(ListAPIView):
     serializer_class = TranslationTaskSerializer
 
 
-class TranslationEditCreateView(CreateAPIView):
+class TranslationRequestEditCreateView(CreateAPIView):
     """
     Create a ModerationTask of type moderator_edit
     """
@@ -50,8 +51,8 @@ class TranslationEditCreateView(CreateAPIView):
         if len(TranslationTask.objects.all()) > 0:
             new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
 
-        headers = None      
-        # Creates a new translation task entry 
+        headers = None
+        # Creates a new translation task entry
         # for every target in the request
         request_data = request.data.copy()
         for item in request_data["targets"]:
@@ -59,7 +60,7 @@ class TranslationEditCreateView(CreateAPIView):
             copy_data["category"] = "translation_task"
             if "id" in request_data.keys():
                 copy_data["request_id"] = request_data["id"]
-            else: 
+            else:
                 copy_data["request_id"] = new_request_id
             copy_data["target"] = item
             copy_data["language_from"] = request_data["language"]["from"]
@@ -68,7 +69,7 @@ class TranslationEditCreateView(CreateAPIView):
             copy_data["message"] = request_data["message"]
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
-            
+
             copy_data["status"] = "open"
             # Revalidate
             serializer = self.get_serializer(data=copy_data)
@@ -95,10 +96,10 @@ class TranslationTaskRetrieveByRequestIdView(RetrieveAPIView):
     queryset = TranslationTask.objects.all()
     serializer_class = TranslationTaskSerializer
 
-    def get(self, request, request_id=None, *args, **kwargs):  
+    def get(self, request, request_id=None, *args, **kwargs):
         '''
         Returns all translation task objects with some request_id
-        '''      
+        '''
         serializer = TranslationTaskSerializer(
             TranslationTask.objects.all(), many=True, context={"request_id": request_id}
         )
@@ -110,17 +111,17 @@ class TranslationTaskRetrieveView(RetrieveAPIView):
     queryset = TranslationTask.objects.all()
     serializer_class = TranslationTaskWithDataSerializer
 
-    def get(self, request, id=None, *args, **kwargs):  
+    def get(self, request, id=None, *args, **kwargs):
         '''
         Returns all translation task objects with some id
-        '''      
+        '''
         translation_task = get_object_or_404(TranslationTask, id=id)
         serializer = TranslationTaskWithDataSerializer(
             translation_task, context={"id": id}
         )
         ret = serializer.data
-        target = serializer.data["target"]["data"]
-        
+        # target = serializer.data["target"]["data"]
+
         # TODO: Figure out how data works.
 
         return Response(ret, status=status.HTTP_200_OK)
@@ -129,13 +130,13 @@ class TranslationTaskRetrieveView(RetrieveAPIView):
 class TranslationRequestRetrieveView(RetrieveAPIView):
 
     queryset = TranslationTask.objects.all()
-    def get(self, request, request_id, *args, **kwargs):  
+    def get(self, request, request_id, *args, **kwargs):
         serializer = TranslationTaskSerializer(
             TranslationTask.objects.filter(request_id=request_id), many=True, context={"request_id": request_id}
         )
 
         data = serializer.data
-        if len(data) == 0: 
+        if len(data) == 0:
             return Response([], status=status.HTTP_200_OK)
 
         first_task = data[0]
@@ -152,7 +153,7 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
             "moderator": first_task["moderator"],
             "created_at": first_task["created_at"],
             "updated_at":  first_task["updated_at"],
-            
+
         }
 
         for item in serializer.data:
@@ -165,7 +166,7 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
             }
             base["tasks"].append(single_task)
 
-        
+
         return Response(base, status=status.HTTP_200_OK)
 
 
@@ -195,18 +196,6 @@ class TranslationRequestSearchListView(ListAPIView):
     """
 
     permission_classes = [IsAdminUser]
-
-    # Creates a queryset of TranslationTasks with unique request_ids i.e. 
-    # always the first TranslationTask of the request.
-    # values_list = TranslationTask.objects.values_list('request_id', 'id').distinct()
-    # ids_list = []
-    # requirement_id_list = [] 
-    # for value in values_list:
-    #     if value[0] not in requirement_id_list:
-    #         ids_list.append(value[1])
-    #         requirement_id_list.append(value[0])
-
-    # queryset = TranslationTask.objects.filter(pk__in=ids_list)
     queryset = TranslationTask.objects.all()
 
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
@@ -218,3 +207,74 @@ class TranslationRequestSearchListView(ListAPIView):
     )
     filter_fields = ("category",)
     serializer_class = TranslationRequestSerializer
+
+
+class TranslationTaskEditCreateView(UpdateAPIView):
+    """
+    Create a ModerationTask of type moderator_edit
+    """
+
+    permission_classes = [IsAdminUser]
+    lookup_field = "id"
+    queryset = TranslationTask.objects.all()
+    serializer_class = TranslationTaskWithDataSerializer
+
+    def update(self, request, id=None, *args, **kwargs):
+        translation_task = get_object_or_404(TranslationTask, pk=id)
+
+        serializer = self.get_serializer(translation_task)
+
+        if translation_task.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        # if translation_task.moderator != request.user:
+        #     return Response(None, status=status.HTTP_403_FORBIDDEN)
+
+        translation_task.item_type = "modified"
+        
+        if request.data["draft"]:
+            translation_task.status = "in_progress"
+        else:
+            translation_task.status = "closed"
+
+        translation_task_data = {}
+        if type(request.data["data"]) is not dict:
+            translation_task_data = json.loads(request.data["data"])  # TODO: Validate
+        else:
+            translation_task_data = request.data["data"]  # TODO: Validate
+
+        new_data = {}
+        new_data["task_id"] = translation_task
+        new_data["images"] = translation_task_data["images"]
+        new_data["name"] = translation_task_data["name"]["lang"]
+        new_data["language"] = translation_task_data["language"]
+        new_data["description_short"] = translation_task_data["description"]["short"]["lang"]
+        new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
+        new_data["website"] = translation_task_data["website"]["lang"]
+
+        old_translation_data = get_object_or_404(TranslationData, task_id = id)
+        if old_translation_data:
+            old_translation_data.images = translation_task_data["images"]
+            old_translation_data.name = translation_task_data["name"]["lang"]
+            old_translation_data.language = translation_task_data["language"]
+            old_translation_data.description_short = translation_task_data["description"]["short"]["lang"]
+            old_translation_data.description_long = translation_task_data["description"]["long"]["lang"]
+            old_translation_data.website = translation_task_data["website"]["lang"]
+            old_translation_data.save()
+        else:
+            translation_data = TranslationData(**new_data)
+            translation_data.save()
+        translation_task.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TranslationDataListView(ListAPIView):
+    """
+    Show
+
+    """
+
+    # permission_classes = [IsAdminUser]
+    queryset = TranslationData.objects.all()
+    filter_backends = [filters.OrderingFilter]
+    serializer_class = TranslationDataSerializer

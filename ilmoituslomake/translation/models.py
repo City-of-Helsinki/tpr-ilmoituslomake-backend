@@ -40,7 +40,7 @@ class TranslationTask(models.Model):
     ]
     ITEM_TYPE_CHOICES = CHANGE_TYPE_CHOICES + MODERATION_TYPE_CHOICES
     item_type = models.CharField(
-        max_length=16, choices=ITEM_TYPE_CHOICES, default="change", db_index=True
+        max_length=16, choices=ITEM_TYPE_CHOICES, default="created", db_index=True
     )
 
     STATUS_CHOICES = [
