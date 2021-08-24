@@ -14,3 +14,10 @@ class ModeratorSerializer(serializers.ModelSerializer):
         model = User
         fields = ("first_name", "last_name", "is_staff", "email")
         read_only_fields = fields
+
+
+class TranslatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "is_translator", "email")
+        read_only_fields = fields
