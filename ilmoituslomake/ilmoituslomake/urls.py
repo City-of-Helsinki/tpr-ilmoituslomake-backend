@@ -167,7 +167,7 @@ urlpatterns += [
          translation_views.TranslationTaskListView.as_view()),
     path("api/moderation/translation/task/<int:id>/", 
          translation_views.TranslationTaskRetrieveView.as_view()),
-    path("api/moderation_translation/save_request/",
+    path("api/moderation/translation/save_request/",
          translation_views.TranslationRequestEditCreateView.as_view()),
     path("api/moderation/translation/request/<int:request_id>/",
          translation_views.TranslationRequestRetrieveView.as_view()),
@@ -185,6 +185,6 @@ urlpatterns += [
          translation_views.TranslationTodoRetrieveView.as_view()),
     path("api/translation/todos/find/",
          translation_views.TranslationTaskSearchListView.as_view()),
-    path("api/moderation_translation/cancel_request/<int:id>/",
+    path("api/moderation/translation/cancel_request/<int:id>/",
          translation_views.ModerationTranslationRequestDeleteView.as_view())
 ]
