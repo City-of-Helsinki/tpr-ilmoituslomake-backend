@@ -180,7 +180,7 @@ urlpatterns += [
     path("api/moderation/translationdata/", 
          translation_views.TranslationDataListView.as_view()),
     path("api/moderation/translation/save_task/<int:id>/",
-         translation_views.TranslationTaskEditCreateView.as_view()),
+         translation_views.ModerationTranslationTaskEditCreateView.as_view()),
     path("api/translation/todos/<int:id>/",
-         translation_views.TranslationTaskRetrieveView.as_view())
+         translation_views.TranslationTodoRetrieveView.as_view())
 ]

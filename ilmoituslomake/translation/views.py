@@ -1,4 +1,5 @@
 from copy import error
+from users.models import IsTranslatorUser
 import json
 from translation.serializers import TranslationDataSerializer, TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
 from translation.models import TranslationData, TranslationTask
@@ -106,10 +107,11 @@ class TranslationTaskRetrieveByRequestIdView(RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class TranslationTaskRetrieveView(RetrieveAPIView):
+class TranslationTodoRetrieveView(RetrieveAPIView):
     lookup_field = "id"
     queryset = TranslationTask.objects.all()
     serializer_class = TranslationTaskWithDataSerializer
+    permission_classes = [IsTranslatorUser]
 
     def get(self, request, id=None, *args, **kwargs):
         '''
@@ -120,10 +122,24 @@ class TranslationTaskRetrieveView(RetrieveAPIView):
             translation_task, context={"id": id}
         )
         ret = serializer.data
-        # target = serializer.data["target"]["data"]
+        return Response(ret, status=status.HTTP_200_OK)
 
-        # TODO: Figure out how data works.
 
+class TranslationTaskRetrieveView(RetrieveAPIView):
+    lookup_field = "id"
+    queryset = TranslationTask.objects.all()
+    serializer_class = TranslationTaskWithDataSerializer
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, id=None, *args, **kwargs):
+        '''
+        Returns all translation task objects with some id
+        '''
+        translation_task = get_object_or_404(TranslationTask, id=id)
+        serializer = TranslationTaskWithDataSerializer(
+            translation_task, context={"id": id}
+        )
+        ret = serializer.data
         return Response(ret, status=status.HTTP_200_OK)
 
 
@@ -211,7 +227,66 @@ class TranslationRequestSearchListView(ListAPIView):
 
 class TranslationTaskEditCreateView(UpdateAPIView):
     """
-    Create a ModerationTask of type moderator_edit
+    Update TranslationTask view for Translator
+    """
+
+    permission_classes = [IsTranslatorUser]
+    lookup_field = "id"
+    queryset = TranslationTask.objects.all()
+    serializer_class = TranslationTaskWithDataSerializer
+
+    def update(self, request, id=None, *args, **kwargs):
+        translation_task = get_object_or_404(TranslationTask, pk=id)
+
+        serializer = self.get_serializer(translation_task)
+
+        if translation_task.status == "closed":
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        # if translation_task.moderator != request.user:
+        #     return Response(None, status=status.HTTP_403_FORBIDDEN)
+
+        translation_task.item_type = "modified"
+        
+        if request.data["draft"]:
+            translation_task.status = "in_progress"
+        else:
+            translation_task.status = "closed"
+
+        translation_task_data = {}
+        if type(request.data["data"]) is not dict:
+            translation_task_data = json.loads(request.data["data"])  # TODO: Validate
+        else:
+            translation_task_data = request.data["data"]  # TODO: Validate
+
+        new_data = {}
+        new_data["task_id"] = translation_task
+        new_data["images"] = translation_task_data["images"]
+        new_data["name"] = translation_task_data["name"]["lang"]
+        new_data["language"] = translation_task_data["language"]
+        new_data["description_short"] = translation_task_data["description"]["short"]["lang"]
+        new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
+        new_data["website"] = translation_task_data["website"]["lang"]
+
+        old_translation_data = TranslationData.objects.filter(task_id = id)
+        if len(old_translation_data) > 0:
+            old_translation_data[0].images = translation_task_data["images"]
+            old_translation_data[0].name = translation_task_data["name"]["lang"]
+            old_translation_data[0].language = translation_task_data["language"]
+            old_translation_data[0].description_short = translation_task_data["description"]["short"]["lang"]
+            old_translation_data[0].description_long = translation_task_data["description"]["long"]["lang"]
+            old_translation_data[0].website = translation_task_data["website"]["lang"]
+            old_translation_data[0].save()
+        else:
+            translation_data = TranslationData(**new_data)
+            translation_data.save()
+        translation_task.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ModerationTranslationTaskEditCreateView(UpdateAPIView):
+    """
+    Update TranslationTask view for Moderator
     """
 
     permission_classes = [IsAdminUser]
