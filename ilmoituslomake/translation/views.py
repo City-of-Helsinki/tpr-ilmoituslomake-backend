@@ -9,6 +9,7 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
     UpdateAPIView,
+    DestroyAPIView
 )
 from rest_framework import filters, serializers
 from django.shortcuts import render, get_list_or_404
@@ -41,7 +42,7 @@ class TranslationRequestEditCreateView(CreateAPIView):
     Create a ModerationTask of type moderator_edit
     """
 
-    #permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     queryset = TranslationTask.objects.all()
     serializer_class = ChangeRequestSerializer
 
@@ -372,3 +373,28 @@ class TranslationDataListView(ListAPIView):
     queryset = TranslationData.objects.all()
     filter_backends = [filters.OrderingFilter]
     serializer_class = TranslationDataSerializer
+
+
+class ModerationTranslationRequestDeleteView(DestroyAPIView):
+
+    permission_classes = [IsAdminUser]
+    queryset = TranslationTask.objects.all()
+    serializer_class = ChangeRequestSerializer
+    
+    def delete(self, request, id=None, *args, **kwargs):
+        
+        translation_tasks = get_list_or_404(TranslationTask, request_id=id)
+
+        for task in translation_tasks:
+
+            if task.status == "closed":
+                return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+            if task.moderator != request.user:
+                return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+            task.status = "closed"
+            task.published = False
+            task.save()
+
+        return Response(None, status=status.HTTP_200_OK)

@@ -7,6 +7,8 @@ from django.contrib.postgres.fields import JSONField
 from users.models import User
 
 class TranslationTask(models.Model):
+    
+    published = models.BooleanField(default=False, db_index=True)
 
     request_id = models.IntegerField()
     
@@ -16,7 +18,7 @@ class TranslationTask(models.Model):
         related_name="translation_items",
         on_delete=models.CASCADE,
     )
-    target_revision = models.IntegerField(default=0)
+    target_revision = models.IntegerField(default=0, db_index=True)
 
     language_from = models.TextField()
     language_to = models.TextField()
