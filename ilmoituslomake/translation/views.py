@@ -192,6 +192,25 @@ class TranslationTaskSearchListView(ListAPIView):
 
     """
 
+    permission_classes = [IsTranslatorUser]
+    queryset = TranslationTask.objects.all()
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    search_fields = (
+        "target__data__name__fi",
+        "target__data__name__sv",
+        "target__data__name__en",
+        "target__id",
+    )
+    filter_fields = ("category",)
+    serializer_class = TranslationTaskSerializer
+
+
+class ModerationTranslationTaskSearchListView(ListAPIView):
+    """
+    Search all closed moderation items
+
+    """
+
     permission_classes = [IsAdminUser]
     queryset = TranslationTask.objects.all()
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
