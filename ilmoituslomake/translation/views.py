@@ -282,13 +282,13 @@ class TranslationTaskEditCreateView(UpdateAPIView):
 
         # if translation_task.moderator != request.user:
         #     return Response(None, status=status.HTTP_403_FORBIDDEN)
-
-        translation_task.item_type = "modified"
         
         if request.data["draft"]:
             translation_task.status = "in_progress"
+            translation_task.published = False
         else:
             translation_task.status = "closed"
+            translation_task.published = True
 
         translation_task_data = {}
         if type(request.data["data"]) is not dict:
@@ -316,7 +316,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             new_data["website"] = translation_task_data["website"]["lang"]
             translation_data = TranslationData(**new_data)
             translation_data.save()
-            
+
         translation_task.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -341,8 +341,6 @@ class ModerationTranslationTaskEditCreateView(UpdateAPIView):
 
         # if translation_task.moderator != request.user:
         #     return Response(None, status=status.HTTP_403_FORBIDDEN)
-
-        translation_task.item_type = "modified"
         
         if request.data["draft"]:
             translation_task.status = "in_progress"

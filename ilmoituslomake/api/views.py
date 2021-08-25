@@ -52,7 +52,8 @@ class ApiRetrieveViewV1(RetrieveAPIView):
                     serializer = TranslationDataSerializer(
                         translation_data[0]
                     )
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    if task.published:
+                        return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
 
