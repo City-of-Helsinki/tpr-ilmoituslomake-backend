@@ -38,22 +38,34 @@ class ApiRetrieveViewV1(RetrieveAPIView):
 
     def get(self, request, id=None, *args, **kwargs):
         lang = request.GET.get("language", "fi")
+        moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
         if lang == "fi" or lang == "sv" or lang == "en":
-            moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
             serializer = ApiModeratedNotificationSerializerV1(
                 moderated_notification, context={"lang": lang}
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
+            serializer = ApiModeratedNotificationSerializerV1(
+                moderated_notification
+            )
+            modified_data = serializer.data
             translation_tasks = TranslationTask.objects.filter(target = id, language_to = lang)
             for task in translation_tasks:
                 translation_data = TranslationData.objects.filter(task_id = task.id)
                 if len(translation_data) > 0:
-                    serializer = TranslationDataSerializer(
-                        translation_data[0]
-                    )
                     if task.published:
-                        return Response(serializer.data, status=status.HTTP_200_OK)
+                        data_serializer = TranslationDataSerializer(
+                            translation_data[0]
+                        )
+                        modified_data["name"] = data_serializer.data["name"]
+                        modified_data["short_description"] = data_serializer.data["description"]["short"]
+                        modified_data["long_description"] = data_serializer.data["description"]["long"]
+                        for image in modified_data["images"]:
+                            for translated_image in data_serializer.data["images"]:
+                                if image["uuid"] == translated_image["uuid"]:
+                                    image["source"] = translated_image["source"]
+                                    image["alt_text"] = translated_image["alt_text"]
+                        return Response(modified_data, status=status.HTTP_200_OK)
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
 
