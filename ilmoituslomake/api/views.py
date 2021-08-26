@@ -57,9 +57,9 @@ class ApiRetrieveViewV1(RetrieveAPIView):
                         data_serializer = TranslationDataSerializer(
                             translation_data[0]
                         )
-                        modified_data["name"] = data_serializer.data["name"]
-                        modified_data["short_description"] = data_serializer.data["description"]["short"]
-                        modified_data["long_description"] = data_serializer.data["description"]["long"]
+                        modified_data["name"] = data_serializer.data["name"]["lang"]
+                        modified_data["short_description"] = data_serializer.data["description"]["short"]["lang"]
+                        modified_data["description"] = data_serializer.data["description"]["long"]["lang"]
                         for image in modified_data["images"]:
                             for translated_image in data_serializer.data["images"]:
                                 if image["uuid"] == translated_image["uuid"]:
