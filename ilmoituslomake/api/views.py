@@ -64,7 +64,8 @@ class ApiRetrieveViewV1(RetrieveAPIView):
                             for translated_image in data_serializer.data["images"]:
                                 if image["uuid"] == translated_image["uuid"]:
                                     image["source"] = translated_image["source"]
-                                    image["alt_text"] = translated_image["alt_text"]
+                                    if "lang" in translated_image["alt_text"]:
+                                        image["alt_text"] = translated_image["alt_text"]["lang"]
                         return Response(modified_data, status=status.HTTP_200_OK)
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 

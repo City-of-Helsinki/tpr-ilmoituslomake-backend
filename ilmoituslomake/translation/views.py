@@ -196,7 +196,8 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
                 "target": {
                     "id": item["target"]["id"],
                     "name": item["target"]["name"]
-                }
+                },
+                "status":  item["status"]
             }
             base["tasks"].append(single_task)
 
