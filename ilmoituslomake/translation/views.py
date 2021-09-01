@@ -134,6 +134,8 @@ class TranslationTodoRetrieveView(RetrieveAPIView):
         '''
         Returns all translation task objects with some id
         '''
+        if not request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
         translation_task = get_object_or_404(TranslationTask, id=id)
         serializer = TranslationTaskWithDataSerializer(
             translation_task, context={"id": id}
@@ -182,7 +184,6 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
             "tasks": [],
             "category": first_task["category"],
             "item_type": first_task["item_type"],
-            "status": first_task["status"],
             "translator": first_task["translator"],
             "moderator": first_task["moderator"],
             "created_at": first_task["created_at"],

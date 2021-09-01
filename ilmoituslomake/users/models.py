@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.db import models
 from helusers.models import AbstractUser
 from django.contrib.postgres.fields import JSONField
@@ -26,4 +27,6 @@ class IsTranslatorUser(BasePermission):
     """
 
     def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return bool(False)
         return bool(request.user and request.user.is_translator)
