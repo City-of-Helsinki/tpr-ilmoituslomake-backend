@@ -31,7 +31,7 @@ class ModeratedNotificationImageSerializer(serializers.ModelSerializer):
         image_metadata = self.context.get("images")[ret["metadata"]["uuid"]]
         if id != None:
             image = ret["metadata"]["uuid"] + ".jpg"
-            image["metadata"] = image_metadata
+            ret["metadata"] = image_metadata
             ret["metadata"]["url"] = (
                 "https://tprimages.blob.core.windows.net/"
                 + PUBLIC_AZURE_CONTAINER
