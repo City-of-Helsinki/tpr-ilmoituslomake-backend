@@ -28,7 +28,9 @@ class ModeratedNotificationImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         id = self.context.get("id", None)
+        image_metadata = self.context.get("images")[ret["metadata"]["uuid"]]
         if id != None:
+            image["metadata"] = image_metadata
             image = ret["metadata"]["uuid"] + ".jpg"
             ret["metadata"]["url"] = (
                 "https://tprimages.blob.core.windows.net/"
@@ -179,7 +181,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -233,7 +235,7 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -355,7 +357,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )
         del ret["data"]["images"]
         ret["data"]["images"] = serializer.data
