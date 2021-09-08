@@ -483,8 +483,8 @@ class ModeratedNotificationSearchListView(ListAPIView):
         published = True
         #
         search = {
-            "search_name__search": "",
-            "search_address__search": "",
+            "search_name__contains": "",
+            "search_address__contains": "",
             "data__ontology_ids__contains": [],
             "data__matko_ids__contains": [],
             "search_comments__contains": "",
