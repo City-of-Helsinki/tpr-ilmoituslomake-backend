@@ -1,5 +1,5 @@
 from copy import error
-from users.serializers import UserSerializer
+from users.serializers import TranslatorListSerializer, UserSerializer
 from users.models import IsTranslatorUser, User
 import json
 from translation.serializers import TranslationDataSerializer, TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
@@ -435,5 +435,5 @@ class ModerationTranslationRequestDeleteView(DestroyAPIView):
 class TranslationUsersListView(ListAPIView):
 
     permission_classes = [IsAdminUser]
-    serializer_class = UserSerializer
+    serializer_class = TranslatorListSerializer
     queryset = User.objects.filter(is_translator=True)

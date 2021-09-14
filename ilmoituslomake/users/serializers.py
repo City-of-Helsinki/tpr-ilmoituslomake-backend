@@ -1,3 +1,4 @@
+from django.db.models import fields
 from rest_framework import serializers
 from users.models import User
 
@@ -20,4 +21,11 @@ class TranslatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("first_name", "last_name", "is_translator", "email")
+        read_only_fields = fields
+
+
+class TranslatorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "is_translator", "email", "uuid")
         read_only_fields = fields
