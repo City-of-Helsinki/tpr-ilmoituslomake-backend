@@ -22,6 +22,12 @@ class TranslatorSerializer(serializers.ModelSerializer):
         model = User
         fields = ("first_name", "last_name", "is_translator", "email")
         read_only_fields = fields
+    # def to_representation(self, instance):
+    #     ret = super().to_representation(instance)
+    #     translator = {}
+    #     translator["name"] = ret["first_name"] + " " + ret["last_name"]
+    #     translator["email"] = ret["email"]
+    #     return translator
 
 
 class TranslatorListSerializer(serializers.ModelSerializer):

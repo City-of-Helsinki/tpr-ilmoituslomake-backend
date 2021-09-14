@@ -58,7 +58,9 @@ class TranslationRequestEditCreateView(CreateAPIView):
         if "id" in request_data.keys():
             old_tasks = TranslationTask.objects.filter(request_id = request_data["id"])
             for task in old_tasks:
-                task.translator = request_data["translator"]
+                task.language_from = request_data["language"]["from"]
+                task.language_to = request_data["language"]["to"]
+                task.translator = request_data["translator"] # get_object_or_404(User, uuid=request_data["translator"])
                 task.message = request_data["message"]
                 task.save()
             return Response(
@@ -74,18 +76,26 @@ class TranslationRequestEditCreateView(CreateAPIView):
 
         # Creates a new translation task entry
         # for every target in the request
-        for item in request_data["targets"]:
+        for target in request_data["targets"]:
             copy_data = {}
             copy_data["category"] = "translation_task"
             if "id" in request_data.keys():
                 copy_data["request_id"] = request_data["id"]
             else:
                 copy_data["request_id"] = new_request_id
-            copy_data["target"] = item
+            copy_data["target"] = target
             copy_data["language_from"] = request_data["language"]["from"]
             copy_data["language_to"] = request_data["language"]["to"]
             copy_data["translator"] = request_data["translator"]
             copy_data["message"] = request_data["message"]
+            # translation_tasks = TranslationTask.objects.filter(target=target)
+            # new_data = {}
+            # for task in translation_tasks:
+            #     translation_data = TranslationData.objects.filter(task_id=task.id)
+            #     if len(translation_data) >0:
+            #         new_data = translation_data[0]
+            #         break
+                
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
 
@@ -101,12 +111,19 @@ class TranslationRequestEditCreateView(CreateAPIView):
             headers = self.get_success_headers(serializer.data)
 
             request_id = copy_data["request_id"]
+            # if new_data:
+            #     new_data.task_id = translation_task
+            #     data_serializer = TranslationDataSerializer(data=new_data.__dict__)
+            #     data_serializer.is_valid(raise_exception=True)
+            #     final_data = data_serializer.save()
+            #     final_data.save()          
+
 
         return Response(
             {"id": request_id}, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  
         return self.create(request, *args, **kwargs)
 
 
@@ -295,7 +312,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        if translation_task.translator.email != request.user.email:
+        if translation_task.translator["email"] != request.user.email:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
             
         if request.data["draft"]:

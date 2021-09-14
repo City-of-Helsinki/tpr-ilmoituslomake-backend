@@ -49,9 +49,9 @@ class ApiRetrieveViewV1(RetrieveAPIView):
                 moderated_notification
             )
             modified_data = serializer.data
-            translation_tasks = TranslationTask.objects.filter(target = id, language_to = lang)
-            for task in translation_tasks:
-                translation_data = TranslationData.objects.filter(task_id = task.id)
+            translation_tasks = TranslationTask.objects.filter(target=id, language_to=lang)
+            for task in sorted(translation_tasks, key=lambda x:x.id, reverse=True):
+                translation_data = TranslationData.objects.filter(task_id=task.id)
                 if len(translation_data) > 0:
                     if task.published:
                         data_serializer = TranslationDataSerializer(

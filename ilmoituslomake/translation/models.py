@@ -58,7 +58,9 @@ class TranslationTask(models.Model):
 
     message = models.TextField()
 
-    translator = JSONField(default=dict)
+    translator = JSONField(default=dict) #models.ForeignKey(
+    #     User, null=True, related_name="translation_translator", on_delete=models.DO_NOTHING
+    # )
 
     moderator = models.ForeignKey(
         User, null=True, related_name="translation_moderator", on_delete=models.DO_NOTHING

@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from moderation.serializers import PrivateModeratedNotificationSerializer, ModeratedNotificationTargetSerializer
-from users.serializers import ModeratorSerializer, UserSerializer
+from users.serializers import ModeratorSerializer, TranslatorSerializer, UserSerializer
 from translation.models import TranslationData, TranslationTask
-
+from django.forms.models import model_to_dict
 class TranslationTaskSerializer(serializers.ModelSerializer):
 
     target = ModeratedNotificationTargetSerializer()
     moderator = ModeratorSerializer()
+    # translator = TranslatorSerializer
 
     class Meta:
         model = TranslationTask
@@ -37,7 +38,6 @@ class TranslationTaskSerializer(serializers.ModelSerializer):
         del ret["request_id"]
         del ret["language_to"]
         del ret["language_from"]
-
         return ret
 
 
@@ -117,7 +117,20 @@ class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
             many=True, context={"task_id": ret["id"]}
         )        
         if data.data == []:
-            ret["data"] = {}
+            tasks_with_same_target = TranslationTask.objects.filter(target=ret["target"]["id"])
+            data_with_same_target = []
+            for task in tasks_with_same_target:
+                if task.published:
+                    data_with_task_id = TranslationData.objects.filter(task_id=task.id)
+                    if data_with_task_id:
+                        data_with_same_target.extend(data_with_task_id)
+
+            if len(data_with_same_target) != 0:
+                newest_data = max(data_with_task_id, key=lambda x:x.task_id)
+                data_serializer = TranslationDataSerializer(newest_data)
+                ret["data"] = data_serializer.data
+            else:
+                ret["data"] = {}
         else:   
             ret["data"] = data.data[0]
 
