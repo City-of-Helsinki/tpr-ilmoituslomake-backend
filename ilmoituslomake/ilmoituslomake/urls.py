@@ -186,5 +186,7 @@ urlpatterns += [
     path("api/translation/todos/find/",
          translation_views.TranslationTaskSearchListView.as_view()),
     path("api/moderation/translation/cancel_request/<int:id>/",
-         translation_views.ModerationTranslationRequestDeleteView.as_view())
-]
+         translation_views.ModerationTranslationRequestDeleteView.as_view()),
+    path("api/moderation/translation/translators/",
+         translation_views.TranslationUsersListView.as_view())
+]   

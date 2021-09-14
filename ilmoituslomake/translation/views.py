@@ -1,5 +1,6 @@
 from copy import error
-from users.models import IsTranslatorUser
+from users.serializers import UserSerializer
+from users.models import IsTranslatorUser, User
 import json
 from translation.serializers import TranslationDataSerializer, TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
 from translation.models import TranslationData, TranslationTask
@@ -136,7 +137,12 @@ class TranslationTodoRetrieveView(RetrieveAPIView):
         '''
         if not request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
+
         translation_task = get_object_or_404(TranslationTask, id=id)
+
+        if translation_task.translator["email"] != request.user.email:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+
         serializer = TranslationTaskWithDataSerializer(
             translation_task, context={"id": id}
         )
@@ -213,7 +219,15 @@ class TranslationTaskSearchListView(ListAPIView):
     """
 
     permission_classes = [IsTranslatorUser]
-    queryset = TranslationTask.objects.all()
+    serializer_class = TranslationTaskSerializer
+    def get_queryset(self):
+        user = self.request.user
+        temp = {
+                "name": user.first_name,
+                "email": user.email,
+            },
+        return TranslationTask.objects.all()
+    # queryset = TranslationTask.objects.all()
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",
@@ -222,7 +236,6 @@ class TranslationTaskSearchListView(ListAPIView):
         "target__id",
     )
     filter_fields = ("category",)
-    serializer_class = TranslationTaskSerializer
 
 
 class ModerationTranslationTaskSearchListView(ListAPIView):
@@ -282,9 +295,9 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        # if translation_task.moderator != request.user:
-        #     return Response(None, status=status.HTTP_403_FORBIDDEN)
-        
+        if translation_task.translator.email != request.user.email:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+            
         if request.data["draft"]:
             translation_task.status = "in_progress"
             translation_task.published = False
@@ -417,3 +430,10 @@ class ModerationTranslationRequestDeleteView(DestroyAPIView):
             task.save()
 
         return Response(None, status=status.HTTP_200_OK)
+
+
+class TranslationUsersListView(ListAPIView):
+
+    permission_classes = [IsAdminUser]
+    serializer_class = UserSerializer
+    queryset = User.objects.filter(is_translator=True)
