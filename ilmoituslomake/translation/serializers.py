@@ -85,6 +85,7 @@ class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
 
     target = PrivateModeratedNotificationSerializer()
     moderator = ModeratorSerializer()
+    translator = TranslatorListSerializer()
 
     class Meta:
         model = TranslationTask
@@ -160,7 +161,8 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
 
 class TranslationRequestSerializer(serializers.ModelSerializer):
     moderator = ModeratorSerializer()
-
+    translator = TranslatorListSerializer()
+    
     class Meta:
         model = TranslationTask
         fields = (
