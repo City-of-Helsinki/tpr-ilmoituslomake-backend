@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from moderation.serializers import PrivateModeratedNotificationSerializer, ModeratedNotificationTargetSerializer
-from users.serializers import ModeratorSerializer, TranslatorSerializer, UserSerializer
+from users.serializers import ModeratorSerializer, TranslatorListSerializer, TranslatorSerializer, UserSerializer
 from translation.models import TranslationData, TranslationTask
 from django.forms.models import model_to_dict
 class TranslationTaskSerializer(serializers.ModelSerializer):
 
     target = ModeratedNotificationTargetSerializer()
     moderator = ModeratorSerializer()
-    # translator = TranslatorSerializer
+    translator = TranslatorListSerializer()
 
     class Meta:
         model = TranslationTask
