@@ -60,7 +60,7 @@ class TranslationRequestEditCreateView(CreateAPIView):
             for task in old_tasks:
                 task.language_from = request_data["language"]["from"]
                 task.language_to = request_data["language"]["to"]
-                task.translator = get_object_or_404(User, uuid=request_data["translator"]).id
+                task.translator = get_object_or_404(User, uuid=request_data["translator"])
                 task.message = request_data["message"]
                 task.save()
             return Response(
