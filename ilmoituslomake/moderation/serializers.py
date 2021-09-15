@@ -6,7 +6,7 @@ from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 
 #
-from users.serializers import ModeratorSerializer
+from users.serializers import ModeratorSerializer, UserSerializer
 
 # from base.serializers import NotificationSerializer
 from notification_form.serializers import (
@@ -28,8 +28,10 @@ class ModeratedNotificationImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         id = self.context.get("id", None)
+        image_metadata = self.context.get("images")[ret["metadata"]["uuid"]]
         if id != None:
             image = ret["metadata"]["uuid"] + ".jpg"
+            ret["metadata"] = image_metadata
             ret["metadata"]["url"] = (
                 "https://tprimages.blob.core.windows.net/"
                 + PUBLIC_AZURE_CONTAINER
@@ -102,6 +104,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "target",
+            "category",
             "item_type",
             "user_place_name",
             "user_comments",
@@ -129,6 +132,9 @@ class ApproveModeratorSerializer(serializers.ModelSerializer):
 
 
 class ModerationNotificationSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Notification
         fields = (
@@ -175,7 +181,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -183,7 +189,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
 
 class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
 
-    # is_notifier = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = ModeratedNotification
@@ -229,7 +235,7 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -351,7 +357,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk},
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )
         del ret["data"]["images"]
         ret["data"]["images"] = serializer.data

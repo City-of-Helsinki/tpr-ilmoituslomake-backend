@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "notification_form",
     "api",
     "social_django",
+    "translation",
     # "huey.contrib.djhuey",
 ]
 

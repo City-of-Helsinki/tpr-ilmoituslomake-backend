@@ -15,20 +15,33 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.utils import translation
 
 from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
+from translation import views as translation_views
 
 from api import views as api_views
+
+from ilmoituslomake.settings import DEBUG
 
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-urlpatterns += [
-    path("admin/", admin.site.urls),
-]
+if DEBUG:
+    urlpatterns += [
+        path("admin/", admin.site.urls),
+        path(
+            "api/schema/get/<int:id>/",
+            notification_form_views.NotificationSchemaRetrieveView.as_view(),
+        ),
+        path(
+            "api/schema/create/",
+            notification_form_views.NotificationSchemaCreateView.as_view(),
+        ),
+    ]
 
 
 # Authentication
@@ -68,6 +81,10 @@ urlpatterns += [
     path(
         "api/moderation/get/<int:id>/",
         moderation_views.ModerationNotificationRetrieveView.as_view(),
+    ),
+    path(
+        "api/moderation/moderator_edit/",
+        moderation_views.ModeratorEditCreateView.as_view(),
     ),
     path("api/moderation/assign/", moderation_views.AssignModerationItemView.as_view()),
     path(
@@ -112,14 +129,6 @@ urlpatterns += [
         "api/change_request/",
         notification_form_views.ChangeRequestCreateView.as_view(),
     ),
-    path(
-        "api/schema/get/<int:id>/",
-        notification_form_views.NotificationSchemaRetrieveView.as_view(),
-    ),
-    path(
-        "api/schema/create/",
-        notification_form_views.NotificationSchemaCreateView.as_view(),
-    ),
     # notifications
     path(
         "api/notification/create/",
@@ -142,7 +151,42 @@ urlpatterns += [
 # Open API
 urlpatterns += [
     path(
-        "api/open/notification/<int:id>/",
-        api_views.ApiRetrieveView.as_view(),
+        "api/open/v1/target/",
+        api_views.ApiListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/target/<int:id>/",
+        api_views.ApiRetrieveViewV1.as_view(),
     ),
 ]
+
+
+# Translation
+urlpatterns += [
+    path("api/moderation/translation/task/", 
+         translation_views.TranslationTaskListView.as_view()),
+    path("api/moderation/translation/task/<int:id>/", 
+         translation_views.TranslationTaskRetrieveView.as_view()),
+    path("api/moderation/translation/save_request/",
+         translation_views.TranslationRequestEditCreateView.as_view()),
+    path("api/moderation/translation/request/<int:request_id>/",
+         translation_views.TranslationRequestRetrieveView.as_view()),
+    path("api/moderation/translation/task/find/",
+         translation_views.ModerationTranslationTaskSearchListView.as_view()),
+    path("api/moderation/translation/request/find/",
+         translation_views.TranslationRequestSearchListView.as_view()),
+    path("api/moderation/translationdata/", 
+         translation_views.TranslationDataListView.as_view()),
+    path("api/moderation/translation/save_task/<int:id>/",
+         translation_views.ModerationTranslationTaskEditCreateView.as_view()),
+    path("api/translation/todos/<int:id>/",
+         translation_views.TranslationTodoRetrieveView.as_view()),
+    path("api/translation/todos/find/",
+         translation_views.TranslationTaskSearchListView.as_view()),
+    path("api/translation/save/<int:id>/",
+         translation_views.TranslationTaskEditCreateView.as_view()),
+    path("api/moderation/translation/cancel_request/<int:id>/",
+         translation_views.ModerationTranslationRequestDeleteView.as_view()),
+    path("api/moderation/translation/translators/",
+         translation_views.TranslationUsersListView.as_view())
+]   

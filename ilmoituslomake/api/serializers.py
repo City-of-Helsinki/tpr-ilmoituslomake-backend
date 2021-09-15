@@ -7,42 +7,12 @@ from moderation.models import ModeratedNotification
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
 
-class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
+class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return obj.id
-
-    org_id = serializers.SerializerMethodField()
-
-    def get_org_id(self, obj):
-        return None
-
-    dept_id = serializers.SerializerMethodField()
-
-    def get_dept_id(self, obj):
-        return None
-
-    provider_type = serializers.SerializerMethodField()
-
-    def get_provider_type(self, obj):
-        return None
-
-    organizer_type = serializers.SerializerMethodField()
-
-    def get_organizer_type(self, obj):
-        return None
-
-    organizer_name = serializers.SerializerMethodField()
-
-    def get_organizer_name(self, obj):
-        return None
-
-    data_source_url = serializers.SerializerMethodField()
-
-    def get_data_source_url(self, obj):
-        return None
 
     name = serializers.SerializerMethodField()
 
@@ -79,16 +49,6 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
 
     def get_extra_searchwords(self, obj):
         return obj.data.get("extra_keywords", [])
-
-    tags = serializers.SerializerMethodField()
-
-    def get_tags(self, obj):
-        return []  # TODO:
-
-    sources = serializers.SerializerMethodField()
-
-    def get_sources(self, obj):
-        return []  # TODO:
 
     latitude = serializers.SerializerMethodField()
 
@@ -171,7 +131,6 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
                     "source": i["source"],
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
-                    "source_type": i["source_type"],
                 },
                 obj.data.get("images", []),
             )
@@ -196,20 +155,12 @@ class ApiModeratedNotificationSerializer(serializers.ModelSerializer):
         model = ModeratedNotification
         fields = (
             "id",
-            "org_id",
-            "dept_id",
-            "provider_type",
-            "organizer_type",
-            "organizer_name",
-            "data_source_url",
             "name",
             "short_description",
             "description",
             "ontologyword_ids",
             "auxiliary_tourism_codes",
             "extra_searchwords",
-            "tags",
-            "sources",
             "latitude",
             "longitude",
             "street_address",
