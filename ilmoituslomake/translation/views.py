@@ -142,7 +142,7 @@ class TranslationTodoRetrieveView(RetrieveAPIView):
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         translation_task = get_object_or_404(TranslationTask, id=id)
-        if translation_task.translator.email != request.user.email:
+        if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         serializer = TranslationTaskWithDataSerializer(
@@ -225,12 +225,8 @@ class TranslationTaskSearchListView(ListAPIView):
     serializer_class = TranslationTaskSerializer
     def get_queryset(self):
         user = self.request.user
-        temp = {
-                "name": user.first_name,
-                "email": user.email,
-            },
-        return TranslationTask.objects.all()
-    # queryset = TranslationTask.objects.all()
+        return TranslationTask.objects.filter(translator=self.request.user)
+
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",
@@ -298,7 +294,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        if translation_task.translator.email != request.user.email:
+        if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
             
         if request.data["draft"]:
