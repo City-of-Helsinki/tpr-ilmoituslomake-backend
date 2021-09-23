@@ -122,7 +122,7 @@ class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
             data_with_same_target = []
             for task in tasks_with_same_target:
                 if task.published:
-                    data_with_task_id = TranslationData.objects.filter(task_id=task.id)
+                    data_with_task_id = TranslationData.objects.filter(task_id=task.id, language=ret["language_to"])
                     if data_with_task_id:
                         data_with_same_target.extend(data_with_task_id)
 
