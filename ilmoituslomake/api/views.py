@@ -26,6 +26,23 @@ from api.serializers import ApiModeratedNotificationSerializerV1
 
 from django.db.models import Q
 
+from rest_framework_api_key.models import APIKey
+from rest_framework_api_key.permissions import HasAPIKey
+
+def modify_translation_data(old_data, new_data):
+    '''
+    Modifies the data to the correct format for the front-end.
+    '''
+    old_data["name"] = new_data["name"]["lang"]
+    old_data["short_description"] = new_data["description"]["short"]["lang"]
+    old_data["description"] = new_data["description"]["long"]["lang"]
+    for image in old_data["images"]:
+        for translated_image in new_data["images"]:
+            if image["uuid"] == translated_image["uuid"]:
+                image["source"] = translated_image["source"]
+                if "lang" in translated_image["alt_text"]:
+                    image["alt_text"] = translated_image["alt_text"]["lang"]
+
 
 class ApiRetrieveViewV1(RetrieveAPIView):
     """
@@ -41,39 +58,37 @@ class ApiRetrieveViewV1(RetrieveAPIView):
         lang = request.GET.get("language", "fi")
         moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
 
+        hasApiKey = False
+
+        if "HTTP_AUTHORIZATION" in request.META:
+            key = request.META["HTTP_AUTHORIZATION"].split()[1]
+            api_key = APIKey.objects.get_from_key(key)
+            if api_key:
+                hasApiKey = True
+
         # If language is finnish, swedish or english, works with the serializer
         if lang in ["fi", "sv", "en"]:
             serializer = ApiModeratedNotificationSerializerV1(
-                moderated_notification, context={"lang": lang}
+                moderated_notification, context={"lang": lang, "hasApiKey": hasApiKey}
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
         # If language is not finnish, swedish or english, find the newest, published 
         # translationdata matching to the target and language and replace name, short_description, 
         # description and picture alt text with the translations.
-        else:
-            serializer = ApiModeratedNotificationSerializerV1(
-                moderated_notification
-            )
-            modified_data = serializer.data
-            translation_tasks = TranslationTask.objects.filter(target=id, language_to=lang)
-            for task in sorted(translation_tasks, key=lambda x:x.id, reverse=True):
-                translation_data = TranslationData.objects.filter(task_id=task.id, language=lang)
-                if len(translation_data) > 0:
-                    if task.published:
-                        data_serializer = TranslationDataSerializer(
-                            translation_data[0]
-                        )
-                        modified_data["name"] = data_serializer.data["name"]["lang"]
-                        modified_data["short_description"] = data_serializer.data["description"]["short"]["lang"]
-                        modified_data["description"] = data_serializer.data["description"]["long"]["lang"]
-                        for image in modified_data["images"]:
-                            for translated_image in data_serializer.data["images"]:
-                                if image["uuid"] == translated_image["uuid"]:
-                                    image["source"] = translated_image["source"]
-                                    if "lang" in translated_image["alt_text"]:
-                                        image["alt_text"] = translated_image["alt_text"]["lang"]
-                        return Response(modified_data, status=status.HTTP_200_OK)
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
+        serializer = ApiModeratedNotificationSerializerV1(
+            moderated_notification, context={"hasApiKey": hasApiKey}
+        )
+        modified_data = serializer.data
+        translation_tasks = TranslationTask.objects.filter(target=id, language_to=lang)
+        for task in sorted(translation_tasks, key=lambda x:x.id, reverse=True):
+            translation_data = TranslationData.objects.filter(task_id=task.id, language=lang)
+            if len(translation_data) > 0 and task.published:
+                data_serializer = TranslationDataSerializer(
+                    translation_data[0]
+                )
+                modify_translation_data(modified_data, data_serializer.data)
+                return Response(modified_data, status=status.HTTP_200_OK)
+        return Response(None, status=status.HTTP_404_NOT_FOUND)
 
 
 class ApiListViewV1(ListAPIView):
@@ -93,6 +108,15 @@ class ApiListViewV1(ListAPIView):
         lang = self.request.GET.get("language")
         pagination = PageNumberPagination()
 
+        hasApiKey = False
+
+        if "HTTP_AUTHORIZATION" in request.META:
+            key = request.META["HTTP_AUTHORIZATION"].split()[1]
+            api_key = APIKey.objects.get_from_key(key)
+            if api_key:
+                hasApiKey = True
+
+
         # If no language parameter is given, assume finnish
         if lang is None or lang is "":
             lang = "fi"
@@ -103,7 +127,7 @@ class ApiListViewV1(ListAPIView):
         if search_query is None:
             data = ModeratedNotification.objects.all().filter(Q(published=True))
             qs = pagination.paginate_queryset(data, request)
-            serializer = ApiModeratedNotificationSerializerV1(qs, many=True, context={"lang": lang})
+            serializer = ApiModeratedNotificationSerializerV1(qs, many=True, context={"lang": lang, "hasApiKey": hasApiKey})
             modified_data = serializer.data
         # If search_query is given, filter all ModeratedNotifications by the name of their data
         else:
@@ -115,40 +139,32 @@ class ApiListViewV1(ListAPIView):
                 )
             )
             qs = pagination.paginate_queryset(data, request)
-            serializer = ApiModeratedNotificationSerializerV1(qs, many=True, context={"lang": lang})
+            serializer = ApiModeratedNotificationSerializerV1(qs, many=True, context={"lang": lang, "hasApiKey": hasApiKey})
             modified_data = serializer.data
         
         # If language is not finnish, swedish or english, find the newest, published 
         # translationdata matching to the target and language and replace name, short_description, 
         # description and picture alt text with the translations.
-        if lang not in ["fi", "sv", "en"]:
-            index = 0
-            for moderation_item in modified_data:
-                translation_tasks = TranslationTask.objects.filter(target=moderation_item["id"], language_to=lang)
-                sorted_tasks = sorted(translation_tasks, key=lambda x:x.id, reverse=True)
-                found = False
-                for task in sorted_tasks:
-                    translation_objects = TranslationData.objects.filter(task_id=task.id, language=lang)
-                    if not found and translation_objects.exists():
-                        if task.published:
-                            data_serializer = TranslationDataSerializer(
-                                translation_objects[0]
-                            )
-                            found = True
-                            moderation_item["name"] = data_serializer.data["name"]["lang"]
-                            moderation_item["short_description"] = data_serializer.data["description"]["short"]["lang"]
-                            moderation_item["description"] = data_serializer.data["description"]["long"]["lang"]
-                            for image in moderation_item["images"]:
-                                for translated_image in data_serializer.data["images"]:
-                                    if image["uuid"] == translated_image["uuid"]:
-                                        image["source"] = translated_image["source"]
-                                        if "lang" in translated_image["alt_text"]:
-                                            image["alt_text"] = translated_image["alt_text"]["lang"]
-                # If no translations are found for the target for the language, remove it from the response.
-                if not found:
-                    modified_data[index] = None
-                index += 1
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-            return Response([i for i in modified_data if i], status=status.HTTP_200_OK)
+        if lang in ["fi", "sv", "en"]:
+            return Response(modified_data, status=status.HTTP_200_OK)
 
-        return Response(modified_data, status=status.HTTP_200_OK)
+        index = 0
+        for moderation_item in modified_data:
+            translation_tasks = TranslationTask.objects.filter(target=moderation_item["id"], language_to=lang)
+            sorted_tasks = sorted(translation_tasks, key=lambda x:x.id, reverse=True)
+            found = False
+            for task in sorted_tasks:
+                translation_objects = TranslationData.objects.filter(task_id=task.id, language=lang)
+                if not found and translation_objects.exists() and task.published:
+                    data_serializer = TranslationDataSerializer(
+                        translation_objects[0]
+                    )
+                    found = True
+                    modify_translation_data(moderation_item, data_serializer.data)
+            # If no translations are found for the target for the language, remove it from the response.
+            if not found:
+                modified_data[index] = None
+            index += 1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+        return Response([i for i in modified_data if i], status=status.HTTP_200_OK)
+

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "users",
     # DRF
     "rest_framework",
+    "rest_framework_api_key",
     # Django
     # "django.contrib.admin",
     "django.contrib.auth",
@@ -183,7 +184,8 @@ REST_FRAMEWORK = {
     #        'helusers.oidc.ApiTokenAuthentication',
     #        'rest_framework.authentication.SessionAuthentication',
     #    ),
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated", 
+                                   "rest_framework_api_key.permissions.HasAPIKey"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 50,
 }
