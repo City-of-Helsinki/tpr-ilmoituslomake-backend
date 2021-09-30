@@ -81,6 +81,7 @@ class TranslationData(models.Model):
         on_delete=models.CASCADE,
     )
 
+    target_revision = models.IntegerField()
     language = models.TextField()
     name = models.TextField()
     description_long = models.TextField()

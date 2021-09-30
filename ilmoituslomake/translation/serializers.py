@@ -51,7 +51,8 @@ class TranslationDataSerializer(serializers.ModelSerializer):
             "description_long",
             "description_short",
             "images",
-            "website"
+            "website",
+            "target_revision"
         )
         read_only_fields = fields
     
@@ -93,6 +94,7 @@ class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
             "id",
             "request_id",
             "target",
+            "target_revision",
             "language_from",
             "language_to",
             "category",
@@ -127,7 +129,7 @@ class TranslationTaskWithDataSerializer(serializers.ModelSerializer):
                         data_with_same_target.extend(data_with_task_id)
 
             if len(data_with_same_target) != 0:
-                newest_data = max(data_with_task_id, key=lambda x:x.task_id)
+                newest_data = max(data_with_same_target, key=lambda x:x.task_id.id)
                 data_serializer = TranslationDataSerializer(newest_data)
                 ret["data"] = data_serializer.data
             else:
@@ -149,6 +151,7 @@ class ChangeRequestSerializer(serializers.ModelSerializer):
             "id",
             "request_id",
             "target",
+            "target_revision",
             "language_from",
             "language_to",
             "category",
