@@ -43,7 +43,11 @@ def modify_translation_data(old_data, new_data):
                 if "lang" in translated_image["alt_text"]:
                     image["alt_text"] = translated_image["alt_text"]["lang"]
 
-
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 200
+    page_size_query_param = 'page_size'
+    max_page_size = 200
+    
 class ApiRetrieveViewV1(RetrieveAPIView):
     """
     Returns a single ModeratedNotification instance
@@ -100,6 +104,7 @@ class ApiListViewV1(ListAPIView):
     queryset = ModeratedNotification.objects.all().filter(Q(published=True))
     serializer_class = ApiModeratedNotificationSerializerV1
     filter_backends = [filters.SearchFilter]
+    pagination_class = LargeResultsSetPagination
     # TODO: Create migration which generates indices for JSON data
     search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
 
