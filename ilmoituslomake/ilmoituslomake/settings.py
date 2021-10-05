@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "api",
     "social_django",
     "translation",
+    "opening_times"
     # "huey.contrib.djhuey",
 ]
 

@@ -43,10 +43,12 @@ def modify_translation_data(old_data, new_data):
                 if "lang" in translated_image["alt_text"]:
                     image["alt_text"] = translated_image["alt_text"]["lang"]
 
+
 class LargeResultsSetPagination(PageNumberPagination):
     page_size = 200
     page_size_query_param = 'page_size'
     max_page_size = 200
+    
     
 class ApiRetrieveViewV1(RetrieveAPIView):
     """
