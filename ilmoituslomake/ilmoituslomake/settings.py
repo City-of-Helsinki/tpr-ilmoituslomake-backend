@@ -31,6 +31,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
+HAUKI_SECRET_KEY = env("HAUKI_SECRET_KEY")
+
+API_TOKEN = env("API_TOKEN")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
