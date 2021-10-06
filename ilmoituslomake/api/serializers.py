@@ -115,6 +115,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_images(self, obj):
         lang = self.context.get("lang", "fi")
+        has_api_key = self.context.get("has_api_key", False)
         return list(
             map(
                 lambda i: {
@@ -132,7 +133,10 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
                 },
-                obj.data.get("images", []),
+                filter(
+                    lambda i: (has_api_key or i["permission"] != "Location only"),
+                    obj.data.get("images", []),
+                ),
             )
         )
 
