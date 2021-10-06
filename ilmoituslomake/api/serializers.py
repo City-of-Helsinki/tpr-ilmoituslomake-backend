@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
-from moderation.models import MatkoWord
+from base.models import MatkoWord
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -46,7 +46,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def get_auxiliary_tourism_codes(self, obj):
         lang = self.context.get("lang", "fi")
         return map(
-            lambda atc: {"id": atc["id"], "tag": atc["matkoword"][lang]},
+            lambda atc: {"id": atc.data["id"], "tag": atc.data["matkoword"][lang]},
             MatkoWord.objects.filter(data__id__in=obj.data["matko_ids"]),
         )
 
