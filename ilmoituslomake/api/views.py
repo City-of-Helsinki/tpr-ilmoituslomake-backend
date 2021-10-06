@@ -7,6 +7,8 @@ from translation.models import TranslationData, TranslationTask
 from django.shortcuts import render, get_object_or_404
 from django.utils import translation
 
+from ilmoituslomake.settings import API_KEY_CUSTOM_HEADER
+
 # Permissions
 from rest_framework.permissions import AllowAny
 from rest_framework import status
@@ -28,6 +30,18 @@ from django.db.models import Q
 
 from rest_framework_api_key.models import APIKey
 from rest_framework_api_key.permissions import HasAPIKey
+
+
+def request_has_api_key(request):
+    try:
+        if (API_KEY_CUSTOM_HEADER) in request.META:
+            key = request.META[API_KEY_CUSTOM_HEADER].split()[-1]
+            api_key = APIKey.objects.get_from_key(key)
+            if api_key:
+                return True
+    except Exception as e:
+        pass
+    return False
 
 
 def modify_translation_data(old_data, new_data):
@@ -65,13 +79,7 @@ class ApiRetrieveViewV1(RetrieveAPIView):
         lang = request.GET.get("language", "fi")
         moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
 
-        has_api_key = False
-
-        if "HTTP_AUTHORIZATION" in request.META:
-            key = request.META["HTTP_AUTHORIZATION"].split()[1]
-            api_key = APIKey.objects.get_from_key(key)
-            if api_key:
-                has_api_key = True
+        has_api_key = request_has_api_key(request)
 
         # If language is finnish, swedish or english, works with the serializer
         if lang in ["fi", "sv", "en"]:
@@ -117,13 +125,7 @@ class ApiListViewV1(ListAPIView):
         lang = self.request.GET.get("language")
         pagination = PageNumberPagination()
 
-        has_api_key = False
-
-        if "HTTP_AUTHORIZATION" in request.META:
-            key = request.META["HTTP_AUTHORIZATION"].split()[1]
-            api_key = APIKey.objects.get_from_key(key)
-            if api_key:
-                has_api_key = True
+        has_api_key = request_has_api_key(request)
 
         # If no language parameter is given, assume finnish
         if lang is None or lang is "":
