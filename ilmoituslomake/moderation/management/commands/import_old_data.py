@@ -1,6 +1,6 @@
 import requests
 
-import csv
+import uuid
 
 from itertools import islice
 
@@ -8,10 +8,20 @@ from itertools import islice
 
 from django.core.management.base import BaseCommand, CommandError
 
-from moderation.models import ModeratedNotification
+from moderation.models import ModeratedNotification, ModeratedNotificationImage
 from notification_form.models import Notification
 
+from base.image_utils import preprocess_images, process_images, unpublish_images
+
 #
+
+# This is needed so we can fake request object out of a dictionary
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 
 class Command(BaseCommand):
@@ -28,23 +38,29 @@ class Command(BaseCommand):
             )
         )
 
-    def handle_images(self, place):
-        ret = []
+    def create_fake_image_request(self, place):
+        data_images = []
+        data = []
         images = place.get("description", {}).get("images", [])
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
-                    ret.append(
+                    image_uuid = str(uuid.uuid4())
+                    data.append({"uuid": image_uuid, "url": image["url"]})
+                    data_images.append(
                         {
-                            "url": "",
+                            "uuid": image_uuid,
+                            "url": image["url"],
                             "permission": "Creative Commons BY 4.0"
                             if image["license_type"]["id"] == 3
                             else "Location only",
                             "source": image["copyright_holder"],
+                            "source_type": "url",
                             "alt_text": {"fi": "", "sv": "", "en": ""},
                         }
                     )
-        return ret
+        # print(ret)
+        return dotdict({"data": {"data": {"images": data_images}, "images": data}})
 
     def handle(self, *args, **options):
 
@@ -58,6 +74,9 @@ class Command(BaseCommand):
                 id = int(place["id"])
 
                 max_id = max(id, max_id)
+
+                fake_image_request = self.create_fake_image_request(place)
+                images = fake_image_request.data["data"]["images"]
 
                 data = {
                     "organization": {},
@@ -130,7 +149,7 @@ class Command(BaseCommand):
                         "sv": str(place.get("info_url", "")),
                         "en": str(place.get("info_url", "")),
                     },
-                    "images": self.handle_images(place),
+                    "images": images,
                     "opening_times": [],
                     "ontology_ids": [],
                     "matko_ids": self.handle_matko_tags(place),
@@ -144,15 +163,30 @@ class Command(BaseCommand):
                     },
                 }
 
+                # TODO: LANG
                 # zh_val = place.get("name", {}).get("zh", "")
                 # zh = str(zh_val) if zh_val != None else ""
                 # if zh != "":
                 #    print(zh)
 
-                # new_notification = Notification(data=data, moderated_notification_id=id, status="approved")
-                # new_notification.save()
-                # new_moderated_notification = ModeratedNotification(id=id, notification_id=new_notification.pk, data=data, published=True)
-                # new_moderated_notification.save()
+                new_notification = Notification(
+                    data=data, moderated_notification_id=id, status="approved"
+                )
+                new_notification.save()
+                new_moderated_notification = ModeratedNotification(
+                    id=id,
+                    notification_id=new_notification.pk,
+                    data=data,
+                    published=True,
+                )
+                new_moderated_notification.save()
+
+                pimages = preprocess_images(fake_image_request)
+                process_images(
+                    ModeratedNotificationImage, new_moderated_notification, pimages
+                )
+                unpublish_images(ModeratedNotificationImage, new_moderated_notification)
+                break
 
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
