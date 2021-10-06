@@ -12,7 +12,7 @@ import datetime
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
-from ilmoituslomake.ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
+from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
 # Create your views here.
 REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/tprek:", id, "/"
