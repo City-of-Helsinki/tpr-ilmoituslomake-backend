@@ -3,6 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
+from base.models import MatkoWord
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -43,7 +44,11 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     auxiliary_tourism_codes = serializers.SerializerMethodField()
 
     def get_auxiliary_tourism_codes(self, obj):
-        return obj.data["matko_ids"]
+        lang = self.context.get("lang", "fi")
+        return map(
+            lambda atc: {"id": atc.data["id"], "name": atc.data["matkoword"][lang]},
+            MatkoWord.objects.filter(data__id__in=obj.data["matko_ids"]),
+        )
 
     extra_searchwords = serializers.SerializerMethodField()
 
@@ -115,6 +120,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_images(self, obj):
         lang = self.context.get("lang", "fi")
+        has_api_key = self.context.get("has_api_key", False)
         return list(
             map(
                 lambda i: {
@@ -132,7 +138,10 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
                 },
-                obj.data.get("images", []),
+                filter(
+                    lambda i: (has_api_key or i["permission"] != "Location only"),
+                    obj.data.get("images", []),
+                ),
             )
         )
 

@@ -57,11 +57,17 @@ class TranslationRequestEditCreateView(CreateAPIView):
         # If a request already exists, modify the old
         if "id" in request_data.keys():
             old_tasks = TranslationTask.objects.filter(request_id = request_data["id"])
+
+            # If the translation is already published, it cannot be modified.
+            if old_tasks[0].published:
+                return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
             for task in old_tasks:
                 task.language_from = request_data["language"]["from"]
                 task.language_to = request_data["language"]["to"]
                 task.translator = get_object_or_404(User, uuid=request_data["translator"])
                 task.message = request_data["message"]
+                task.target_revision = task.target.revision
                 task.save()
             return Response(
                 {"id": request_data["id"]}, status=status.HTTP_201_CREATED
@@ -88,7 +94,9 @@ class TranslationRequestEditCreateView(CreateAPIView):
             copy_data["language_to"] = request_data["language"]["to"]
             copy_data["translator"] = get_object_or_404(User, uuid=request_data["translator"]).id
             copy_data["message"] = request_data["message"]
-                
+            copy_data["target_revision"] = get_object_or_404(ModeratedNotification, id=target).revision
+
+
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
 
@@ -142,7 +150,7 @@ class TranslationTodoRetrieveView(RetrieveAPIView):
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         translation_task = get_object_or_404(TranslationTask, id=id)
-        if translation_task.translator.email != request.user.email:
+        if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
         serializer = TranslationTaskWithDataSerializer(
@@ -225,12 +233,8 @@ class TranslationTaskSearchListView(ListAPIView):
     serializer_class = TranslationTaskSerializer
     def get_queryset(self):
         user = self.request.user
-        temp = {
-                "name": user.first_name,
-                "email": user.email,
-            },
-        return TranslationTask.objects.all()
-    # queryset = TranslationTask.objects.all()
+        return TranslationTask.objects.filter(translator=self.request.user)
+
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",
@@ -298,7 +302,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        if translation_task.translator.email != request.user.email:
+        if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
             
         if request.data["draft"]:
@@ -313,6 +317,8 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             translation_task_data = json.loads(request.data["data"])  # TODO: Validate
         else:
             translation_task_data = request.data["data"]  # TODO: Validate
+        
+        target_revision = translation_task.target.revision
 
         old_translation_data = TranslationData.objects.filter(task_id = id)
         if len(old_translation_data) > 0:
@@ -322,6 +328,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             old_translation_data[0].description_short = translation_task_data["description"]["short"]["lang"]
             old_translation_data[0].description_long = translation_task_data["description"]["long"]["lang"]
             old_translation_data[0].website = translation_task_data["website"]["lang"]
+            old_translation_data[0].target_revision = target_revision
             old_translation_data[0].save()
         else:
             new_data = {}
@@ -332,6 +339,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             new_data["description_short"] = translation_task_data["description"]["short"]["lang"]
             new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
             new_data["website"] = translation_task_data["website"]["lang"]
+            new_data["target_revision"] = target_revision
             translation_data = TranslationData(**new_data)
             translation_data.save()
 

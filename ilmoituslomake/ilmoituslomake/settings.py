@@ -31,6 +31,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
+HAUKI_SECRET_KEY = env("HAUKI_SECRET_KEY")
+
+API_TOKEN = env("API_TOKEN")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     "users",
     # DRF
     "rest_framework",
+    "rest_framework_api_key",
     # Django
     # "django.contrib.admin",
     "django.contrib.auth",
@@ -65,6 +70,7 @@ INSTALLED_APPS = [
     "api",
     "social_django",
     "translation",
+    "opening_times"
     # "huey.contrib.djhuey",
 ]
 
@@ -224,11 +230,13 @@ PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 # USE_X_FORWARDED_HOST = True
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # FORCE_SCRIPT_NAME = "/TPRalusta_testi"
-FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
+# FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
-FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
+FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS")  #  + FORCE_SCRIPT_NAME
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10
 
 
 JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
+
+API_KEY_CUSTOM_HEADER = "HTTP_OPEN_API_KEY"
