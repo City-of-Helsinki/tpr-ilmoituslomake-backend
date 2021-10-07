@@ -1,234 +1,201 @@
-matko_type_id;type_name;SUOMEKSI;RUOTSIKSI;ENGLANNIKSI
-282;Academy;Akatemia;;
-1;ACCOMMODATION;Majoitus;;
-165;Activity;Aktiviteetti;;
-207;AdventurePark;Seikkailupuisto;;
-293;Airport;Lentoasema;;
-166;AlvarAalto;Alvar Aalto;;
-87;AmusementPark;Huvipuisto;;
-88;Animals;Eläimet;;
-100;Antiquariat;Antikvariaatti;;
-69;Antiques;Antiikki;;
-12;Apartment;Huoneistohotelli;;
-278;Arboretum;Arboretum;;
-24;Architecture;Arkkitehtuuri;;
-30;Arena;Areena;;
-21;Art;Taide;;
-80;Asian;Aasialainen;;
-128;Athletics;Athletics;;
-110;Auditorium;Auditorium;;
-257;BabySupplies;Vauvatarvikkeet;;
-276;Badminton;Sulkapallo;;
-258;Bags;Kassit;;
-214;Bakery;Leipomo;;
-15;Banquet;Banquet;;
-56;BanquetIsland;BanquetIsland;;
-57;BanquetSeaside;BanquetSeaside;;
-3;BANQUET VENUES;BANQUET VENUES;;
-52;Bar;Baari;;
-199;Barber;Kampaamo;;
-228;BARS & NIGHTLIFE;Baarit ja yöelämä;;
-212;Basketball;Basketball;;
-32;Beach;Uimaranta;;
-201;BeautySalon;Kauneussalonki;;
-84;Bed&Breakfast;Bed & Breakfast;;
-187;Beef;Pihvi;;
-244;Beer;Olut;;
-95;Biking;Pyöräily;;
-108;Billiards;Biljardi;;
-141;Bistro;Bistro;;
-101;BookStore;Kirjakauppa;;
-152;BotanicalGarden;Kasvitieteellinen puutarha;;
-129;Bowling;Keilailu;;
-167;Breakfast;Aamiainen;;
-220;Brewery;Panimo;;
-168;Brunch;Brunssi;;
-48;Cafe;Kahvila;;
-83;CafeSummer;Kesäkahvila;;
-13;Camping;Leirintäalue;;
-255;Candy;Makeiset;;
-98;Canoeing;Melonta;;
-55;Casino;Kasino;;
-177;Chinese;Kiinalainen;;
-25;Church;Kirkko;;
-223;Circus;Sirkus;;
-266;Climbing;Kiipeily;;
-148;Club;Klubi;;
-144;Cocktail;Cocktailbaari;;
-194;Coffee;Kahvi;;
-28;Concert;Konsertti;;
-281;ContemporaryArt;Nykytaide;;
-200;Cosmetics;Kosmetiikka;;
-242;Cottage;Mökki;;
-259;Craft;Käsityö;;
-296;CultureCentre;Kulttuurikeskus;;
-76;Dance;Tanssi;;
-60;DepartmentStore;Tavaratalo;;
-23;Design;Design;;
-245;Distillery;Tislaamo;;
-270;DogPark;Koirapuisto;;
-261;Drapery;Kangakauppa;;
-149;EcoCompass;Eco Compass;;
-243;EcoFriendly;Ekoystävällinen;;
-116;EcoShop;EcoShop;;
-301;Electronics;Electronics;;
-96;EquipmentRental;Laitevuokraus;;
-208;EscapeRoom;Escaperoom;;
-252;Fair;Messu;;
-240;Family;Perhe;;
-180;Fashion;Muoti;;
-300;FastFood;FastFood;;
-235;Filipino;Filippiiniläinen;;
-46;FineDining;Fine dining;;
-42;Finnish;Suomalainen;;
-217;Fish;Kala;;
-263;FleaMarket;Kirpputori;;
-268;Floorball;Salibandy;;
-178;Florist;Kukkakauppa;;
-188;Food;Ruoka;;
-127;Football;Jalkapallo;;
-122;Free;Ilmainen;;
-111;FreeCatering;FreeCatering;;
-190;French;Ranskalainen;;
-215;Frisbeegolf;Frisbeegolf;;
-211;Furniture;Furniture;;
-65;FursLeather;FursLeather;;
-22;Gallery;Galleria;;
-249;Garden;Puutarha;;
-233;Georgian;Georgialainen;;
-92;Golf;Golf;;
-237;Greek;Kreikkalainen;;
-164;GreenKey;Green Key;;
-103;Grocery;Grocery;;
-91;GymFitness;Kuntosali;;
-269;Gymnastics;Voimistelu;;
-170;Hamburger;Hampurilainen;;
-292;Harbour;Satama;;
-189;HardwareStore;Rautakauppa;;
-254;HealthService;Terveyspalvelu;;
-260;Hiking;Retkeily;;
-77;History;Historia;;
-94;HorseRiding;Ratsastus;;
-11;Hostel;Hostelli;;
-241;Hotel;Hotelli;;
-36;IceSkating;Luistelu;;
-33;IceSwimming;Avanto;;
-172;Indian;Intialainen;;
-67;InteriorDesign;Sisustus;;
-44;International;Kansainvälinen;;
-47;Island;Saaristo;;
-191;IslandRestaurant;Saaristoravintola;;
-171;Italian;Italialainen;;
-174;Japanese;Japanilainen;;
-173;Jazz;Jazz;;
-72;Jewellery;Korut;;
-106;Karaoke;Karaoke;;
-130;Karting;Karting;;
-231;Kebab;Kebab;;
-205;KidsClothing;Lastenvaatteet;;
-238;Korean;Korealainen;;
-287;Laundry;Pesula;;
-221;LEEDEcoCertification;LEED Eco Certification;;
-54;LGBT;LGBT;;
-213;Library;Kirjasto;;
-53;LiveMusic;Live-musiikki;;
-297;Lunch;Lounas;;
-112;Luxury;Luksus;;
-19;MainAttraction;Päänähtäyvyys;;
-163;Mansion;Kartanot;;
-62;MarketHall;Kauppahalli;;
-61;MarketPlace;Tori;;
-203;Massage;Hieronta;;
-2;MEETING PLACES;MEETING PLACES;;
-248;Metal;Metallimusiikki;;
-183;Mexican;Meksikolainen;;
-230;Michelin;Michelin;;
-179;MiddleEast;Lähi-Itä;;
-93;MiniGolf;Minigolf;;
-253;MixedSauna;Sekasauna;;
-147;ModernNordic;Skandinaavinen;;
-251;Monument;Monumentti;;
-86;MovieTheatre;Elokuvateatteri;;
-40;Museum;Museo;;
-6;MUSEUMS & GALLERIES;Museot ja galleriat;;
-182;Music;Musiikki;;
-272;NationalPark;Kansallispuisto;;
-74;Nature;Luonto;;
-5;NATURE & SPORTS;Luonto ja liikunta;;
-275;NeighbourhoodSport;Lähiliikunta;;
-184;Nepalese;Nepalilainen;;
-50;Nightclub;Yökerho;;
-114;NordicSwan;Nordic Swan;;
-27;Opera;Ooppera;;
-145;Organic;Luomu;;
-70;Outlet;Outlet;;
-20;Park;Puisto;;
-280;Photography;Valokuvaus;;
-186;Pizza;Pizza;;
-271;Playground;Leikkipuisto;;
-209;PopUp;PopUp;;
-49;Pub;Pubi;;
-294;Railwaystation;Rautatieasema;;
-104;RecordStore;Levykauppa;;
-132;RecreationalArea;Ulkoilualue;;
-133;RecreationalCentre;Liikuntakeskus;;
-229;Restaurant;Ravintola;;
-10;RESTAURANTS & CAFES;Ravintolat ja kahvilat;;
-82;RestaurantSummer;Kesäravintola;;
-105;Rock;Rock;;
-157;Running;Juoksu;;
-196;Russian;Venäläinen;;
-17;Sauna;Sauna;;
-18;SaunaMeeting;SaunaMeeting;;
-169;SAUNA & WELLNESS;Sauna ja hyvinvointi;;
-250;Science;Tiede;;
-89;Sculpture;Veistokset;;
-181;Sea;Meri;;
-158;Seaside;Merenrantakahvila;;
-68;SecondHand;Second hand;;
-227;SERVICES;Palvelut;;
-66;Shoes;Kengät;;
-9;SHOPPING;Ostokset;;
-59;ShoppingCentre;Kauppakeskus;;
-4;SIGHTS & ATTRACTIONS;Nähtävyys ja kohde;;
-90;SkateBoard;Rullalautailu;;
-267;SkiingCrosscountry;Hiihto;;
-38;SkiingDownhill;Laskettelu;;
-142;SmartCasual;Smart casual;;
-71;Souvenirs;Matkamuistot;;
-35;Spa;Spa;;
-236;Spanish;Espanjalainen;;
-41;Speciality;Speciality;;
-29;Sport;Urheilu;;
-131;SportCenter;Urheilukeskus;;
-210;SportOutdoor;SportOutdoor;;
-246;StandUp;StandUp;;
-283;StartUp;StartUp;;
-224;StationaryShop;StationaryShop;;
-175;StreetFood;Katuruoka;;
-113;StreetStyle;Katumuoti;;
-274;Sup;Suppailu;;
-192;Sushi;Sushi;;
-31;Swimming;Uinti;;
-265;SwimmingHall;Uimahalli;;
-239;Tea;Tee;;
-279;Technical;Tekninen;;
-216;Tennis;Tennis;;
-193;Thai;Thaimaalainen;;
-26;Theatre;Teatteri;;
-299;TouristInformation;Matkailuneuvonta;;
-102;ToyStore;Lelukauppa;;
-146;TraditionalFinnish;Perinneruoka;;
-298;TravelAgency;TravelAgency;;
-195;Turkish;Turkkilainen;;
-234;Vegan;Vegaani;;
-117;Vegetarian;Kasvisruoka;;
-225;VENUES;Tapahtumapaikat;;
-197;Vietnamese;Vietnamilainen;;
-218;Viewpoint;Näköala;;
-126;Waterpark;Waterpark;;
-206;Wellness;Hyvinvointi;;
-198;Wine;Viini;;
-284;WorkSpace;Työtila;;
-226;WORK & STUDY;Työ ja opiskelu;;
-264;Yoga;Jooga;;
+matko_type_id;type_name_matko;SUOMEKSI;RUOTSIKSI;ENGLANNIKSI
+282;Academy;Akatemia;Akademi;Academy
+207;AdventurePark;Seikkailupuisto;Äventyrspark;Adventure park
+293;Airport;Lentoasema;Flygplats;Airport
+166;AlvarAalto;Alvar Aalto;Alvar Aalto;Alvar Aalto
+87;AmusementPark;Huvipuisto;Nöjespark;Amusement park
+88;Animals;Eläimet;Djur;Animals
+100;Antiquariat;Antikvariaatti;Antikvariat;Antiquariat
+69;Antiques;Antiikki;Antik;Antique
+12;Apartment;Huoneistohotelli;Lägenhetshotell;Apartment hotel
+278;Arboretum;Arboretum;Arboretum;Arboretum
+24;Architecture;Arkkitehtuuri;Arkitektur;Architecture
+30;Arena;Areena;Arena;Arena
+21;Art;Taidemuseo;Konstmuseum;Art museum
+80;Asian;Aasialainen;Asiatisk;Asian
+128;Athletics;Yleisurheilu;Friidrott;Athletics
+110;Auditorium;Auditorio;Auditorium;Auditorium
+257;BabySupplies;Vauvantarvikkeet;Babytillbehör;Baby supplies
+276;Badminton;Sulkapallo;Badminton;Badminton
+258;Bags;Laukut;Väskor;Bags
+214;Bakery;Leipomo;Bageri;Bakery
+52;Bar;Baari;Bar;Bar
+199;Barber;Kampaamo;Frisör;Hairdresser
+212;Basketball;Koripallo;Basket;Basketball
+32;Beach;Uimaranta;Simstrand;Beach
+201;BeautySalon;Kauneushoitola;Skönhetssalong;Beauty salon
+84;Bed&Breakfast;Bed & Breakfast;Bed & Breakfast;Bed & Breakfast
+187;Beef;Pihvi;Biff;Steak
+244;Beer;Olut;Öl;Beer
+95;Biking;Pyöräily;Cykling;Biking
+108;Billiards;Biljardi;Biljard;Billiards
+141;Bistro;Bistro;Bistro;Bistro
+101;BookStore;Kirjakauppa;Bokhandel;Bookstore
+152;BotanicalGarden;Kasvitieteellinen puutarha;Botanisk trädgård;Botanical garden
+129;Bowling;Keilailu;Bowling;Bowling
+167;Breakfast;Aamiainen;Frukost;Breakfast
+220;Brewery;Panimo;Bryggeri;Brewery
+168;Brunch;Brunssi;Brunch;Brunch
+83;CafeSummer;Kesäkahvila;Sommarcafé;Summer café
+13;Camping;Leirintäalue;Camping;Camping
+255;Candy;Makeiset;Sötsaker;Sweets
+98;Canoeing;Melonta;Paddling;Canoeing
+55;Casino;Kasino;Casino;Casino
+177;Chinese;Kiinalainen;Kinesisk;Chinese
+25;Church;Kirkko;Kyrka;Church
+223;Circus;Sirkus;Cirkus;Circus
+266;Climbing;Kiipeily;Klättring;Climbing
+148;Club;Klubi;Club;Club
+144;Cocktail;Cocktailbaari;Cocktailbar;Cocktail bar
+194;Coffee;Kahvi;Kaffe;Coffee
+28;Concert;Konsertti;Konsert;Concert
+281;ContemporaryArt;Nykytaide;Samtidskonst;Contemporary art
+200;Cosmetics;Kosmetiikka;Kosmetik;Cosmetics
+242;Cottage;Mökki;Stuga;Cottage
+259;Craft;Käsityö;Handarbete;Craft
+296;CultureCentre;Kulttuurikeskus;Kulturcentrum;Culture centre
+76;Dance;Tanssi;Dans;Dance
+60;DepartmentStore;Tavaratalo;Varuhus;Department store
+23;Design;Design;Design;Design
+245;Distillery;Tislaamo;Destilleri;Distillery
+270;DogPark;Koirapuisto;Hundpark;Dog park
+261;Drapery;Kankaat;Tyger;Drapery
+301;Electronics;Elektroniikka;Elektronik;Electronics
+96;EquipmentRental;Välinevuokraus;Redskapsuthyrning;Equipment rental
+208;EscapeRoom;Pakohuone;Escape room;Escape room
+252;Fair;Messu;Mässa;Fair
+240;Family;Perhe;Familj;Family
+180;Fashion;Muoti;Mode;Fashion
+300;FastFood;Pikaruoka;Snabbmat;Fast food
+235;Filipino;Filippiiniläinen;Filippinsk;Filipino
+46;FineDining;Fine dining;Fine dining;Fine dining
+42;Finnish;Suomalainen;Finsk;Finnish
+217;Fish;Kala;Fisk;Fish
+263;FleaMarket;Kirpputori;Lopptorg;Flea market
+268;Floorball;Salibandy;Innbandy;Floorball
+178;Florist;Kukkakauppa;Florist;Florist
+188;Food;Ruoka;Mat;Food
+127;Football;Jalkapallo;Fotboll;Football
+122;Free;Ilmainen;Gratis;Free
+190;French;Ranskalainen;Fransk;French
+215;Frisbeegolf;Frisbeegolf;Frisbeegolf;Frisbeegolf
+211;Furniture;Huonekalut;Möbler;Furniture
+65;FursLeather;Turkis ja nahka;Päls och läder;Furs and leather
+249;Garden;Puutarha;Trädgård;Garden
+233;Georgian;Georgialainen;Georgisk;Georgian
+92;Golf;Golf;Golf;Golf
+237;Greek;Kreikkalainen;Grekisk;Greek
+103;Grocery;Päivittäistavarakauppa;Dagligvaruhandel;Grocery store
+91;GymFitness;Kuntosali;Gym;Gym
+269;Gymnastics;Voimistelu;Gymnastik;Gymnastics
+170;Hamburger;Hampurilainen;Hamburger;Hamburger
+292;Harbour;Satama;Hamn;Harbour
+189;HardwareStore;Rautakauppa;Järnhandel;Hardware store
+254;HealthService;Terveyspalvelu;Hälsotjänst;Health service
+260;Hiking;Retkeily;Vandring;Hiking
+77;History;Historia;Historia;History
+94;HorseRiding;Ratsastus;Ridning;Horse riding
+11;Hostel;Hostelli;Vandrarhem;Hostel
+241;Hotel;Hotelli;Hotell;Hotel
+36;IceSkating;Luistelu;Skridskoåkning;Ice skating
+33;IceSwimming;Avantouinti;Vaksimning;Ice swimming
+172;Indian;Intialainen;Indisk;Indian
+67;InteriorDesign;Sisustus;Inredning;Interior design
+44;International;Kansainvälinen;Internationell;International
+47;Island;Saaristo;Skärgård;Archipelago
+191;IslandRestaurant;Saaristoravintola;Skärgårdsrestaurang;Island restaurant
+171;Italian;Italialainen;Italiensk;Italian
+174;Japanese;Japanilainen;Japansk;Japanese
+173;Jazz;Jazz;Jazz;Jazz
+72;Jewellery;Korut;Smycken;Jewllery
+106;Karaoke;Karaoke;Karaoke;Karaoke
+130;Karting;Karting;Karting;Karting
+231;Kebab;Kebab;Kebab;Kebab
+205;KidsClothing;Lastenvaatteet;Barnkläder;Kids clothing
+238;Korean;Korealainen;Koreansk;Korean
+287;Laundry;Pesula;Tvätteri;Laundry
+54;LGBT;LGBT+;LGBT+;LGBT+
+213;Library;Kirjasto;Bibliotek;Library
+53;LiveMusic;Live-musiikki;Live musik;Live music
+297;Lunch;Lounas;Lunch;Lunch
+112;Luxury;Luksus;Lyx;Luxury
+19;MainAttraction;Päänähtäyvyys;Huvudsevärdhet;Main attraction
+163;Mansion;Kartano;Herrgård;Mansion
+62;MarketHall;Kauppahalli;Saluhall;Market hall
+61;MarketPlace;Tori;Torg;Market place
+203;Massage;Hieronta;Massage;Massage
+183;Mexican;Meksikolainen;Mexikansk;Mexican
+230;Michelin;Michelin;Michelin;Michelin
+179;MiddleEast;Lähi-Itä;Mellanöstern;Middle East
+93;MiniGolf;Minigolf;Minigolf;Minigolf
+253;MixedSauna;Sekasauna;Blandbastu;Mixed sauna
+147;ModernNordic;Modern Nordic;Modern Nordic;Modern Nordic
+251;Monument;Monumentti;Monument;Monument
+86;MovieTheatre;Elokuvateatteri;Biograf;Movie theatre
+182;Music;Musiikki;Musik;Music
+272;NationalPark;Kansallispuisto;Nationalpark;National park
+275;NeighbourhoodSport;Lähiliikunta;Näridrott;Neighbourhood sport
+184;Nepalese;Nepalilainen;Nepalesisk;Nepalese
+50;Nightclub;Yökerho;Nattklubb;Nightclub
+27;Opera;Ooppera;Opera;Opera
+145;Organic;Luomu;Ekologisk;Organic
+70;Outlet;Outlet;Outlet;Outlet
+20;Park;Puisto;Park;Park
+280;Photography;Valokuvaus;Fotografering;Photography
+186;Pizza;Pizza;Pizza;Pizza
+271;Playground;Leikkipuisto;Lekpark;Playground
+209;PopUp;Pop up;Pop up;Pop up
+49;Pub;Pubi;Pub;Pub
+294;Railwaystation;Rautatieasema;Järnvägsstation;Railway station
+104;RecordStore;Levykauppa;Skivbutik;Record store
+132;RecreationalArea;Ulkoilualue;Friluftsområde;Recreational area
+133;RecreationalCentre;Liikuntakeskus;Motionscenter;Recreational centre
+82;RestaurantSummer;Kesäravintola;Sommarrestaurang;Summer restaurant
+105;Rock;Rock;Rock;Rock
+157;Running;Juoksu;Löpning;Running
+196;Russian;Venäläinen;Rysk;Russian
+17;Sauna;Sauna;Bastu;Sauna
+250;Science;Tiede;Vetenskap;Science
+89;Sculpture;Veistos;Skuptur;Sculpture
+181;Sea;Meri;Havet;Sea
+68;SecondHand;Second hand;Second hand;Second hand
+227;SERVICES;Palvelut;Tjänst;Services
+66;Shoes;Kengät;Skor;Shoes
+59;ShoppingCentre;Kauppakeskus;Köpcentrum;Shopping centre
+90;SkateBoard;Rullalautailu;Skateboarding;Skateboarding
+267;SkiingCrosscountry;Hiihto;Skidåkning;Skiing crosscountry
+38;SkiingDownhill;Laskettelu;Slalomåkning;Skiing downhill
+142;SmartCasual;Smart casual;Smart casual;Smart casual
+71;Souvenirs;Matkamuistot;Souvenirer;Souvenirs
+35;Spa;Spa;Spa;Spa
+236;Spanish;Espanjalainen;Spansk;Spanish
+41;Speciality;Erikoismuseo;Specialmuseum;Speciality museum
+29;Sport;Urheilu;Idrott;Sport
+131;SportCenter;Urheilukeskus;Sportcenter;Sports centre
+210;SportOutdoor;Ulkoilu- ja urheiluvarusteliike;Friluftsutrustning och sportaffär;Outdoor and sports shop
+246;StandUp;Stand up;Stand up;Stand up
+283;StartUp;Start up;Start up;Start up
+224;StationaryShop;Paperikauppa;Pappershandel;Stationary shop
+175;StreetFood;Katuruoka;Street food;Street food
+274;Sup;SUP-lautailu;SUP-paddling;SUP paddling
+192;Sushi;Sushi;Sushi;Sushi
+31;Swimming;Uinti;Simning;Swimming
+265;SwimmingHall;Uimahalli;Simhall;Swimming hall
+239;Tea;Tee;Te;Tea
+279;Technical;Tekninen;Tekniskt;Technical
+216;Tennis;Tennis;Tennis;Tennis
+193;Thai;Thaimaalainen;Thailändsk;Thai
+26;Theatre;Teatteri;Teater;Theatre
+299;TouristInformation;Matkailuneuvonta;Turistinformation;Tourist information
+102;ToyStore;Lelukauppa;Leksaksbutik;Toy store
+146;TraditionalFinnish;Perinneruoka;Traditionell mat;Traditional cuisine
+298;TravelAgency;Matkatoimisto;Resebyrå;Travel agency
+195;Turkish;Turkkilainen;Turkisk;Turkish
+234;Vegan;Vegaani;Vegansk;Vegan
+117;Vegetarian;Kasvisruoka;Vegetarisk;Vegetarian
+197;Vietnamese;Vietnamilainen;Vietnamesisk;Vietnamese
+218;Viewpoint;Näköalapaikka;Utsiktsplats;Viewpoint
+126;Waterpark;Vesipuisto;Vattenpark;Waterpark
+198;Wine;Viini;Vin;Wine
+284;WorkSpace;Työtila;Arbetsutrymme;Work space
+264;Yoga;Jooga;Yoga;Yoga
