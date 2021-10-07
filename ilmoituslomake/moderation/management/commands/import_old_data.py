@@ -73,8 +73,52 @@ class Command(BaseCommand):
 
             data = response.json()["data"]
 
-            for place in data:
-                id = int(place["id"])
+            for loc in data:
+                id = int(loc["id"])
+
+                place = requests.get(
+                    "http://open-api.myhelsinki.fi/v1/place/"
+                    + str(id)
+                    + "?language_filter=fi"
+                ).json()
+                place_sv = requests.get(
+                    "http://open-api.myhelsinki.fi/v1/place/"
+                    + str(id)
+                    + "?language_filter=sv"
+                ).json()
+                place_en = requests.get(
+                    "http://open-api.myhelsinki.fi/v1/place/"
+                    + str(id)
+                    + "?language_filter=en"
+                ).json()
+
+                address = (
+                    place.get("location", {})
+                    .get("address", {})
+                    .get("street_address", "")
+                )  # + " " + place.get("location", {}).get("address", {}).get("postal_code", "")
+                # https://api.hel.fi/servicemap/v2/search/?format=json&type=address&input=address&language=fi
+                # const neighbourhoodResponse = await fetch(`${getOrigin(router)}${NEIGHBOURHOOD_URL}&lon=${lon}&lat=${lat}`);
+
+                lon = float(place.get("location", {}).get("lon", 0))
+                lat = float(place.get("location", {}).get("lat", 0))
+
+                nhood = requests.get(
+                    "https://api.hel.fi/servicemap/v2/administrative_division/?type=neighborhood&lon="
+                    + str(lon)
+                    + "&lat="
+                    + str(lat)
+                    + "&format=json"
+                ).json()
+
+                nhood_id = ""
+                nhood_name_fi = ""
+                nhood_name_sv = ""
+
+                if len(nhood["results"]) > 0:
+                    nhood_id = str(nhood["results"][0]["origin_id"])
+                    nhood_name_fi = str(nhood["results"][0]["name"]["fi"])
+                    nhood_name_sv = str(nhood["results"][0]["name"]["sv"])
 
                 max_id = max(id, max_id)
 
@@ -89,19 +133,19 @@ class Command(BaseCommand):
                         "en": str(place.get("name", {}).get("en", "")),
                     },
                     "location": [
-                        float(place.get("location", {}).get("lat", 0)),
-                        float(place.get("location", {}).get("lon", 0)),
+                        lat,
+                        lon,
                     ],
                     "description": {
                         "short": {
                             "fi": str(place.get("description", {}).get("body", "")),
-                            "sv": "",
-                            "en": "",
+                            "sv": str(place_sv.get("description", {}).get("body", "")),
+                            "en": str(place_en.get("description", {}).get("body", "")),
                         },
                         "long": {
                             "fi": str(place.get("description", {}).get("body", "")),
-                            "sv": "",
-                            "en": "",
+                            "sv": str(place_sv.get("description", {}).get("body", "")),
+                            "en": str(place_en.get("description", {}).get("body", "")),
                         },
                     },
                     "address": {
@@ -121,36 +165,36 @@ class Command(BaseCommand):
                                 .get("address", {})
                                 .get("locality", "")
                             ),
-                            "neighborhood_id": "",
-                            "neighborhood": "",
+                            "neighborhood_id": nhood_id,
+                            "neighborhood": nhood_name_fi,
                         },
                         "sv": {
                             "street": str(
-                                place.get("location", {})
+                                place_sv.get("location", {})
                                 .get("address", {})
                                 .get("street_address", "")
                             ),
                             "postal_code": str(
-                                place.get("location", {})
+                                place_sv.get("location", {})
                                 .get("address", {})
                                 .get("postal_code", "")
                             ),
                             "post_office": str(
-                                place.get("location", {})
+                                place_sv.get("location", {})
                                 .get("address", {})
                                 .get("locality", "")
                             ),
-                            "neighborhood_id": "",
-                            "neighborhood": "",
+                            "neighborhood_id": nhood_id,
+                            "neighborhood": nhood_name_sv,
                         },
                     },
                     "businessid": "",
                     "phone": "",
                     "email": "",
                     "website": {
-                        "fi": "",
-                        "sv": "",
-                        "en": "",
+                        "fi": str(place.get("info_url", "")),
+                        "sv": str(place_sv.get("info_url", "")),
+                        "en": str(place_en.get("info_url", "")),
                     },
                     "images": images,
                     "opening_times": [],
@@ -165,6 +209,10 @@ class Command(BaseCommand):
                         "phone": "",
                     },
                 }
+
+                print(data)
+
+                break
 
                 has_zh = False
                 zh_val = place.get("name", {}).get("zh", "")
@@ -220,7 +268,7 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             query = (
                 "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
-                + (max_id + 10)
+                + str(max_id + 10)
                 + ";"
             )
             cursor.execute(query)
