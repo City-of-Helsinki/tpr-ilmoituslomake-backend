@@ -13,6 +13,8 @@ from notification_form.models import Notification
 
 from base.image_utils import preprocess_images, process_images, unpublish_images
 
+from django.db import connection
+
 #
 
 # This is needed so we can fake request object out of a dictionary
@@ -63,9 +65,9 @@ class Command(BaseCommand):
         return dotdict({"data": {"data": {"images": data_images}, "images": data}})
 
     def handle(self, *args, **options):
-
+        max_id = 0
         try:
-            max_id = 0
+
             response = requests.get("http://open-api.myhelsinki.fi/v1/places/")
 
             data = response.json()["data"]
@@ -145,9 +147,9 @@ class Command(BaseCommand):
                     "phone": "",
                     "email": "",
                     "website": {
-                        "fi": str(place.get("info_url", "")),
-                        "sv": str(place.get("info_url", "")),
-                        "en": str(place.get("info_url", "")),
+                        "fi": "",
+                        "sv": "",
+                        "en": "",
                     },
                     "images": images,
                     "opening_times": [],
@@ -168,29 +170,51 @@ class Command(BaseCommand):
                 # zh = str(zh_val) if zh_val != None else ""
                 # if zh != "":
                 #    print(zh)
+                new_moderated_notification = None
+                try:
+                    new_moderated_notification = ModeratedNotification.objects.get(
+                        id=id
+                    )
+                    new_moderated_notification.data = data
+                    new_moderated_notification.save()
+                except Exception as e:  # Model.DoesNotExist:
+                    new_notification = Notification(
+                        data=data, moderated_notification_id=id, status="approved"
+                    )
+                    new_notification.save()
+                    new_moderated_notification = (
+                        new_moderated_notification
+                    ) = ModeratedNotification(
+                        id=id,
+                        notification_id=new_notification.pk,
+                        data=data,
+                        published=True,
+                    )
+                    new_moderated_notification.save()
 
-                new_notification = Notification(
-                    data=data, moderated_notification_id=id, status="approved"
-                )
-                new_notification.save()
-                new_moderated_notification = ModeratedNotification(
-                    id=id,
-                    notification_id=new_notification.pk,
-                    data=data,
-                    published=True,
-                )
-                new_moderated_notification.save()
+                if new_moderated_notification == None:
+                    print("error")
+                    pass
 
                 pimages = preprocess_images(fake_image_request)
                 process_images(
                     ModeratedNotificationImage, new_moderated_notification, pimages
                 )
                 unpublish_images(ModeratedNotificationImage, new_moderated_notification)
-                break
+                # break
 
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
+
+        # Alter sequence so that it wont break
+        with connection.cursor() as cursor:
+            query = (
+                "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
+                + (max_id + 10)
+                + ";"
+            )
+            cursor.execute(query)
 
         # Success
         self.stdout.write(self.style.SUCCESS("Data loaded successfully."))

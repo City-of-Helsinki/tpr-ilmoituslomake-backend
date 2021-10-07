@@ -16,7 +16,7 @@ from rest_framework.response import Response
 
 from rest_framework import filters
 
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 
 from rest_framework.generics import (
     ListAPIView,
@@ -59,10 +59,9 @@ def modify_translation_data(old_data, new_data):
                     image["alt_text"] = translated_image["alt_text"]["lang"]
 
 
-class LargeResultsSetPagination(PageNumberPagination):
-    page_size = 200
-    page_size_query_param = "page_size"
-    max_page_size = 200
+class LargeResultsSetPagination(LimitOffsetPagination):
+    default_limit = 200
+    max_limit = 200
 
 
 class ApiRetrieveViewV1(RetrieveAPIView):
@@ -115,53 +114,29 @@ class ApiListViewV1(ListAPIView):
     permission_classes = [AllowAny]
     queryset = ModeratedNotification.objects.all().filter(Q(published=True))
     serializer_class = ApiModeratedNotificationSerializerV1
-    filter_backends = [filters.SearchFilter]
-    pagination_class = LargeResultsSetPagination
-    # TODO: Create migration which generates indices for JSON data
-    search_fields = ["data__name__fi", "data__name__sv", "data__name__en"]
+    # pagination_class = LargeResultsSetPagination
 
     def list(self, request, *args, **kwargs):
-        search_query = self.request.GET.get("search")
-        lang = self.request.GET.get("language")
-        pagination = PageNumberPagination()
+        lang = self.request.GET.get("language", "fi")
 
         has_api_key = request_has_api_key(request)
 
-        # If no language parameter is given, assume finnish
-        if lang is None or lang is "":
-            lang = "fi"
-
         modified_data = []
 
-        # If no search_query is given, return every target with translation to the language
-        if search_query is None:
-            data = ModeratedNotification.objects.all().filter(Q(published=True))
-            qs = pagination.paginate_queryset(data, request)
-            serializer = ApiModeratedNotificationSerializerV1(
-                qs, many=True, context={"lang": lang, "has_api_key": has_api_key}
-            )
-            modified_data = serializer.data
-        # If search_query is given, filter all ModeratedNotifications by the name of their data
-        else:
-            data = ModeratedNotification.objects.all().filter(
-                Q(published=True)
-                & (
-                    Q(data__name__fi__icontains=search_query)
-                    | Q(data__name__sv__icontains=search_query)
-                    | Q(data__name__en__icontains=search_query)
-                )
-            )
-            qs = pagination.paginate_queryset(data, request)
-            serializer = ApiModeratedNotificationSerializerV1(
-                qs, many=True, context={"lang": lang, "has_api_key": has_api_key}
-            )
-            modified_data = serializer.data
+        pagination = LargeResultsSetPagination()
+        data = ModeratedNotification.objects.all().filter(Q(published=True))
+        qs = pagination.paginate_queryset(data, request)
+        serializer = ApiModeratedNotificationSerializerV1(
+            qs, many=True, context={"lang": lang, "has_api_key": has_api_key}
+        )
+        modified_data = serializer.data
 
         # If language is not finnish, swedish or english, find the newest, published
         # translationdata matching to the target and language and replace name, short_description,
         # description and picture alt text with the translations.
         if lang in ["fi", "sv", "en"]:
-            return Response(modified_data, status=status.HTTP_200_OK)
+            return pagination.get_paginated_response(modified_data)
+        # return Response(modified_data, status=status.HTTP_200_OK)
 
         index = 0
         for moderation_item in modified_data:
@@ -183,4 +158,5 @@ class ApiListViewV1(ListAPIView):
                 modified_data[index] = None
             index += 1
 
-        return Response([i for i in modified_data if i], status=status.HTTP_200_OK)
+        return pagination.get_paginated_response([i for i in modified_data if i])
+        # return Response([i for i in modified_data if i], status=status.HTTP_200_OK)
