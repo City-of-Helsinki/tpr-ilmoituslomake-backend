@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from moderation.models import ModeratedNotification, ModeratedNotificationImage
 from notification_form.models import Notification
+from translation.models import TranslationData, TranslationTask
 
 from base.image_utils import preprocess_images, process_images, unpublish_images
 
@@ -165,11 +166,12 @@ class Command(BaseCommand):
                     },
                 }
 
-                # TODO: LANG
-                # zh_val = place.get("name", {}).get("zh", "")
-                # zh = str(zh_val) if zh_val != None else ""
-                # if zh != "":
-                #    print(zh)
+                has_zh = False
+                zh_val = place.get("name", {}).get("zh", "")
+                zh = str(zh_val) if zh_val != None else ""
+                if zh != "":
+                    has_zh = True
+
                 new_moderated_notification = None
                 try:
                     new_moderated_notification = ModeratedNotification.objects.get(
@@ -194,14 +196,21 @@ class Command(BaseCommand):
 
                 if new_moderated_notification == None:
                     print("error")
-                    pass
+                    continue
 
                 pimages = preprocess_images(fake_image_request)
                 process_images(
                     ModeratedNotificationImage, new_moderated_notification, pimages
                 )
                 unpublish_images(ModeratedNotificationImage, new_moderated_notification)
-                # break
+
+                # TODO: Implement translation
+                if has_zh:
+                    pass
+                    # Create TranslationTask and TranslationData manually for 'new_moderated_notification'
+                    # It is from 'en' to 'zh'
+                    # The variable 'zh' contains the translation. It is a string for the name field.
+                    # All other fields are untranslated = empty.
 
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
