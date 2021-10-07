@@ -4,6 +4,9 @@ import uuid
 
 from itertools import islice
 
+import lxml
+from bs4 import BeautifulSoup
+
 # from jsonschema import validate
 
 from django.core.management.base import BaseCommand, CommandError
@@ -17,6 +20,7 @@ from base.image_utils import preprocess_images, process_images, unpublish_images
 from django.db import connection
 
 #
+muni_translations = {"HELSINKI": "Helsingfors", "ESPOO": "Esbo"}
 
 # This is needed so we can fake request object out of a dictionary
 class dotdict(dict):
@@ -40,6 +44,18 @@ class Command(BaseCommand):
                 ),
             )
         )
+
+    def find_xml_element(self, id, elems, elems_sv, elems_en):
+        return {
+            "fi": list(
+                filter(lambda item: item.find("matko:id", string=str(id)), elems)
+            )[0],
+            "sv": "",
+            "en": "",
+        }
+
+    def extract_property(self, elems, lang, prop):
+        return str(elems[lang].find(prop).string)
 
     def create_fake_image_request(self, place):
         data_images = []
@@ -70,11 +86,31 @@ class Command(BaseCommand):
         try:
 
             response = requests.get("http://open-api.myhelsinki.fi/v1/places/")
+            xml_fi = BeautifulSoup(
+                requests.get(
+                    "http://feeds.myhelsinki.fi/places/helsinki_matkailu_poi.xml"
+                ).content,
+                "xml",
+            ).find_all("item")
+            xml_sv = BeautifulSoup(
+                requests.get(
+                    "http://feeds.myhelsinki.fi/places/helsinki_turism_poi.xml"
+                ).content,
+                "xml",
+            ).find_all("item")
+            xml_en = BeautifulSoup(
+                requests.get(
+                    "http://feeds.myhelsinki.fi/places/helsinki_tourism_poi.xml"
+                ).content,
+                "xml",
+            ).find_all("item")
 
             data = response.json()["data"]
 
             for loc in data:
                 id = int(loc["id"])
+
+                xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
 
                 place = requests.get(
                     "http://open-api.myhelsinki.fi/v1/place/"
@@ -96,9 +132,7 @@ class Command(BaseCommand):
                     place.get("location", {})
                     .get("address", {})
                     .get("street_address", "")
-                )  # + " " + place.get("location", {}).get("address", {}).get("postal_code", "")
-                # https://api.hel.fi/servicemap/v2/search/?format=json&type=address&input=address&language=fi
-                # const neighbourhoodResponse = await fetch(`${getOrigin(router)}${NEIGHBOURHOOD_URL}&lon=${lon}&lat=${lat}`);
+                )
 
                 lon = float(place.get("location", {}).get("lon", 0))
                 lat = float(place.get("location", {}).get("lat", 0))
@@ -169,28 +203,31 @@ class Command(BaseCommand):
                             "neighborhood": nhood_name_fi,
                         },
                         "sv": {
-                            "street": str(
-                                place_sv.get("location", {})
-                                .get("address", {})
-                                .get("street_address", "")
-                            ),
+                            "street": self.extract_property(xml, "sv", "matko:address"),
                             "postal_code": str(
                                 place_sv.get("location", {})
                                 .get("address", {})
                                 .get("postal_code", "")
                             ),
-                            "post_office": str(
-                                place_sv.get("location", {})
-                                .get("address", {})
-                                .get("locality", "")
+                            "post_office": muni_translations.get(
+                                str(
+                                    place_sv.get("location", {})
+                                    .get("address", {})
+                                    .get("locality", "")
+                                ).to_upper(),
+                                str(
+                                    place_sv.get("location", {})
+                                    .get("address", {})
+                                    .get("locality", "")
+                                ),
                             ),
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_sv,
                         },
                     },
                     "businessid": "",
-                    "phone": "",
-                    "email": "",
+                    "phone": self.extract_property(xml, "fi", "matko:phone"),
+                    "email": self.extract_property(xml, "fi", "matko:email"),
                     "website": {
                         "fi": str(place.get("info_url", "")),
                         "sv": str(place_sv.get("info_url", "")),
@@ -212,7 +249,7 @@ class Command(BaseCommand):
 
                 print(data)
 
-                break
+                continue
 
                 has_zh = False
                 zh_val = place.get("name", {}).get("zh", "")
@@ -263,6 +300,7 @@ class Command(BaseCommand):
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
+        return
 
         # Alter sequence so that it wont break
         with connection.cursor() as cursor:
