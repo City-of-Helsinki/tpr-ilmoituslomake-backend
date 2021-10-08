@@ -47,15 +47,44 @@ class Command(BaseCommand):
 
     def find_xml_element(self, id, elems, elems_sv, elems_en):
         return {
-            "fi": list(
-                filter(lambda item: item.find("matko:id", string=str(id)), elems)
-            )[0],
-            "sv": "",
-            "en": "",
+            "fi": elems.get(str(id), None),
+            "sv": elems_sv.get(str(id), None),
+        }
+
+    def find_xml_element2(self, id, elems, elems_sv, elems_en):
+        fi = list(
+            filter(
+                lambda item: item != None,
+                filter(lambda item: item.find("matko:id", string=str(id)), elems),
+            )
+        )
+        sv = list(
+            filter(
+                lambda item: item != None,
+                filter(lambda item: item.find("matko:id", string=str(id)), elems_sv),
+            )
+        )
+        e_fi = fi[0] if len(fi) > 0 else None
+        e_sv = sv[0] if len(sv) > 0 else None
+        if e_fi != None:
+            elems.remove(e_fi)
+        if e_sv != None:
+            elems_sv.remove(e_sv)
+        return {
+            "fi": e_fi,
+            "sv": e_sv
+            # "en": list(
+            #    filter(lambda item: item.find("matko:id", string=str(id)), elems_en)
+            # )[0],
         }
 
     def extract_property(self, elems, lang, prop):
-        return str(elems[lang].find(prop).string)
+        if elems[lang] == None:
+            return ""
+        f = elems[lang].find(prop)
+        if f:
+            return str(f.string)
+        return ""
 
     def create_fake_image_request(self, place):
         data_images = []
@@ -86,30 +115,35 @@ class Command(BaseCommand):
         try:
 
             response = requests.get("http://open-api.myhelsinki.fi/v1/places/")
-            xml_fi = BeautifulSoup(
+            xml_fi_ = BeautifulSoup(
                 requests.get(
                     "http://feeds.myhelsinki.fi/places/helsinki_matkailu_poi.xml"
                 ).content,
                 "xml",
             ).find_all("item")
-            xml_sv = BeautifulSoup(
+            xml_sv_ = BeautifulSoup(
                 requests.get(
-                    "http://feeds.myhelsinki.fi/places/helsinki_turism_poi.xml"
+                    "http://feeds.myhelsinki.fi/places/helsingfors_turism_poi.xml"
                 ).content,
                 "xml",
             ).find_all("item")
-            xml_en = BeautifulSoup(
+            xml_en_ = BeautifulSoup(
                 requests.get(
                     "http://feeds.myhelsinki.fi/places/helsinki_tourism_poi.xml"
                 ).content,
                 "xml",
             ).find_all("item")
 
+            xml_fi = {i.find("matko:id").string: i for i in xml_fi_}
+            xml_sv = {i.find("matko:id").string: i for i in xml_sv_}
+            xml_en = {i.find("matko:id").string: i for i in xml_en_}
+
             data = response.json()["data"]
 
             for loc in data:
                 id = int(loc["id"])
 
+                print(id)
                 xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
 
                 place = requests.get(
@@ -117,33 +151,38 @@ class Command(BaseCommand):
                     + str(id)
                     + "?language_filter=fi"
                 ).json()
-                place_sv = requests.get(
+
+                place_sv = {}
+                place_sv_ = requests.get(
                     "http://open-api.myhelsinki.fi/v1/place/"
                     + str(id)
                     + "?language_filter=sv"
-                ).json()
-                place_en = requests.get(
+                )
+                if place_sv_.status_code == 200:
+                    place_sv = place_sv_.json()
+
+                place_en = {}
+                place_en_ = requests.get(
                     "http://open-api.myhelsinki.fi/v1/place/"
                     + str(id)
                     + "?language_filter=en"
-                ).json()
-
-                address = (
-                    place.get("location", {})
-                    .get("address", {})
-                    .get("street_address", "")
                 )
+
+                if place_en_.status_code == 200:
+                    place_en = place_en_.json()
 
                 lon = float(place.get("location", {}).get("lon", 0))
                 lat = float(place.get("location", {}).get("lat", 0))
 
-                nhood = requests.get(
+                nhood_ = requests.get(
                     "https://api.hel.fi/servicemap/v2/administrative_division/?type=neighborhood&lon="
                     + str(lon)
                     + "&lat="
                     + str(lat)
                     + "&format=json"
-                ).json()
+                )
+
+                nhood = nhood_.json()
 
                 nhood_id = ""
                 nhood_name_fi = ""
@@ -214,7 +253,7 @@ class Command(BaseCommand):
                                     place_sv.get("location", {})
                                     .get("address", {})
                                     .get("locality", "")
-                                ).to_upper(),
+                                ).upper(),
                                 str(
                                     place_sv.get("location", {})
                                     .get("address", {})
@@ -247,7 +286,7 @@ class Command(BaseCommand):
                     },
                 }
 
-                print(data)
+                # print(data)
 
                 continue
 
