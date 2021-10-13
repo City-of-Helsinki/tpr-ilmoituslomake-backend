@@ -284,6 +284,9 @@
                             }
                         },
                         "required": ["fi", "sv", "en"]
+                    },
+                    "media_id": {
+                        "type": "string"
                     }
                 },
                 "required": ["index", "uuid", "source_type", "url", "permission", "source", "alt_text"]
