@@ -128,9 +128,14 @@ class Command(BaseCommand):
                     ontology_array = ontology_array + [d]
                 else:
                     if a == 226:
-                        ontology_array = ontology_array
+                        if "WorkSpace" in matkos:
+                            ontology_array = ontology_array + [921]
+                        else:
+                            ontology_array = ontology_array + [920]
                     else:
-                        pass
+                        fw = list(set(matkos).intersection(set(list(d.keys()))))
+                        for f in fw:
+                            ontology_array.append(d[f])
 
             else:
                 matko_array.append(a)
@@ -404,7 +409,7 @@ class Command(BaseCommand):
                     },
                 }
 
-                # print(data)
+                print(data)
 
                 has_zh = False
                 zh_val = place.get("name", {}).get("zh", "")
