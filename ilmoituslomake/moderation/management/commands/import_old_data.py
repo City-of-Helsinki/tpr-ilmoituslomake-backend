@@ -1,6 +1,7 @@
 import requests
 
 import uuid
+import csv
 
 from itertools import islice
 
@@ -34,8 +35,8 @@ class dotdict(dict):
 class Command(BaseCommand):
     help = "Imports data from OPEN API"
 
-    def handle_matko_tags(self, place):
-        return list(
+    def handle_matko_tags(self, place, ontology_conversion):
+        arr = list(
             map(
                 lambda t: int(t["id"].split(":")[-1]),
                 filter(
@@ -44,38 +45,20 @@ class Command(BaseCommand):
                 ),
             )
         )
+        ontology_array = []
+        matko_array = []
+        for a in arr:
+            if a in ontology_conversion:
+                ontology_array = ontology_array + ontology_conversion[a]
+            else:
+                matko_array.append(a)
+
+        return list(set(ontology_array)), list(set(matko_array))
 
     def find_xml_element(self, id, elems, elems_sv, elems_en):
         return {
             "fi": elems.get(str(id), None),
             "sv": elems_sv.get(str(id), None),
-        }
-
-    def find_xml_element2(self, id, elems, elems_sv, elems_en):
-        fi = list(
-            filter(
-                lambda item: item != None,
-                filter(lambda item: item.find("matko:id", string=str(id)), elems),
-            )
-        )
-        sv = list(
-            filter(
-                lambda item: item != None,
-                filter(lambda item: item.find("matko:id", string=str(id)), elems_sv),
-            )
-        )
-        e_fi = fi[0] if len(fi) > 0 else None
-        e_sv = sv[0] if len(sv) > 0 else None
-        if e_fi != None:
-            elems.remove(e_fi)
-        if e_sv != None:
-            elems_sv.remove(e_sv)
-        return {
-            "fi": e_fi,
-            "sv": e_sv
-            # "en": list(
-            #    filter(lambda item: item.find("matko:id", string=str(id)), elems_en)
-            # )[0],
         }
 
     def extract_property(self, elems, lang, prop):
@@ -113,6 +96,20 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         max_id = 0
         try:
+            ontology_conversion = {}
+            with open(
+                "/app/moderation/management/commands/ontology_conversion.csv"
+            ) as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=";")
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:
+                        pass
+                    else:
+                        from_id = int(row[0])
+                        to_ids = list(map(lambda x: int(x), row[1].split("+")))
+                        ontology_conversion[from_id] = to_ids
+                    line_count += 1
 
             response = requests.get("http://open-api.myhelsinki.fi/v1/places/")
             xml_fi_ = BeautifulSoup(
@@ -198,6 +195,10 @@ class Command(BaseCommand):
                 fake_image_request = self.create_fake_image_request(place)
                 images = fake_image_request.data["data"]["images"]
 
+                ontology_array, matko_array = self.handle_matko_tags(
+                    place, ontology_conversion
+                )
+
                 data = {
                     "organization": {},
                     "name": {
@@ -274,8 +275,8 @@ class Command(BaseCommand):
                     },
                     "images": images,
                     "opening_times": [],
-                    "ontology_ids": [],
-                    "matko_ids": self.handle_matko_tags(place),
+                    "ontology_ids": ontology_array,
+                    "matko_ids": matko_array,
                     "extra_keywords": [],
                     "comments": "",
                     "notifier": {
