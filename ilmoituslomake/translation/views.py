@@ -1,8 +1,18 @@
 from copy import error
-from users.serializers import TranslatorListSerializer, TranslatorSerializer, UserSerializer
+from users.serializers import (
+    TranslatorListSerializer,
+    TranslatorSerializer,
+    UserSerializer,
+)
 from users.models import IsTranslatorUser, User
 import json
-from translation.serializers import TranslationDataSerializer, TranslationTaskWithDataSerializer, TranslationTaskSerializer, ChangeRequestSerializer, TranslationRequestSerializer
+from translation.serializers import (
+    TranslationDataSerializer,
+    TranslationTaskWithDataSerializer,
+    TranslationTaskSerializer,
+    ChangeRequestSerializer,
+    TranslationRequestSerializer,
+)
 from translation.models import TranslationData, TranslationTask
 from django.shortcuts import get_object_or_404, render
 from rest_framework.generics import (
@@ -10,7 +20,7 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
     UpdateAPIView,
-    DestroyAPIView
+    DestroyAPIView,
 )
 from rest_framework import filters, serializers
 from django.shortcuts import render, get_list_or_404
@@ -48,15 +58,15 @@ class TranslationRequestEditCreateView(CreateAPIView):
     serializer_class = ChangeRequestSerializer
 
     def create(self, request, *args, **kwargs):
-        '''
+        """
         If a translation request exists, modifies it. Otherwise
         creates a new translation request.
-        '''
+        """
         request_data = request.data.copy()
 
         # If a request already exists, modify the old
         if "id" in request_data.keys():
-            old_tasks = TranslationTask.objects.filter(request_id = request_data["id"])
+            old_tasks = TranslationTask.objects.filter(request_id=request_data["id"])
 
             # If the translation is already published, it cannot be modified.
             if old_tasks[0].published:
@@ -65,18 +75,20 @@ class TranslationRequestEditCreateView(CreateAPIView):
             for task in old_tasks:
                 task.language_from = request_data["language"]["from"]
                 task.language_to = request_data["language"]["to"]
-                task.translator = get_object_or_404(User, uuid=request_data["translator"])
+                task.translator = get_object_or_404(
+                    User, uuid=request_data["translator"]
+                )
                 task.message = request_data["message"]
                 task.target_revision = task.target.revision
                 task.save()
-            return Response(
-                {"id": request_data["id"]}, status=status.HTTP_201_CREATED
-            )
+            return Response({"id": request_data["id"]}, status=status.HTTP_201_CREATED)
 
         request_id = 1
         new_request_id = 1
-        if len(TranslationTask.objects.all()) > 0:
-            new_request_id = TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
+        if TranslationTask.objects.count() > 0:
+            new_request_id = (
+                TranslationTask.objects.all().order_by("-request_id")[0].request_id + 1
+            )
 
         headers = None
 
@@ -92,10 +104,13 @@ class TranslationRequestEditCreateView(CreateAPIView):
             copy_data["target"] = target
             copy_data["language_from"] = request_data["language"]["from"]
             copy_data["language_to"] = request_data["language"]["to"]
-            copy_data["translator"] = get_object_or_404(User, uuid=request_data["translator"]).id
+            copy_data["translator"] = get_object_or_404(
+                User, uuid=request_data["translator"]
+            ).id
             copy_data["message"] = request_data["message"]
-            copy_data["target_revision"] = get_object_or_404(ModeratedNotification, id=target).revision
-
+            copy_data["target_revision"] = get_object_or_404(
+                ModeratedNotification, id=target
+            ).revision
 
             serializer = self.get_serializer(data=copy_data)
             serializer.is_valid(raise_exception=True)
@@ -117,7 +132,7 @@ class TranslationRequestEditCreateView(CreateAPIView):
             {"id": request_id}, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def post(self, request, *args, **kwargs):  
+    def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
 
@@ -127,9 +142,9 @@ class TranslationTaskRetrieveByRequestIdView(RetrieveAPIView):
     serializer_class = TranslationTaskSerializer
 
     def get(self, request, request_id=None, *args, **kwargs):
-        '''
+        """
         Returns all translation task objects with some request_id
-        '''
+        """
         serializer = TranslationTaskSerializer(
             TranslationTask.objects.all(), many=True, context={"request_id": request_id}
         )
@@ -143,9 +158,9 @@ class TranslationTodoRetrieveView(RetrieveAPIView):
     permission_classes = [IsTranslatorUser]
 
     def get(self, request, id=None, *args, **kwargs):
-        '''
+        """
         Returns all translation task objects with some id
-        '''
+        """
         if not request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
@@ -167,9 +182,9 @@ class TranslationTaskRetrieveView(RetrieveAPIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, id=None, *args, **kwargs):
-        '''
+        """
         Returns all translation task objects with some id
-        '''
+        """
         translation_task = get_object_or_404(TranslationTask, id=id)
         serializer = TranslationTaskWithDataSerializer(
             translation_task, context={"id": id}
@@ -185,7 +200,9 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
 
     def get(self, request, request_id, *args, **kwargs):
         serializer = TranslationTaskSerializer(
-            TranslationTask.objects.filter(request_id=request_id), many=True, context={"request_id": request_id}
+            TranslationTask.objects.filter(request_id=request_id),
+            many=True,
+            context={"request_id": request_id},
         )
 
         data = serializer.data
@@ -204,21 +221,16 @@ class TranslationRequestRetrieveView(RetrieveAPIView):
             "translator": first_task["translator"],
             "moderator": first_task["moderator"],
             "created_at": first_task["created_at"],
-            "updated_at":  first_task["updated_at"],
-
+            "updated_at": first_task["updated_at"],
         }
 
         for item in serializer.data:
             single_task = {
                 "id": item["id"],
-                "target": {
-                    "id": item["target"]["id"],
-                    "name": item["target"]["name"]
-                },
-                "status":  item["status"]
+                "target": {"id": item["target"]["id"], "name": item["target"]["name"]},
+                "status": item["status"],
             }
             base["tasks"].append(single_task)
-
 
         return Response(base, status=status.HTTP_200_OK)
 
@@ -231,6 +243,7 @@ class TranslationTaskSearchListView(ListAPIView):
 
     permission_classes = [IsTranslatorUser]
     serializer_class = TranslationTaskSerializer
+
     def get_queryset(self):
         user = self.request.user
         return TranslationTask.objects.filter(translator=self.request.user)
@@ -304,7 +317,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
 
         if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
-            
+
         if request.data["draft"]:
             translation_task.status = "in_progress"
             translation_task.published = False
@@ -317,16 +330,20 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             translation_task_data = json.loads(request.data["data"])  # TODO: Validate
         else:
             translation_task_data = request.data["data"]  # TODO: Validate
-        
+
         target_revision = translation_task.target.revision
 
-        old_translation_data = TranslationData.objects.filter(task_id = id)
+        old_translation_data = TranslationData.objects.filter(task_id=id)
         if len(old_translation_data) > 0:
             old_translation_data[0].images = translation_task_data["images"]
             old_translation_data[0].name = translation_task_data["name"]["lang"]
             old_translation_data[0].language = translation_task_data["language"]
-            old_translation_data[0].description_short = translation_task_data["description"]["short"]["lang"]
-            old_translation_data[0].description_long = translation_task_data["description"]["long"]["lang"]
+            old_translation_data[0].description_short = translation_task_data[
+                "description"
+            ]["short"]["lang"]
+            old_translation_data[0].description_long = translation_task_data[
+                "description"
+            ]["long"]["lang"]
             old_translation_data[0].website = translation_task_data["website"]["lang"]
             old_translation_data[0].target_revision = target_revision
             old_translation_data[0].save()
@@ -336,8 +353,12 @@ class TranslationTaskEditCreateView(UpdateAPIView):
             new_data["images"] = translation_task_data["images"]
             new_data["name"] = translation_task_data["name"]["lang"]
             new_data["language"] = translation_task_data["language"]
-            new_data["description_short"] = translation_task_data["description"]["short"]["lang"]
-            new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
+            new_data["description_short"] = translation_task_data["description"][
+                "short"
+            ]["lang"]
+            new_data["description_long"] = translation_task_data["description"]["long"][
+                "lang"
+            ]
             new_data["website"] = translation_task_data["website"]["lang"]
             new_data["target_revision"] = target_revision
             translation_data = TranslationData(**new_data)
@@ -367,7 +388,7 @@ class ModerationTranslationTaskEditCreateView(UpdateAPIView):
 
         # if translation_task.moderator != request.user:
         #     return Response(None, status=status.HTTP_403_FORBIDDEN)
-        
+
         if request.data["draft"]:
             translation_task.status = "in_progress"
             translation_task.published = False
@@ -381,13 +402,17 @@ class ModerationTranslationTaskEditCreateView(UpdateAPIView):
         else:
             translation_task_data = request.data["data"]  # TODO: Validate
 
-        old_translation_data = TranslationData.objects.filter(task_id = id)
+        old_translation_data = TranslationData.objects.filter(task_id=id)
         if len(old_translation_data) > 0:
             old_translation_data[0].images = translation_task_data["images"]
             old_translation_data[0].name = translation_task_data["name"]["lang"]
             old_translation_data[0].language = translation_task_data["language"]
-            old_translation_data[0].description_short = translation_task_data["description"]["short"]["lang"]
-            old_translation_data[0].description_long = translation_task_data["description"]["long"]["lang"]
+            old_translation_data[0].description_short = translation_task_data[
+                "description"
+            ]["short"]["lang"]
+            old_translation_data[0].description_long = translation_task_data[
+                "description"
+            ]["long"]["lang"]
             old_translation_data[0].website = translation_task_data["website"]["lang"]
             old_translation_data[0].save()
         else:
@@ -396,8 +421,12 @@ class ModerationTranslationTaskEditCreateView(UpdateAPIView):
             new_data["images"] = translation_task_data["images"]
             new_data["name"] = translation_task_data["name"]["lang"]
             new_data["language"] = translation_task_data["language"]
-            new_data["description_short"] = translation_task_data["description"]["short"]["lang"]
-            new_data["description_long"] = translation_task_data["description"]["long"]["lang"]
+            new_data["description_short"] = translation_task_data["description"][
+                "short"
+            ]["lang"]
+            new_data["description_long"] = translation_task_data["description"]["long"][
+                "lang"
+            ]
             new_data["website"] = translation_task_data["website"]["lang"]
             translation_data = TranslationData(**new_data)
             translation_data.save()
@@ -423,9 +452,9 @@ class ModerationTranslationRequestDeleteView(DestroyAPIView):
     permission_classes = [IsAdminUser]
     queryset = TranslationTask.objects.all()
     serializer_class = ChangeRequestSerializer
-    
+
     def delete(self, request, id=None, *args, **kwargs):
-        
+
         translation_tasks = get_list_or_404(TranslationTask, request_id=id)
 
         for task in translation_tasks:

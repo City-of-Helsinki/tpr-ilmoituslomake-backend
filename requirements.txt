@@ -3,6 +3,7 @@ attrs==20.2.0
 azure-common==1.1.26
 azure-storage-blob==2.1.0
 azure-storage-common==2.1.0
+beautifulsoup4==4.10.0
 black==20.8b1
 certifi==2020.6.20
 cffi==1.14.3
@@ -33,6 +34,7 @@ idna==2.10
 importlib-metadata==2.0.0
 isodate==0.6.0
 jsonschema==3.2.0
+lxml==4.6.3
 Markdown==3.3.2
 mccabe==0.6.1
 msrest==0.6.21
@@ -65,6 +67,7 @@ rsa==4.6
 six==1.15.0
 social-auth-app-django==4.0.0
 social-auth-core==3.3.3
+soupsieve==2.2.1
 sqlparse==0.4.1
 toml==0.10.1
 typed-ast==1.4.1
