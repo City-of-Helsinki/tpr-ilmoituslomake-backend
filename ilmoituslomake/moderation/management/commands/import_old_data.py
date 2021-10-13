@@ -73,6 +73,7 @@ class Command(BaseCommand):
         data_images = []
         data = []
         images = place.get("description", {}).get("images", [])
+        i = 0
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
@@ -80,6 +81,7 @@ class Command(BaseCommand):
                     data.append({"uuid": image_uuid, "url": image["url"]})
                     data_images.append(
                         {
+                            "index": i,
                             "uuid": image_uuid,
                             "url": image["url"],
                             "permission": "Creative Commons BY 4.0"
@@ -88,8 +90,10 @@ class Command(BaseCommand):
                             "source": image["copyright_holder"],
                             "source_type": "url",
                             "alt_text": {"fi": "", "sv": "", "en": ""},
+                            "media_id": image["media_id"],
                         }
                     )
+                    i += 1
         # print(ret)
         return dotdict({"data": {"data": {"images": data_images}, "images": data}})
 
@@ -137,7 +141,11 @@ class Command(BaseCommand):
 
             data = response.json()["data"]
 
+            ii = 0
             for loc in data:
+                ii += 1
+                if ii > 15:
+                    break
                 id = int(loc["id"])
 
                 print(id)
@@ -165,8 +173,15 @@ class Command(BaseCommand):
                     + "?language_filter=en"
                 )
 
-                if place_en_.status_code == 200:
-                    place_en = place_en_.json()
+                place_zh = {}
+                place_zh_ = requests.get(
+                    "http://open-api.myhelsinki.fi/v1/place/"
+                    + str(id)
+                    + "?language_filter=zh"
+                )
+
+                if place_zh_.status_code == 200:
+                    place_zh = place_zh_.json()
 
                 lon = float(place.get("location", {}).get("lon", 0))
                 lat = float(place.get("location", {}).get("lat", 0))
@@ -202,9 +217,9 @@ class Command(BaseCommand):
                 data = {
                     "organization": {},
                     "name": {
-                        "fi": str(place.get("name", {}).get("fi", "")),
-                        "sv": str(place.get("name", {}).get("sv", "")),
-                        "en": str(place.get("name", {}).get("en", "")),
+                        "fi": str(place.get("name", {}).get("fi", "")).strip(),
+                        "sv": str(place.get("name", {}).get("sv", "")).strip(),
+                        "en": str(place.get("name", {}).get("en", "")).strip(),
                     },
                     "location": [
                         lat,
@@ -212,14 +227,26 @@ class Command(BaseCommand):
                     ],
                     "description": {
                         "short": {
-                            "fi": str(place.get("description", {}).get("body", "")),
-                            "sv": str(place_sv.get("description", {}).get("body", "")),
-                            "en": str(place_en.get("description", {}).get("body", "")),
+                            "fi": str(
+                                place.get("description", {}).get("body", "")
+                            ).strip(),
+                            "sv": str(
+                                place_sv.get("description", {}).get("body", "")
+                            ).strip(),
+                            "en": str(
+                                place_en.get("description", {}).get("body", "")
+                            ).strip(),
                         },
                         "long": {
-                            "fi": str(place.get("description", {}).get("body", "")),
-                            "sv": str(place_sv.get("description", {}).get("body", "")),
-                            "en": str(place_en.get("description", {}).get("body", "")),
+                            "fi": str(
+                                place.get("description", {}).get("body", "")
+                            ).strip(),
+                            "sv": str(
+                                place_sv.get("description", {}).get("body", "")
+                            ).strip(),
+                            "en": str(
+                                place_en.get("description", {}).get("body", "")
+                            ).strip(),
                         },
                     },
                     "address": {
@@ -278,7 +305,7 @@ class Command(BaseCommand):
                     "ontology_ids": ontology_array,
                     "matko_ids": matko_array,
                     "extra_keywords": [],
-                    "comments": "",
+                    "comments": "Tuotu ohjelmallisesti vanhoista järjestelmistä.",
                     "notifier": {
                         "notifier_type": "",
                         "full_name": "",
@@ -289,13 +316,40 @@ class Command(BaseCommand):
 
                 # print(data)
 
-                continue
-
                 has_zh = False
                 zh_val = place.get("name", {}).get("zh", "")
-                zh = str(zh_val) if zh_val != None else ""
-                if zh != "":
+                zh_name = str(zh_val) if zh_val != None else ""
+                tdata = {}
+                if zh_name != "":
                     has_zh = True
+                    # tdata["task_id"] = translation_task
+                    # tdata["images"] = translation_task_data["images"]
+                    tdata["name"] = zh_name.strip()
+                    tdata["language"] = "zh"
+                    tdata["description_short"] = str(
+                        place_zh.get("description", {}).get("body", "")
+                    ).strip()
+                    tdata["description_long"] = str(
+                        place_zh.get("description", {}).get("body", "")
+                    ).strip()
+                    tdata["website"] = str(place_zh.get("info_url", ""))
+                    # tdata["target_revision"] = target_revision
+                    tdata["images"] = []
+                    # images_dict = { i["uuid"]: i for i in images }
+                    t_images = []
+                    for i in range(len(images)):
+                        image = images[i]
+                        t_images.append(
+                            {
+                                "index": i,
+                                "uuid": image["uuid"],
+                                "source": image["source"],
+                                "alt_text": {"lang": ""},
+                            }
+                        )
+                    tdata["images"] = t_images
+
+                    print(tdata)
 
                 new_moderated_notification = None
                 try:
@@ -331,11 +385,29 @@ class Command(BaseCommand):
 
                 # TODO: Implement translation
                 if has_zh:
-                    pass
-                    # Create TranslationTask and TranslationData manually for 'new_moderated_notification'
-                    # It is from 'en' to 'zh'
-                    # The variable 'zh' contains the translation. It is a string for the name field.
-                    # All other fields are untranslated = empty.
+
+                    ttask = {
+                        "published": True,
+                        "request_id": TranslationTask.objects.count() + 1,
+                        "target": new_moderated_notification,
+                        "target_revision": new_moderated_notification.revision,
+                        "language_from": "en",
+                        "language_to": "zh",
+                        "category": "translation_task",
+                        "item_type": "created",
+                        "status": "closed",
+                        "data": tdata,
+                        "message": "Imported from old systems.",
+                    }
+
+                    translation_task = TranslationTask(**ttask)
+                    translation_task.save()
+
+                    tdata["task_id"] = translation_task
+                    tdata["target_revision"] = new_moderated_notification.revision
+
+                    translation_data = TranslationData(**tdata)
+                    translation_data.save()
 
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
@@ -346,7 +418,7 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             query = (
                 "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
-                + str(max_id + 10)
+                + str(max_id + 100)
                 + ";"
             )
             cursor.execute(query)
