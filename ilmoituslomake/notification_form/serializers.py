@@ -24,8 +24,10 @@ class NotificationImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         id = self.context.get("id", None)
+        image_metadata = self.context.get("images")[ret["metadata"]["uuid"]]
         if id != None:
             image = ret["metadata"]["uuid"] + ".jpg"
+            ret["metadata"] = image_metadata
             token = jwt.encode(
                 {
                     "id": str(id),

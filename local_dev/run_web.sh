@@ -6,7 +6,7 @@
 sleep 20
 
 # prepare init migration
-python manage.py makemigrations users base moderation notification_form
+python manage.py makemigrations users base moderation notification_form translation
 # migrate db, so we have the latest db schema
 python manage.py migrate
 # load ontologies

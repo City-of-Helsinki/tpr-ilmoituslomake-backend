@@ -3,6 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
+from base.models import MatkoWord
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -13,36 +14,6 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return obj.id
-
-    org_id = serializers.SerializerMethodField()
-
-    def get_org_id(self, obj):
-        return None
-
-    dept_id = serializers.SerializerMethodField()
-
-    def get_dept_id(self, obj):
-        return None
-
-    provider_type = serializers.SerializerMethodField()
-
-    def get_provider_type(self, obj):
-        return None
-
-    organizer_type = serializers.SerializerMethodField()
-
-    def get_organizer_type(self, obj):
-        return None
-
-    organizer_name = serializers.SerializerMethodField()
-
-    def get_organizer_name(self, obj):
-        return None
-
-    data_source_url = serializers.SerializerMethodField()
-
-    def get_data_source_url(self, obj):
-        return None
 
     name = serializers.SerializerMethodField()
 
@@ -73,22 +44,16 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     auxiliary_tourism_codes = serializers.SerializerMethodField()
 
     def get_auxiliary_tourism_codes(self, obj):
-        return obj.data["matko_ids"]
+        lang = self.context.get("lang", "fi")
+        return map(
+            lambda atc: {"id": atc.data["id"], "name": atc.data["matkoword"][lang]},
+            MatkoWord.objects.filter(data__id__in=obj.data["matko_ids"]),
+        )
 
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
         return obj.data.get("extra_keywords", [])
-
-    tags = serializers.SerializerMethodField()
-
-    def get_tags(self, obj):
-        return []  # TODO:
-
-    sources = serializers.SerializerMethodField()
-
-    def get_sources(self, obj):
-        return []  # TODO:
 
     latitude = serializers.SerializerMethodField()
 
@@ -155,6 +120,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_images(self, obj):
         lang = self.context.get("lang", "fi")
+        has_api_key = self.context.get("has_api_key", False)
         return list(
             map(
                 lambda i: {
@@ -172,7 +138,10 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
                 },
-                obj.data.get("images", []),
+                filter(
+                    lambda i: (has_api_key or i["permission"] != "Location only"),
+                    obj.data.get("images", []),
+                ),
             )
         )
 
@@ -195,20 +164,12 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
         model = ModeratedNotification
         fields = (
             "id",
-            "org_id",
-            "dept_id",
-            "provider_type",
-            "organizer_type",
-            "organizer_name",
-            "data_source_url",
             "name",
             "short_description",
             "description",
             "ontologyword_ids",
             "auxiliary_tourism_codes",
             "extra_searchwords",
-            "tags",
-            "sources",
             "latitude",
             "longitude",
             "street_address",

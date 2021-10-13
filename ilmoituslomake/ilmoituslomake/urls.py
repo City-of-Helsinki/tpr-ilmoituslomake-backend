@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.utils import translation
 
 from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
+from translation import views as translation_views
+from opening_times import views as opening_times_views
 
 from api import views as api_views
 
@@ -156,4 +159,39 @@ urlpatterns += [
         "api/open/v1/target/<int:id>/",
         api_views.ApiRetrieveViewV1.as_view(),
     ),
+]
+
+# Translation
+urlpatterns += [
+    # path("api/moderation/translation/task/", 
+    #      translation_views.TranslationTaskListView.as_view()),
+    path("api/moderation/translation/task/<int:id>/", 
+         translation_views.TranslationTaskRetrieveView.as_view()),
+    path("api/moderation/translation/save_request/",
+         translation_views.TranslationRequestEditCreateView.as_view()),
+    path("api/moderation/translation/request/<int:request_id>/",
+         translation_views.TranslationRequestRetrieveView.as_view()),
+    path("api/moderation/translation/task/find/",
+         translation_views.ModerationTranslationTaskSearchListView.as_view()),
+    path("api/moderation/translation/request/find/",
+         translation_views.TranslationRequestSearchListView.as_view()),
+    # path("api/moderation/translationdata/", 
+    #      translation_views.TranslationDataListView.as_view()),
+    path("api/moderation/translation/save_task/<int:id>/",
+         translation_views.ModerationTranslationTaskEditCreateView.as_view()),
+    path("api/translation/todos/<int:id>/",
+         translation_views.TranslationTodoRetrieveView.as_view()),
+    path("api/translation/todos/find/",
+         translation_views.TranslationTaskSearchListView.as_view()),
+    path("api/translation/save/<int:id>/",
+         translation_views.TranslationTaskEditCreateView.as_view()),
+    path("api/moderation/translation/cancel_request/<int:id>/",
+         translation_views.ModerationTranslationRequestDeleteView.as_view()),
+    path("api/moderation/translation/translators/",
+         translation_views.TranslationUsersListView.as_view())
+]   
+
+# Opening times
+urlpatterns += [
+    path("api/openingtimes/createlink/<int:id>/", opening_times_views.CreateLink.as_view())
 ]

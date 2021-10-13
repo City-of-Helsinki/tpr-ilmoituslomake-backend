@@ -167,6 +167,17 @@
             },
             "required": ["fi", "sv"]
         },
+        "businessid": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
         "phone": {
             "anyOf": [
                 {

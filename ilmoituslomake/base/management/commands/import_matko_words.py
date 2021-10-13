@@ -100,8 +100,8 @@ class Command(BaseCommand):
                                 "type_name": str(row[1]),
                                 "matkoword": {
                                     "fi": str(row[2]),
-                                    "sv": "",
-                                    "en": "n",
+                                    "sv": str(row[3]),
+                                    "en": str(row[4]),
                                 },
                             }
                         )
