@@ -32,10 +32,84 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
 
 
+conversion_ids = {
+    1: 914,
+    165: 918,
+    15: 214,
+    56: 214,
+    57: 214,
+    3: 214,
+    228: {"Bar": 869, "Pub": 869, "Nightclub": 919, "Club": 919},
+    48: 239,
+    # 149	ei muunneta
+    # 243	ei muunneta
+    # 116	ei muunneta
+    # 111	ei muunneta
+    22: 915,
+    # 164	ei muunneta
+    # 221	ei muunneta
+    2: 326,
+    # 248	ei muunneta
+    40: 961,
+    6: {"Museum": 961, "Gallery": 915},
+    74: 916,
+    5: {
+        "Nature": 916,
+        "RecreationalArea": 916,
+        "Island": 916,
+        "Viewpoint": 916,
+        "Sport": 917,
+        "SportCenter": 917,
+        "SportOutdoor": 917,
+        "Swimming": 917,
+        "Athletics": 917,
+        "Yoga": 917,
+        "GymFitness": 917,
+        "Football": 917,
+        "Basketball": 917,
+        "Tennis": 917,
+        "IceSkating": 917,
+        "Biking": 917,
+        "SkateBoard": 917,
+        "Karting": 917,
+        "Golf": 917,
+        "Bowling": 917,
+        "Canoeing": 917,
+        "Climbing": 917,
+        "Dance": 917,
+        "Frisbeegolf": 917,
+        "HorseRiding": 917,
+        "SkiingCrosscountry": 917,
+        "SkiingDownhill": 917,
+        "MiniGolf": 917,
+        "RecreationalCentre": 917,
+        "WaterPark": 917,
+    },
+    # 114	ei muunneta
+    229: 577,
+    10: {"Restaurant": 577, "Cafe": 239},
+    18: 326,
+    169: 864,
+    # 158	ei muunneta
+    9: 490,
+    4: 473,
+    # 113	ei muunneta
+    225: 868,
+    206: 864,
+    # Exception:
+    # 226: {
+    #    "WorkSpace": 921
+    # }
+    # JOS ei ole Matko-tyyppiä "WorkSpace"
+    # => #920 opiskelu
+}
+
+
 class Command(BaseCommand):
     help = "Imports data from OPEN API"
 
-    def handle_matko_tags(self, place, ontology_conversion):
+    def handle_tags(self, id, place, xml_data, conversion_ids, ontology_words_for_id):
+        matkos = self.extract_property_list(xml_data, "fi", "matko:type2s")
         arr = list(
             map(
                 lambda t: int(t["id"].split(":")[-1]),
@@ -45,11 +119,19 @@ class Command(BaseCommand):
                 ),
             )
         )
-        ontology_array = []
+        ontology_array = ontology_words_for_id.get(id, [])
         matko_array = []
         for a in arr:
-            if a in ontology_conversion:
-                ontology_array = ontology_array + ontology_conversion[a]
+            if a in conversion_ids:
+                d = conversion_ids[a]
+                if type(d) == int:
+                    ontology_array = ontology_array + [d]
+                else:
+                    if a == 226:
+                        ontology_array = ontology_array
+                    else:
+                        pass
+
             else:
                 matko_array.append(a)
 
@@ -60,6 +142,14 @@ class Command(BaseCommand):
             "fi": elems.get(str(id), None),
             "sv": elems_sv.get(str(id), None),
         }
+
+    def extract_property_list(self, elems, lang, prop):
+        if elems[lang] == None:
+            return []
+        f = elems[lang].find(prop)
+        if f:
+            return list(map(lambda x: str(x.string), f))
+        return []
 
     def extract_property(self, elems, lang, prop):
         if elems[lang] == None:
@@ -100,7 +190,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         max_id = 0
         try:
-            ontology_conversion = {}
+            ontology_words_for_id = {}
             with open(
                 "/app/moderation/management/commands/ontology_conversion.csv"
             ) as csv_file:
@@ -112,7 +202,7 @@ class Command(BaseCommand):
                     else:
                         from_id = int(row[0])
                         to_ids = list(map(lambda x: int(x), row[1].split("+")))
-                        ontology_conversion[from_id] = to_ids
+                        ontology_words_for_id[from_id] = to_ids
                     line_count += 1
 
             response = requests.get("http://open-api.myhelsinki.fi/v1/places/")
@@ -210,8 +300,8 @@ class Command(BaseCommand):
                 fake_image_request = self.create_fake_image_request(place)
                 images = fake_image_request.data["data"]["images"]
 
-                ontology_array, matko_array = self.handle_matko_tags(
-                    place, ontology_conversion
+                ontology_array, matko_array = self.handle_tags(
+                    id, place, xml, conversion_ids, ontology_words_for_id
                 )
 
                 data = {
@@ -383,7 +473,6 @@ class Command(BaseCommand):
                 )
                 unpublish_images(ModeratedNotificationImage, new_moderated_notification)
 
-                # TODO: Implement translation
                 if has_zh:
 
                     ttask = {
@@ -412,7 +501,7 @@ class Command(BaseCommand):
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
-        return
+        # return
 
         # Alter sequence so that it wont break
         with connection.cursor() as cursor:

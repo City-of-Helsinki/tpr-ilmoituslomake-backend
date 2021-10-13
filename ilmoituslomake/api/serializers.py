@@ -137,6 +137,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
                     "source": i["source"],
                     "alt_text": i["alt_text"].get(lang, i["alt_text"]["fi"]),
                     "permission": i["permission"],
+                    "media_id": i["media_id"] if "media_id" in i else "",
                 },
                 filter(
                     lambda i: (has_api_key or i["permission"] != "Location only"),
