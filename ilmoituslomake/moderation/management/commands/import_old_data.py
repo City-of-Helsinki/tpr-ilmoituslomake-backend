@@ -238,12 +238,12 @@ class Command(BaseCommand):
 
             ii = 0
             for loc in data:
-                ii += 1
-                if ii > 15:
-                    break
+                # ii += 1
+                # if ii > 15:
+                #    break
                 id = int(loc["id"])
 
-                print(id)
+                # print(id)
                 xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
 
                 place = requests.get(
@@ -409,7 +409,7 @@ class Command(BaseCommand):
                     },
                 }
 
-                print(data)
+                # print(data)
 
                 has_zh = False
                 zh_val = place.get("name", {}).get("zh", "")
@@ -444,7 +444,7 @@ class Command(BaseCommand):
                         )
                     tdata["images"] = t_images
 
-                    print(tdata)
+                    # print(tdata)
 
                 new_moderated_notification = None
                 try:
