@@ -136,21 +136,6 @@ class TranslationRequestEditCreateView(CreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class TranslationTaskRetrieveByRequestIdView(RetrieveAPIView):
-    lookup_field = "id"
-    queryset = TranslationTask.objects.all()
-    serializer_class = TranslationTaskSerializer
-
-    def get(self, request, request_id=None, *args, **kwargs):
-        """
-        Returns all translation task objects with some request_id
-        """
-        serializer = TranslationTaskSerializer(
-            TranslationTask.objects.all(), many=True, context={"request_id": request_id}
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class TranslationTodoRetrieveView(RetrieveAPIView):
     lookup_field = "id"
     queryset = TranslationTask.objects.all()

@@ -103,7 +103,7 @@ class ApiRetrieveViewV1(RetrieveAPIView):
                 data_serializer = TranslationDataSerializer(translation_data[0])
                 modify_translation_data(modified_data, data_serializer.data)
                 return Response(modified_data, status=status.HTTP_200_OK)
-        return Response(None, status=status.HTTP_404_NOT_FOUND)
+        return Response("Ei löydy", status=status.HTTP_404_NOT_FOUND)
 
 
 class ApiListViewV1(ListAPIView):
@@ -158,5 +158,13 @@ class ApiListViewV1(ListAPIView):
                 modified_data[index] = None
             index += 1
 
-        return pagination.get_paginated_response([i for i in modified_data if i])
+        
+        # New pagination is needed there to be 200 entries on each page and the count to be correct
+        modified_data = [i for i in modified_data if i]
+        modified_data_ids = [task["id"] for task in modified_data]
+        pagination = LargeResultsSetPagination()
+        data = ModeratedNotification.objects.filter(pk__in=modified_data_ids)
+        qs = pagination.paginate_queryset(data, request)
+
+        return pagination.get_paginated_response(modified_data)
         # return Response([i for i in modified_data if i], status=status.HTTP_200_OK)
