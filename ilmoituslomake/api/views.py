@@ -76,7 +76,7 @@ class ApiRetrieveViewV1(RetrieveAPIView):
 
     def get(self, request, id=None, *args, **kwargs):
         lang = request.GET.get("language", "fi")
-        moderated_notification = get_object_or_404(ModeratedNotification, pk=id)
+        moderated_notification = get_object_or_404(ModeratedNotification, pk=id, published=True)
 
         has_api_key = request_has_api_key(request)
 
