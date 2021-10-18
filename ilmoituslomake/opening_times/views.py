@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
 # Create your views here.
-REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/tprek:", id, "/"
+REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/kaupunkialusta:", id, "/"
 
 class CreateLink(APIView):
     permission_classes = [IsAuthenticated]
