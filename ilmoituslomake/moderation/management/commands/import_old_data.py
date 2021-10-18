@@ -267,6 +267,9 @@ class Command(BaseCommand):
                     + str(id)
                     + "?language_filter=en"
                 )
+                
+                if place_en_.status_code == 200:
+                    place_en = place_en_.json()
 
                 place_zh = {}
                 place_zh_ = requests.get(
