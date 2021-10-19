@@ -285,6 +285,57 @@ class TranslationRequestSearchListView(ListAPIView):
     serializer_class = TranslationRequestSerializer
 
 
+def edit_create_task(request, id, translation_task, serializer):
+    if request.data["draft"]:
+        translation_task.status = "in_progress"
+        translation_task.published = False
+    else:
+        translation_task.status = "closed"
+        translation_task.published = True
+
+    translation_task_data = {}
+    if type(request.data["data"]) is not dict:
+        translation_task_data = json.loads(request.data["data"])  # TODO: Validate
+    else:
+        translation_task_data = request.data["data"]  # TODO: Validate
+
+    target_revision = translation_task.target.revision
+
+    old_translation_data = TranslationData.objects.filter(task_id=id)
+    if len(old_translation_data) > 0:
+        old_translation_data[0].images = translation_task_data["images"]
+        old_translation_data[0].name = translation_task_data["name"]["lang"]
+        old_translation_data[0].language = translation_task_data["language"]
+        old_translation_data[0].description_short = translation_task_data[
+            "description"
+        ]["short"]["lang"]
+        old_translation_data[0].description_long = translation_task_data[
+            "description"
+        ]["long"]["lang"]
+        old_translation_data[0].website = translation_task_data["website"]["lang"]
+        old_translation_data[0].target_revision = target_revision
+        old_translation_data[0].save()
+    else:
+        new_data = {}
+        new_data["task_id"] = translation_task
+        new_data["images"] = translation_task_data["images"]
+        new_data["name"] = translation_task_data["name"]["lang"]
+        new_data["language"] = translation_task_data["language"]
+        new_data["description_short"] = translation_task_data["description"][
+            "short"
+        ]["lang"]
+        new_data["description_long"] = translation_task_data["description"]["long"][
+            "lang"
+        ]
+        new_data["website"] = translation_task_data["website"]["lang"]
+        new_data["target_revision"] = target_revision
+        translation_data = TranslationData(**new_data)
+        translation_data.save()
+
+    translation_task.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class TranslationTaskEditCreateView(UpdateAPIView):
     """
     Update TranslationTask view for Translator
@@ -306,54 +357,7 @@ class TranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.translator != request.user:
             return Response(None, status=status.HTTP_403_FORBIDDEN)
 
-        if request.data["draft"]:
-            translation_task.status = "in_progress"
-            translation_task.published = False
-        else:
-            translation_task.status = "closed"
-            translation_task.published = True
-
-        translation_task_data = {}
-        if type(request.data["data"]) is not dict:
-            translation_task_data = json.loads(request.data["data"])  # TODO: Validate
-        else:
-            translation_task_data = request.data["data"]  # TODO: Validate
-
-        target_revision = translation_task.target.revision
-
-        old_translation_data = TranslationData.objects.filter(task_id=id)
-        if len(old_translation_data) > 0:
-            old_translation_data[0].images = translation_task_data["images"]
-            old_translation_data[0].name = translation_task_data["name"]["lang"]
-            old_translation_data[0].language = translation_task_data["language"]
-            old_translation_data[0].description_short = translation_task_data[
-                "description"
-            ]["short"]["lang"]
-            old_translation_data[0].description_long = translation_task_data[
-                "description"
-            ]["long"]["lang"]
-            old_translation_data[0].website = translation_task_data["website"]["lang"]
-            old_translation_data[0].target_revision = target_revision
-            old_translation_data[0].save()
-        else:
-            new_data = {}
-            new_data["task_id"] = translation_task
-            new_data["images"] = translation_task_data["images"]
-            new_data["name"] = translation_task_data["name"]["lang"]
-            new_data["language"] = translation_task_data["language"]
-            new_data["description_short"] = translation_task_data["description"][
-                "short"
-            ]["lang"]
-            new_data["description_long"] = translation_task_data["description"]["long"][
-                "lang"
-            ]
-            new_data["website"] = translation_task_data["website"]["lang"]
-            new_data["target_revision"] = target_revision
-            translation_data = TranslationData(**new_data)
-            translation_data.save()
-
-        translation_task.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return edit_create_task(request, id, translation_task, serializer)
 
 
 class ModerationTranslationTaskEditCreateView(UpdateAPIView):
@@ -374,53 +378,7 @@ class ModerationTranslationTaskEditCreateView(UpdateAPIView):
         if translation_task.status == "closed":
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        # if translation_task.moderator != request.user:
-        #     return Response(None, status=status.HTTP_403_FORBIDDEN)
-
-        if request.data["draft"]:
-            translation_task.status = "in_progress"
-            translation_task.published = False
-        else:
-            translation_task.status = "closed"
-            translation_task.published = True
-
-        translation_task_data = {}
-        if type(request.data["data"]) is not dict:
-            translation_task_data = json.loads(request.data["data"])  # TODO: Validate
-        else:
-            translation_task_data = request.data["data"]  # TODO: Validate
-
-        old_translation_data = TranslationData.objects.filter(task_id=id)
-        if len(old_translation_data) > 0:
-            old_translation_data[0].images = translation_task_data["images"]
-            old_translation_data[0].name = translation_task_data["name"]["lang"]
-            old_translation_data[0].language = translation_task_data["language"]
-            old_translation_data[0].description_short = translation_task_data[
-                "description"
-            ]["short"]["lang"]
-            old_translation_data[0].description_long = translation_task_data[
-                "description"
-            ]["long"]["lang"]
-            old_translation_data[0].website = translation_task_data["website"]["lang"]
-            old_translation_data[0].save()
-        else:
-            new_data = {}
-            new_data["task_id"] = translation_task
-            new_data["images"] = translation_task_data["images"]
-            new_data["name"] = translation_task_data["name"]["lang"]
-            new_data["language"] = translation_task_data["language"]
-            new_data["description_short"] = translation_task_data["description"][
-                "short"
-            ]["lang"]
-            new_data["description_long"] = translation_task_data["description"]["long"][
-                "lang"
-            ]
-            new_data["website"] = translation_task_data["website"]["lang"]
-            translation_data = TranslationData(**new_data)
-            translation_data.save()
-
-        translation_task.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return edit_create_task(request, id, translation_task, serializer)
 
 
 class TranslationDataListView(ListAPIView):
