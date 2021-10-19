@@ -450,7 +450,7 @@ class ModerationTranslationRequestDeleteView(DestroyAPIView):
             if task.moderator != request.user:
                 return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
-            task.status = "closed"
+            task.status = "cancelled"
             task.published = False
             task.save()
 

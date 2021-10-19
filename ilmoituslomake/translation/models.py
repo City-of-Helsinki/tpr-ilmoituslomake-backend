@@ -49,6 +49,7 @@ class TranslationTask(models.Model):
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
+        ("cancelled", "cancelled"),
     ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
