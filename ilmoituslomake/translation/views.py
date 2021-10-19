@@ -73,13 +73,16 @@ class TranslationRequestEditCreateView(CreateAPIView):
                 return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
             for task in old_tasks:
-                task.language_from = request_data["language"]["from"]
-                task.language_to = request_data["language"]["to"]
-                task.translator = get_object_or_404(
-                    User, uuid=request_data["translator"]
-                )
-                task.message = request_data["message"]
-                task.target_revision = task.target.revision
+                if task.target.id not in request_data["targets"]:
+                    task.status = "cancelled"
+                else:
+                    task.language_from = request_data["language"]["from"]
+                    task.language_to = request_data["language"]["to"]
+                    task.translator = get_object_or_404(
+                        User, uuid=request_data["translator"]
+                    )
+                    task.message = request_data["message"]
+                    task.target_revision = task.target.revision
                 task.save()
             return Response({"id": request_data["id"]}, status=status.HTTP_201_CREATED)
 
