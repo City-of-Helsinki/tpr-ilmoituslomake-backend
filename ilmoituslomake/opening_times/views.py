@@ -8,7 +8,7 @@ import hashlib
 import hmac 
 import urllib.parse
 import datetime
-
+import uuid
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -30,11 +30,7 @@ class CreateLink(UpdateAPIView):
         description = request_params["description"]
         address = request_params["address"]
         resource_type = request_params["resource_type"]
-        children = [0]
-        parents = [0]
-        organization = request_params["organization"]
         origins = request_params["origins"]
-        extra_data = {"property1": None, "propery2": None}
         is_public = True
         timezone = request_params["timezone"]
 
@@ -61,13 +57,10 @@ class CreateLink(UpdateAPIView):
                 "description": description,
                 "address": address,
                 "resource_type": resource_type,
-                "children": children,
-                "parents": parents,
-                "organization": organization,
                 "origins": origins,
-                "extra_data": extra_data, 
                 "is_public": is_public, 
                 "timezone": timezone,
+                "organization": uuid.UUID("{0c71aa86-f76c-466b-b6f3-81143bd9eecc}")
             }
             create_response = requests.post("https://hauki-api.test.hel.ninja/v1/resource/", params=create_params, headers=authorization_headers)
             if create_response.status_code != 201:
@@ -82,7 +75,7 @@ class CreateLink(UpdateAPIView):
         hsa_created_at = post_response["created"]
         # TODO: Chekc whether this is correct
         hsa_valid_until = valid_until.isoformat()
-        hsa_organization = organization
+        hsa_organization = post_response["organization"]
         hsa_resource = origins[0]["data_source"]["id"]
         hsa_has_organization_rights = ""
 
