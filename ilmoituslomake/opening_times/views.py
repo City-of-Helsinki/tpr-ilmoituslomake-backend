@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from requests.models import Response
+from rest_framework.response import Response
 from rest_framework import response, status
+from rest_framework import permissions
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 import requests
 import hashlib 
@@ -15,12 +16,13 @@ from rest_framework.views import APIView
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
 # Create your views here.
-REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/kaupunkialusta:", id, "/"
+REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/kaupunkialusta:"
 
-class CreateLink(APIView):
+class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
+    #permission_classes = (permissions.AllowAny,)
 
-    def update(self, request, id=None, *args, **kwargs):
+    def post(self, request, id=None, *args, **kwargs):
 
         # Request params
         request_params = request.data
@@ -37,8 +39,8 @@ class CreateLink(APIView):
         timezone = request_params["timezone"]
 
         # Check if resource exists
-        response = requests.get(REQUEST_URL)
-        authorization_headers = {'Authorization': API_TOKEN}
+        response = requests.get(REQUEST_URL + str(id) + "/")
+        authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
 
         post_response = {}
 
@@ -48,9 +50,9 @@ class CreateLink(APIView):
                 "name": name,
                 "address": address,
             }
-            update_response = requests.put(REQUEST_URL, params=update_params, headers=authorization_headers)
+            update_response = requests.put(REQUEST_URL + id + "/", params=update_params, headers=authorization_headers)
             if update_response.status_code != 200:
-                return Response(None, status=status.HTTP_400_BAD_REQUEST)
+                return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
             post_response = update_response.json()
         else:
             # Create data at v1_resource_create
@@ -69,7 +71,7 @@ class CreateLink(APIView):
             }
             create_response = requests.post("https://hauki-api.test.hel.ninja/v1/resource/", params=create_params, headers=authorization_headers)
             if create_response.status_code != 201:
-                return Response(None, status=status.HTTP_400_BAD_REQUEST)
+                return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
             post_response = create_response.json()
         
         valid_until = datetime.datetime.strptime(post_response["updated"], '%Y-%m-%dT%H:%M:%S.%f%z') + datetime.timedelta(hours = 1)
