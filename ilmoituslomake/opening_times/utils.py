@@ -65,4 +65,4 @@ def update_origin(origin_id, id="kaupunkialusta", name_fi=None, name_sv=None, na
     update_response = requests.patch(REQUEST_URL + "visithelsinki:" + origin_id + "/", data=update_params, headers=authorization_headers)
     if update_response.status_code != 200:
         return update_response.json()
-    return update_params
+    return update_response.json()
