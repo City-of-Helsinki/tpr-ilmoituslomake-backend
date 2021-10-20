@@ -329,7 +329,8 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "required": ["fi", "sv", "en"]
         },
         "comments": {
             "type": "string"
