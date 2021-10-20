@@ -55,7 +55,9 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
-        return obj.data.get("extra_keywords", [])
+        lang = self.context.get("lang", "fi")
+        lang_finland = "fi" if lang not in ["fi", "sv"] else lang
+        return obj.data["extra_keywords"].get(lang)
 
     latitude = serializers.SerializerMethodField()
 

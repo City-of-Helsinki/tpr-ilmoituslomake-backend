@@ -309,9 +309,26 @@
             }
         },
         "extra_keywords": {
-            "type": "array",
-            "items": {
-                "type": "string"
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sv": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "en":  {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
             }
         },
         "comments": {

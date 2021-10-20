@@ -402,7 +402,7 @@ class Command(BaseCommand):
                     "opening_times": [],
                     "ontology_ids": ontology_array,
                     "matko_ids": matko_array,
-                    "extra_keywords": [],
+                    "extra_keywords": {"fi":[], "sv": [], "en": []},
                     "comments": "Tuotu ohjelmallisesti vanhoista järjestelmistä.",
                     "notifier": {
                         "notifier_type": "",
