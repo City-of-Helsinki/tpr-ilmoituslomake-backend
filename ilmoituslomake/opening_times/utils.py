@@ -41,7 +41,7 @@ def create_url(url_data):
     calculated_signature = calculate_signature(data_string)
 
 
-    param_string = "hsa_username=" + url_data.get("hsa_username")
+    param_string = "hsa_source=" + url_data.get("hsa_source") + "&hsa_username=" + url_data.get("hsa_username")
     
     if url_data.get("hsa_organization") != "":
         param_string = param_string + "&hsa_organization=" + url_data.get("hsa_organization")
@@ -50,7 +50,8 @@ def create_url(url_data):
         
     param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") + "&hsa_signature=" + calculated_signature
 
-    return "https://hauki-admin.example.com/?" + param_string
+    # return "https://aukioloajat.hel.fi/" + param_string
+    return "https://hauki-admin-ui.dev.hel.ninja/?" + param_string
 
 
 def update_origin(origin_id, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  

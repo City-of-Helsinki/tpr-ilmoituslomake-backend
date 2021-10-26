@@ -84,13 +84,13 @@ class CreateLink(UpdateAPIView):
 
         # Construct the url
         url_data = {
-            "hsa_source": "visithelsinki", #origins[0]["data_source"]["id"]
-            "hsa_username": request.user.username, #request.user.username
+            "hsa_source": "tprek", 
+            "hsa_username": request.user.username, 
             "hsa_created_at": created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
             # TODO: Check whether this is correct
-            "hsa_valid_until": valid_until.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z", #valid_until_in_EET.isoformat() 
-            "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc", #post_response["organization"]
-            "hsa_resource":  "", #"tprek:" + id #origins[0]["data_source"]["id"]
+            "hsa_valid_until": valid_until.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z", 
+            "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
+            "hsa_resource": "tprek:8215",
             "hsa_has_organization_rights": ""
         }
         url = create_url(url_data)
