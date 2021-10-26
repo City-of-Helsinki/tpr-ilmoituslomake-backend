@@ -4,28 +4,51 @@ import hmac
 import urllib.parse
 import requests
 import json
+
 REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/"
 
-def create_url(hsa_source, hsa_username, hsa_created_at, hsa_valid_until, hsa_organization, hsa_resource, hsa_has_organization_rights):
-    secret_key = HAUKI_SECRET_KEY
-    data_fields = [hsa_source, hsa_username, hsa_created_at, hsa_valid_until, hsa_organization, hsa_resource, hsa_has_organization_rights]
-    data_string = ''.join(filter(None, data_fields)) 
-    
-    calculated_signature = hmac.new(
-        key=secret_key.encode("utf-8"), 
-        msg=data_string.encode("utf-8"), 
+REQUIRED_AUTH_PARAM_NAMES = [
+    "hsa_source",
+    "hsa_username",
+    "hsa_created_at",
+    "hsa_valid_until",
+    "hsa_signature"
+]
+
+OPTIONAL_AUTH_PARAM_NAMES = [
+    "hsa_organization",
+    "hsa_resource",
+    "hsa_has_organization_rights"
+]
+
+def calculate_signature(source_string):
+    return hmac.new(
+        key=HAUKI_SECRET_KEY.encode("utf-8"), 
+        msg=source_string.encode("utf-8"), 
         digestmod=hashlib.sha256, 
     ).hexdigest() 
 
 
-    param_string = "hsa_username=" + hsa_username 
+def create_url(url_data):
+    data_fields = [
+        i
+        for i in (REQUIRED_AUTH_PARAM_NAMES + OPTIONAL_AUTH_PARAM_NAMES)
+        if i != "hsa_signature"
+    ]
+    data_string = ''.join([url_data.get(field_name, "") for field_name in data_fields]) 
     
-    if hsa_organization != "":
-        param_string = param_string + "&hsa_organization=" + hsa_organization
-    if hsa_resource != "":
-        param_string = param_string + "&hsa_resource=" + hsa_resource 
+
+    calculated_signature = calculate_signature(data_string)
+
+
+    param_string = "hsa_username=" + url_data.get("hsa_username")
+    
+    if url_data.get("hsa_organization") != "":
+        param_string = param_string + "&hsa_organization=" + url_data.get("hsa_organization")
+    if url_data.get("hsa_resource") != "":
+        param_string = param_string + "&hsa_resource=" + url_data.get("hsa_resource")
         
-    param_string = param_string + "&hsa_created_at=" + hsa_created_at + "&hsa_valid_until=" + hsa_valid_until + "&hsa_signature=" + calculated_signature
+    param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") + "&hsa_signature=" + calculated_signature
 
     return "https://hauki-admin.example.com/?" + param_string
 
