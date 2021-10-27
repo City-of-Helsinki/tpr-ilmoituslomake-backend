@@ -86,7 +86,7 @@ class Command(BaseCommand):
                                 map(lambda x: int(x), str(row[15]).split(","))
                             ),
                             "matko_ids": [],
-                            "extra_keywords": [],
+                            "extra_keywords": {"fi":[], "sv": [], "en": []},
                             "comments": "",
                             "notifier": {
                                 "notifier_type": "",
