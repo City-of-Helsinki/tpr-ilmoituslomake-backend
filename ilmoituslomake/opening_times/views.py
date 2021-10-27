@@ -4,11 +4,7 @@ from rest_framework import response, status
 from rest_framework import permissions
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 import requests
-import hashlib 
-import hmac 
-import urllib.parse
-import datetime
-import uuid
+from datetime import datetime, timedelta
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -17,7 +13,7 @@ from dateutil import tz
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
 # Create your views here.
-REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/"
+REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
 
 class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -66,29 +62,19 @@ class CreateLink(UpdateAPIView):
                     "timezone": timezone,
                     "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
                 }
-                create_response = requests.post("https://hauki-api.test.hel.ninja/v1/resource/", params=create_params, headers=authorization_headers)
+                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", params=create_params, headers=authorization_headers)
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
                 post_response = create_response.json()
         
-        valid_until = datetime.datetime.strptime(post_response["modified"], '%Y-%m-%dT%H:%M:%S.%f%z') + datetime.timedelta(hours = 1)
-        created_at = datetime.datetime.strptime(post_response["created"], '%Y-%m-%dT%H:%M:%S.%f%z')
-
-        from_zone = tz.gettz(post_response["timezone"])
-        to_zone = tz.gettz("EET")
-
-        valid_until.replace(tzinfo=from_zone)
-        valid_until_in_EET = valid_until.astimezone(to_zone)
-        created_at.replace(tzinfo=from_zone)
-        created_at_in_EET = created_at.astimezone(to_zone)
-
+        now = datetime.utcnow().replace(microsecond=0)
         # Construct the url
         url_data = {
             "hsa_source": "tprek", 
             "hsa_username": request.user.username, 
-            "hsa_created_at": created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
+            "hsa_created_at": now.isoformat() + 'Z',
             # TODO: Check whether this is correct
-            "hsa_valid_until": valid_until.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z", 
+            "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + 'Z',
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
             "hsa_resource": "tprek:8215",
             "hsa_has_organization_rights": ""
