@@ -197,7 +197,7 @@ class Command(BaseCommand):
         try:
             ontology_words_for_id = {}
             with open(
-                "/app/moderation/management/commands/ontology_conversion.csv"
+                "/opt/tpr-ilmoituslomake-backend/ilmoituslomake/moderation/management/commands/ontology_conversion.csv"
             ) as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=";")
                 line_count = 0

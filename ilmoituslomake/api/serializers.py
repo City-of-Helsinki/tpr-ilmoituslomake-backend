@@ -45,6 +45,8 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_auxiliary_tourism_codes(self, obj):
         lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "en"
         return map(
             lambda atc: {"id": atc.data["id"], "name": atc.data["matkoword"][lang]},
             MatkoWord.objects.filter(data__id__in=obj.data["matko_ids"]),
