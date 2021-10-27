@@ -172,7 +172,7 @@ class Command(BaseCommand):
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
-                    image_uuid = str(uuid.uuid4())
+                    image_uuid = str(image["media_id"]) # str(uuid.uuid4())
                     data.append({"uuid": image_uuid, "url": image["url"]})
                     data_images.append(
                         {

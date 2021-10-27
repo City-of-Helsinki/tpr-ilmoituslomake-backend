@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from base.image_utils import preprocess_images, process_images
 
 # Permissions
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 # Create your views here.
 from django.contrib.auth.models import User
@@ -41,13 +41,13 @@ from django.db.models import Q
 
 # from image_utils import preprocess_images, process_images
 
-# TODO: Remove
+
 class NotificationSchemaCreateView(CreateAPIView):
     """
     Create a Notification instance
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
     # permission_classes =
@@ -90,7 +90,7 @@ class ChangeRequestCreateView(CreateAPIView):
 
         copy_data = request.data.copy()
         copy_data["category"] = "change_request"
-        
+
         serializer = self.get_serializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
 
