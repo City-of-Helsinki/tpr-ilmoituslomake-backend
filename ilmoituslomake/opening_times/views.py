@@ -21,7 +21,9 @@ class CreateLink(UpdateAPIView):
 
     def post(self, request, id=None, *args, **kwargs):
 
+        # Auth headers
         authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
+
         # Request params
         request_params = request.data
         name = request_params["name"]
@@ -31,9 +33,10 @@ class CreateLink(UpdateAPIView):
         origins = request_params["origins"]
         is_public = True
         timezone = request_params["timezone"]
-        id = "2916"
+        id = str(id)
+        
         # Check if resource exists
-        response = requests.get(REQUEST_URL + "kaupunkialusta:" + str(id) + "/")
+        response = requests.get(REQUEST_URL + "kaupunkialusta:" + id + "/")
         post_response = {}
 
         if response.status_code == 200:
@@ -42,12 +45,12 @@ class CreateLink(UpdateAPIView):
                 "name": name,
                 "address": address,
             }
-            update_response = requests.put(REQUEST_URL + "tprek:" + str(id) + "/", params=update_params, headers=authorization_headers)
+            update_response = requests.patch(REQUEST_URL + "tprek:" + id + "/", data=update_params, headers=authorization_headers)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
             post_response = update_response.json()
         else:
-            visithelsinki_response = requests.get(REQUEST_URL + "visithelsinki:" + str(id) + "/")
+            visithelsinki_response = requests.get(REQUEST_URL + "visithelsinki:" + id + "/")
             if visithelsinki_response.status_code == 200: # or temporary_response == 200:
                 post_response = update_origin(origin_id=id)
             else:
@@ -62,7 +65,7 @@ class CreateLink(UpdateAPIView):
                     "timezone": timezone,
                     "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
                 }
-                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", params=create_params, headers=authorization_headers)
+                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", data=create_params, headers=authorization_headers)
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
                 post_response = create_response.json()
