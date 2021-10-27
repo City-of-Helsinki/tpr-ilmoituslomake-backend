@@ -28,7 +28,7 @@ class TranslationTask(models.Model):
     ]
 
     category = models.CharField(
-        max_length=16, choices=CATEGORY_CHOICES, default="change_request", db_index=True
+        max_length=16, choices=CATEGORY_CHOICES, default="translation_task", db_index=True
     )
 
     CHANGE_TYPE_CHOICES = [
@@ -49,6 +49,7 @@ class TranslationTask(models.Model):
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
+        ("cancelled", "cancelled"),
     ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True

@@ -172,7 +172,7 @@ class Command(BaseCommand):
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
-                    image_uuid = str(uuid.uuid4())
+                    image_uuid = str(image["media_id"]) # str(uuid.uuid4())
                     data.append({"uuid": image_uuid, "url": image["url"]})
                     data_images.append(
                         {
@@ -267,6 +267,9 @@ class Command(BaseCommand):
                     + str(id)
                     + "?language_filter=en"
                 )
+                
+                if place_en_.status_code == 200:
+                    place_en = place_en_.json()
 
                 place_zh = {}
                 place_zh_ = requests.get(
@@ -399,7 +402,7 @@ class Command(BaseCommand):
                     "opening_times": [],
                     "ontology_ids": ontology_array,
                     "matko_ids": matko_array,
-                    "extra_keywords": [],
+                    "extra_keywords": {"fi":[], "sv": [], "en": []},
                     "comments": "Tuotu ohjelmallisesti vanhoista järjestelmistä.",
                     "notifier": {
                         "notifier_type": "",

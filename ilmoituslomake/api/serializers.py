@@ -45,6 +45,8 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
 
     def get_auxiliary_tourism_codes(self, obj):
         lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "en"
         return map(
             lambda atc: {"id": atc.data["id"], "name": atc.data["matkoword"][lang]},
             MatkoWord.objects.filter(data__id__in=obj.data["matko_ids"]),
@@ -53,7 +55,9 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     extra_searchwords = serializers.SerializerMethodField()
 
     def get_extra_searchwords(self, obj):
-        return obj.data.get("extra_keywords", [])
+        lang = self.context.get("lang", "fi")
+        lang_finland = "fi" if lang not in ["fi", "sv"] else lang
+        return obj.data["extra_keywords"].get(lang)
 
     latitude = serializers.SerializerMethodField()
 

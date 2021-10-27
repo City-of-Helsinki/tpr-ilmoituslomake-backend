@@ -68,7 +68,7 @@ class TranslationDataSerializer(serializers.ModelSerializer):
         ret["description"]["short"] = {}
         ret["description"]["long"] = {}
         ret["description"]["short"]["lang"] = ret["description_short"]
-        ret["description"]["long"]["lang"] = ret["description_short"]
+        ret["description"]["long"]["lang"] = ret["description_long"]
         del ret["description_short"]
         del ret["description_long"]
 
