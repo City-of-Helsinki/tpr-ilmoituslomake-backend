@@ -5,7 +5,7 @@ import urllib.parse
 import requests
 import json
 
-REQUEST_URL = "https://hauki-api.test.hel.ninja/v1/resource/"
+REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
 
 REQUIRED_AUTH_PARAM_NAMES = [
     "hsa_source",
@@ -51,16 +51,16 @@ def create_url(url_data):
     param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") + "&hsa_signature=" + calculated_signature
 
     # return "https://aukioloajat.hel.fi/" + param_string
-    return "https://hauki-admin-ui.dev.hel.ninja/?" + param_string
+    return "https://hauki-admin-ui.dev.hel.ninja/" + url_data.get("hsa_resource") + "?" + param_string
 
 
-def update_origin(origin_id, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  
+def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_fi=None, name_sv=None, name_en=None):  
     '''
     Update origin of the given target.
     Returns the response json if successful otherwise {}
     '''
     # Get the existing data
-    response = requests.get(REQUEST_URL + "visithelsinki:" + str(origin_id) + "/")
+    response = requests.get(REQUEST_URL + old_id + ":" + origin_id + "/")
     if response.status_code != 200:
         return response.json()
     authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
@@ -86,7 +86,7 @@ def update_origin(origin_id, id="kaupunkialusta", name_fi=None, name_sv=None, na
         "origins": origins
     }
 
-    update_response = requests.patch(REQUEST_URL + "visithelsinki:" + origin_id + "/", data=update_params, headers=authorization_headers)
+    update_response = requests.patch(REQUEST_URL + old_id + ":" + origin_id + "/", data=update_params, headers=authorization_headers)
     if update_response.status_code != 200:
         return update_response.json()
     return update_response.json()

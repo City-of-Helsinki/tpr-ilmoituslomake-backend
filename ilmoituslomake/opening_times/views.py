@@ -27,8 +27,10 @@ class CreateLink(UpdateAPIView):
         # Request params
         request_params = request.data
         name = request_params["name"]
+        # "Valkoinen Sali",
         description = request_params["description"]
         address = request_params["address"]
+        #  "Aleksanterinkatu 16, Helsinki",
         resource_type = request_params["resource_type"]
         origins = request_params["origins"]
         is_public = True
@@ -42,10 +44,10 @@ class CreateLink(UpdateAPIView):
         if response.status_code == 200:
             # Update data at v1_resource_partial_update
             update_params = {
-                "name": name,
-                "address": address,
+                "name": "Amos Rex",
+                #"address": address,
             }
-            update_response = requests.patch(REQUEST_URL + "tprek:" + id + "/", data=update_params, headers=authorization_headers)
+            update_response = requests.patch(REQUEST_URL + "kaupunkialusta:" + id + "/", data=update_params, headers=authorization_headers)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
             post_response = update_response.json()
@@ -73,13 +75,13 @@ class CreateLink(UpdateAPIView):
         now = datetime.utcnow().replace(microsecond=0)
         # Construct the url
         url_data = {
-            "hsa_source": "tprek", 
-            "hsa_username": request.user.username, 
+            "hsa_source": "kaupunkialusta", 
+            "hsa_username": request.user.email, 
             "hsa_created_at": now.isoformat() + 'Z',
             # TODO: Check whether this is correct
             "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + 'Z',
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
-            "hsa_resource": "tprek:8215",
+            "hsa_resource": "kaupunkialusta:" + id,
             "hsa_has_organization_rights": ""
         }
         url = create_url(url_data)
