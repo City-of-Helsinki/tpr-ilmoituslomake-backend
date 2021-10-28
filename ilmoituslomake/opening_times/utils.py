@@ -22,6 +22,9 @@ OPTIONAL_AUTH_PARAM_NAMES = [
 ]
 
 def calculate_signature(source_string):
+    '''
+    Calculates the hmac signature
+    '''
     return hmac.new(
         key=HAUKI_SECRET_KEY.encode("utf-8"), 
         msg=source_string.encode("utf-8"), 
@@ -36,10 +39,9 @@ def create_url(url_data):
         if i != "hsa_signature"
     ]
     data_string = ''.join([url_data.get(field_name, "") for field_name in data_fields]) 
-    
 
+    # Calculate the signature from the data string
     calculated_signature = calculate_signature(data_string)
-
 
     param_string = "hsa_source=" + url_data.get("hsa_source") + "&hsa_username=" + url_data.get("hsa_username")
     
@@ -50,29 +52,25 @@ def create_url(url_data):
         
     param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") + "&hsa_signature=" + calculated_signature
 
-    # return "https://aukioloajat.hel.fi/" + param_string
     return "https://hauki-admin-ui.dev.hel.ninja/" + url_data.get("hsa_resource") + "?" + param_string
 
 
 def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_fi=None, name_sv=None, name_en=None):  
     '''
     Update origin of the given target.
-    Returns the response json if successful otherwise {}
+    Returns the response json
     '''
     # Get the existing data
     response = requests.get(REQUEST_URL + old_id + ":" + origin_id + "/")
     if response.status_code != 200:
         return response.json()
+
     authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
 
+    # Add the new origin to existing origins.
     origin = {
             "data_source": {
                 "id": id,
-                "name": {
-                    "fi": name_fi,
-                    "sv": name_sv,
-                    "en": name_en
-                }
             },
             "origin_id": origin_id
         }
@@ -86,7 +84,8 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
         "origins": origins
     }
 
-    update_response = requests.patch(REQUEST_URL + old_id + ":" + origin_id + "/", data=update_params, headers=authorization_headers)
-    if update_response.status_code != 200:
-        return update_response.json()
+    # Partially update the resource
+    update_response = requests.patch(REQUEST_URL + old_id + ":" 
+        + origin_id + "/", json=update_params, headers=authorization_headers)
+
     return update_response.json()

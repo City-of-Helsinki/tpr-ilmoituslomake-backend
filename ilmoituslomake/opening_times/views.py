@@ -27,10 +27,8 @@ class CreateLink(UpdateAPIView):
         # Request params
         request_params = request.data
         name = request_params["name"]
-        # "Valkoinen Sali",
         description = request_params["description"]
         address = request_params["address"]
-        #  "Aleksanterinkatu 16, Helsinki",
         resource_type = request_params["resource_type"]
         origins = request_params["origins"]
         is_public = True
@@ -39,22 +37,21 @@ class CreateLink(UpdateAPIView):
         
         # Check if resource exists
         response = requests.get(REQUEST_URL + "kaupunkialusta:" + id + "/")
-        post_response = {}
 
         if response.status_code == 200:
             # Update data at v1_resource_partial_update
             update_params = {
-                "name": "Amos Rex",
-                #"address": address,
+                "name": name,
+                "address": address,
             }
-            update_response = requests.patch(REQUEST_URL + "kaupunkialusta:" + id + "/", data=update_params, headers=authorization_headers)
+            update_response = requests.patch(REQUEST_URL + "kaupunkialusta:" + id + "/", 
+                                             data=update_params, headers=authorization_headers)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
-            post_response = update_response.json()
         else:
             visithelsinki_response = requests.get(REQUEST_URL + "visithelsinki:" + id + "/")
             if visithelsinki_response.status_code == 200: # or temporary_response == 200:
-                post_response = update_origin(origin_id=id)
+                update_origin(origin_id=id)
             else:
                 # Create data at v1_resource_create
                 create_params = {                
@@ -67,18 +64,20 @@ class CreateLink(UpdateAPIView):
                     "timezone": timezone,
                     "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
                 }
-                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", data=create_params, headers=authorization_headers)
+                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", 
+                                                json=create_params, headers=authorization_headers)
+
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
-                post_response = create_response.json()
         
+        # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
+
         # Construct the url
         url_data = {
             "hsa_source": "kaupunkialusta", 
             "hsa_username": request.user.email, 
             "hsa_created_at": now.isoformat() + 'Z',
-            # TODO: Check whether this is correct
             "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + 'Z',
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
             "hsa_resource": "kaupunkialusta:" + id,
