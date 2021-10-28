@@ -172,7 +172,7 @@ class Command(BaseCommand):
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
-                    image_uuid = str(image["media_id"]) # str(uuid.uuid4())
+                    image_uuid = str(image["media_id"])  # str(uuid.uuid4())
                     data.append({"uuid": image_uuid, "url": image["url"]})
                     data_images.append(
                         {
@@ -267,7 +267,7 @@ class Command(BaseCommand):
                     + str(id)
                     + "?language_filter=en"
                 )
-                
+
                 if place_en_.status_code == 200:
                     place_en = place_en_.json()
 
@@ -312,12 +312,16 @@ class Command(BaseCommand):
                     id, place, xml, conversion_ids, ontology_words_for_id
                 )
 
+                fi_name = str(place.get("name", {}).get("fi", "")).strip()
+                sv_name = str(place.get("name", {}).get("sv", "")).strip()
+                en_name = str(place.get("name", {}).get("en", "")).strip()
+
                 data = {
                     "organization": {},
                     "name": {
-                        "fi": str(place.get("name", {}).get("fi", "")).strip(),
-                        "sv": str(place.get("name", {}).get("sv", "")).strip(),
-                        "en": str(place.get("name", {}).get("en", "")).strip(),
+                        "fi": fi_name if fi_name != "None" else "",
+                        "sv": sv_name if sv_name != "None" else "",
+                        "en": en_name if en_name != "None" else "",
                     },
                     "location": [
                         lat,
@@ -402,7 +406,7 @@ class Command(BaseCommand):
                     "opening_times": [],
                     "ontology_ids": ontology_array,
                     "matko_ids": matko_array,
-                    "extra_keywords": {"fi":[], "sv": [], "en": []},
+                    "extra_keywords": {"fi": [], "sv": [], "en": []},
                     "comments": "Tuotu ohjelmallisesti vanhoista järjestelmistä.",
                     "notifier": {
                         "notifier_type": "",
@@ -512,13 +516,13 @@ class Command(BaseCommand):
         # return
 
         # Alter sequence so that it wont break
-        with connection.cursor() as cursor:
-            query = (
-                "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
-                + str(max_id + 100)
-                + ";"
-            )
-            cursor.execute(query)
+        # with connection.cursor() as cursor:
+        #    query = (
+        #        "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
+        #        + str(max_id + 100)
+        #        + ";"
+        #    )
+        #    cursor.execute(query)
 
         # Success
         self.stdout.write(self.style.SUCCESS("Data loaded successfully."))

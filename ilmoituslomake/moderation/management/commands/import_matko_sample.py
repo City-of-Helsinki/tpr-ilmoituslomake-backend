@@ -86,7 +86,7 @@ class Command(BaseCommand):
                                 map(lambda x: int(x), str(row[15]).split(","))
                             ),
                             "matko_ids": [],
-                            "extra_keywords": {"fi":[], "sv": [], "en": []},
+                            "extra_keywords": {"fi": [], "sv": [], "en": []},
                             "comments": "",
                             "notifier": {
                                 "notifier_type": "",
@@ -95,17 +95,24 @@ class Command(BaseCommand):
                                 "phone": "",
                             },
                         }
-                        new_notification = Notification(data=data, moderated_notification_id=id, status="approved")
+                        new_notification = Notification(
+                            data=data, moderated_notification_id=id, status="approved"
+                        )
                         new_notification.save()
-                        new_moderated_notification = ModeratedNotification(id=id, notification_id=new_notification.pk, data=data, published=True)
+                        new_moderated_notification = ModeratedNotification(
+                            id=id,
+                            notification_id=new_notification.pk,
+                            data=data,
+                            published=True,
+                        )
                         new_moderated_notification.save()
                     line_count += 1
 
             # Alter sequence so that it wont break
-            with connection.cursor() as cursor:
-                query = "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH 5100;"
-                cursor.execute(query)
-                
+            # with connection.cursor() as cursor:
+            #    query = "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH 5100;"
+            #    cursor.execute(query)
+
         except Exception as e:
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
