@@ -25,7 +25,7 @@ class ModeratedNotification(BaseNotification):
     # works for fi, sv and end
     def has_lang(self, lang):
         if "name" in self.data and lang in self.data["name"]:
-            return moderated_notification.data["name"][lang] != ""
+            return self.data["name"][lang] != ""
         return False
 
 
