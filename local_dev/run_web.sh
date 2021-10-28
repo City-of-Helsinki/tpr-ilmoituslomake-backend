@@ -3,11 +3,15 @@
 # run Django development server
 
 # wait for PSQL server to start
-sleep 10
+sleep 20
 
 # prepare init migration
-su -m ilmoituslomake -c "python manage.py makemigrations ilmoituslomake"
+python manage.py makemigrations users base moderation notification_form translation
 # migrate db, so we have the latest db schema
-su -m ilmoituslomake -c "python manage.py migrate"
+python manage.py migrate
+# load ontologies
+python manage.py import_ontology_words
+# load matko words
+python manage.py import_matko_words
 # start development server on public ip interface, on port 8008
-su -m ilmoituslomake -c "python manage.py runserver 0.0.0.0:8008"
+python manage.py runserver 0.0.0.0:8008

@@ -1,0 +1,36 @@
+{
+	"$id": "<url>",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Change Request Schema",
+	"description": "<description>",
+	"type": "object",
+	"properties": {
+        "target": {
+            "type": "number"
+        },
+        "change_type": {
+            "type": "string",
+            "enum": ["change", "add", "delete"]
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 400
+                },
+                "contact_details": {
+                    "type": "string",
+                    "maxLength": 400,
+                    "default": ""
+                }
+            },
+            "required": ["description", "contact_details"]
+        }
+    },
+	"required": [
+        "target",
+        "change_type",
+        "description"
+    ]
+}

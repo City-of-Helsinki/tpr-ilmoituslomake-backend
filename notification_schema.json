@@ -1,0 +1,374 @@
+{
+	"$id": "<url>",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Notification Schema",
+	"description": "<description>",
+	"type": "object",
+	"properties": {
+        "organization": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "fi": {
+                "type": "string"
+            },
+            "sv": {
+                "type": "string"
+            },
+            "en": {
+                "type": "string"
+            }
+          },
+          "required": ["fi", "sv", "en"]
+        },
+        "location": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+                "type": "number"
+            } 
+        },
+        "description": {
+            "type": "object",
+            "properties": {
+                "short": {
+                    "type": "object",
+                    "properties": {
+                        "fi": {
+                            "type": "string",
+                            "maxLength": 150
+                        },
+                        "sv": {
+                            "type": "string",
+                            "maxLength": 150
+                        },
+                        "en": {
+                            "type": "string",
+                            "maxLength": 150
+                        }
+                    },
+                    "required": ["fi", "sv", "en"]
+                },
+                "long": {
+                    "type": "object",
+                    "properties": {
+                        "fi": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 120,
+                                    "maxLength": 4000
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        },
+                        "sv": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 120,
+                                    "maxLength": 4000
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        },
+                        "en": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 120,
+                                    "maxLength": 4000
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        }
+                    },
+                    "required": ["fi", "sv", "en"]
+                }
+            },
+            "required": ["short", "long"]        
+        },
+        "address": {
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "object",
+                    "properties": {
+                        "street": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^[0-9][0-9][0-9][0-9][0-9]$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        },
+                        "post_office": {
+                            "type": "string"
+                        },
+                        "neighborhood_id": {
+                            "type": "string"
+                        },
+                        "neighborhood": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["street", "postal_code", "post_office", "neighborhood_id", "neighborhood"]
+                },
+                "sv": {
+                    "type": "object",
+                    "properties": {
+                        "street": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^[0-9][0-9][0-9][0-9][0-9]$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        },
+                        "post_office": {
+                            "type": "string"
+                        },
+                        "neighborhood_id": {
+                            "type": "string"
+                        },
+                        "neighborhood": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["street", "postal_code", "post_office", "neighborhood_id", "neighborhood"]
+                }
+            },
+            "required": ["fi", "sv"]
+        },
+        "businessid": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
+        "phone": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "pattern": "^\\+?[0-9- ]+$"
+                },
+                {
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
+        "email": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "email"
+                },
+                {
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
+        "website": {
+            "type": "object",
+            "properties": {
+                "fi": {
+                   "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }
+                    ]
+                },
+                "sv": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }
+                    ]
+                },
+                "en": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "string",
+                            "maxLength": 0
+                        }
+                    ]
+                }
+            },
+            "required": ["fi", "sv", "en"]
+        },
+        "images": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "index": {
+                        "type": "number"
+                    },
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "source_type": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "permission": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "alt_text": {
+                        "type": "object",
+                        "properties": {
+                            "fi": {
+                                "type": "string",
+                                "maxLength": 125
+                            },
+                            "sv": {
+                                "type": "string",
+                                "maxLength": 125
+                            },
+                            "en": {
+                                "type": "string",
+                                "maxLength": 125
+                            }
+                        },
+                        "required": ["fi", "sv", "en"]
+                    },
+                    "media_id": {
+                        "type": "string"
+                    }
+                },
+                "required": ["index", "uuid", "source_type", "url", "permission", "source", "alt_text"]
+            }
+        },
+        "opening_times": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "ontology_ids": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "matko_ids": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "extra_keywords": {
+            "type": "object",
+            "properties": {
+                "fi": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sv": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "en":  {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["fi", "sv", "en"]
+        },
+        "comments": {
+            "type": "string"
+        },
+        "notifier": {
+            "type": "object",
+            "properties": {
+                "notifier_type": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            },
+            "required": ["notifier_type", "full_name", "email", "phone"]
+        }
+    },
+	"required": [
+        "organization",
+        "name",
+        "location",
+        "description",
+        "address",
+        "phone",
+        "email",
+        "website",
+        "images",
+        "opening_times",
+        "ontology_ids",
+        "matko_ids",
+        "extra_keywords",
+        "comments",
+        "notifier"
+    ]
+}
