@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import response, status
 from rest_framework import permissions
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
 import requests
 from datetime import datetime, timedelta
 # Permissions
@@ -86,3 +86,14 @@ class CreateLink(UpdateAPIView):
         url = create_url(url_data)
 
         return Response(url, status=status.HTTP_200_OK)
+
+class GetTimes(RetrieveAPIView):
+    queryset = ""
+
+    def get(self, request, id=None, *args, **kwargs):
+        if not request.user:
+            return Response(None, status=status.HTTP_403_FORBIDDEN)
+        start_date = self.request.query_params.get("start_date", None)
+        end_date = self.request.query_params.get("end_date", None)
+        response = requests.get(REQUEST_URL + id + "/opening_hours/" + "?start_date=" + start_date + "&end_date=" + end_date)
+        return Response(response.json(), status=status.HTTP_200_OK)
