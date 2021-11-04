@@ -103,7 +103,6 @@ def create_hauki_resource(name, description, address, resource_type, origins, is
         "timezone": timezone,
         "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
     }
-    create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", 
-                                    json=create_params, headers=authorization_headers)
+    create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", json=create_params, headers=authorization_headers)
 
     return create_response.json()
