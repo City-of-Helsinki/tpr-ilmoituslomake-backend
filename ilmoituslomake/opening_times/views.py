@@ -87,6 +87,7 @@ class CreateLink(UpdateAPIView):
 
         return Response(url, status=status.HTTP_200_OK)
 
+
 class GetTimes(RetrieveAPIView):
     queryset = ""
 

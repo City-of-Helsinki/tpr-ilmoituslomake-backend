@@ -89,3 +89,21 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
         + origin_id + "/", json=update_params, headers=authorization_headers)
 
     return update_response.json()
+
+
+def create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone):
+    authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
+    create_params = {                
+        "name": name,
+        "description": description,
+        "address": address,
+        "resource_type": resource_type,
+        "origins": origins,
+        "is_public": is_public, 
+        "timezone": timezone,
+        "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
+    }
+    create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", 
+                                    json=create_params, headers=authorization_headers)
+
+    return create_response.json()

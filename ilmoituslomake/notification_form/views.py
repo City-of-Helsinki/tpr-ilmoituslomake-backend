@@ -17,6 +17,7 @@ from rest_framework.generics import (
     UpdateAPIView,
 )
 from rest_framework import filters
+from opening_times.utils import create_hauki_resource
 
 #
 from moderation.models import ModerationItem
@@ -24,7 +25,7 @@ from moderation.serializers import ChangeRequestSerializer
 
 from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
-from base.models import NotificationSchema, OntologyWord, MatkoWord
+from base.models import BaseNotification, NotificationSchema, OntologyWord, MatkoWord
 
 # from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
@@ -38,8 +39,16 @@ from moderation.serializers import (
 )
 
 from django.db.models import Q
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+# from image_utils import preprocess_images, process_images   
 
-# from image_utils import preprocess_images, process_images
+@receiver(pre_save, sender=Notification)
+def pre_save_create_hauki_resource(sender, instance, **kwargs):
+    resource = create_hauki_resource(instance.data['name'], instance.data['description']['short'], 
+                                     {"fi": instance.data['address']['fi']['street'], "sv": instance.data['address']['sv']['street'], 
+                                     "en": instance.data['address']['fi']['street']}, "unit", None, False, "Europe/Helsinki")
+    instance.hauki_id = resource["id"]
 
 
 class NotificationSchemaCreateView(CreateAPIView):
