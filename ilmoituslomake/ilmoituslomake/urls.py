@@ -194,5 +194,5 @@ urlpatterns += [
 # Opening times
 urlpatterns += [
     path("api/openingtimes/createlink/<int:id>/", opening_times_views.CreateLink.as_view()),
-    path("api/opening_times/get/<str:id>/", opening_times_views.GetTimes.as_view())
+    path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view())
 ]
