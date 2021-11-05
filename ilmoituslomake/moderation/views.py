@@ -445,6 +445,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 # )
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
+                moderated_notification.published = True
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
                 if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
