@@ -316,6 +316,42 @@ class Command(BaseCommand):
                 sv_name = str(place.get("name", {}).get("sv", "") or "").strip()
                 en_name = str(place.get("name", {}).get("en", "") or "").strip()
 
+                _pc_fi = str(
+                    place.get("location", {}).get("address", {}).get("postal_code", "")
+                    or ""
+                )
+                pc_fi = _pc_fi
+                _pc_sv = str(
+                    place_sv.get("location", {})
+                    .get("address", {})
+                    .get("postal_code", "")
+                    or ""
+                )
+                pc_sv = _pc_sv
+                _po_fi = str(
+                    place.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_fi = _po_fi
+                _po_sv = str(
+                    place_sv.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_sv = _po_sv
+
+                #
+                if _pc_fi.isdigit():
+                    pass
+                elif _po_fi.isdigit():
+                    pc_fi = _po_fi
+                    po_fi = _pc_fi
+
+                if _pc_sv.isdigit():
+                    pass
+                elif _po_sv.isdigit():
+                    pc_sv = _po_sv
+                    po_sv = _pc_sv
+
                 data = {
                     "organization": {},
                     "name": {
@@ -359,42 +395,25 @@ class Command(BaseCommand):
                                 .get("street_address", "")
                                 or ""
                             ),
-                            "postal_code": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
-                                or ""
-                            ),
-                            "post_office": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("locality", "")
-                                or ""
-                            ),
+                            "postal_code": pc_fi,
+                            "post_office": po_fi,
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_fi,
                         },
                         "sv": {
-                            "street": self.extract_property(xml, "sv", "matko:address"),
-                            "postal_code": str(
-                                place_sv.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
-                                or ""
+                            "street": self.extract_property(xml, "sv", "matko:address")
+                            or (
+                                str(
+                                    place.get("location", {})
+                                    .get("address", {})
+                                    .get("street_address", "")
+                                    or ""
+                                )
                             ),
+                            "postal_code": pc_sv,
                             "post_office": muni_translations.get(
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                    or ""
-                                ).upper(),
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                    or ""
-                                ),
+                                po_sv.upper(),
+                                po_sv,
                             ),
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_sv,
