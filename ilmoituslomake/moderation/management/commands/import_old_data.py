@@ -312,16 +312,52 @@ class Command(BaseCommand):
                     id, place, xml, conversion_ids, ontology_words_for_id
                 )
 
-                fi_name = str(place.get("name", {}).get("fi", "")).strip()
-                sv_name = str(place.get("name", {}).get("sv", "")).strip()
-                en_name = str(place.get("name", {}).get("en", "")).strip()
+                fi_name = str(place.get("name", {}).get("fi", "") or "").strip()
+                sv_name = str(place.get("name", {}).get("sv", "") or "").strip()
+                en_name = str(place.get("name", {}).get("en", "") or "").strip()
+
+                _pc_fi = str(
+                    place.get("location", {}).get("address", {}).get("postal_code", "")
+                    or ""
+                )
+                pc_fi = _pc_fi
+                _pc_sv = str(
+                    place_sv.get("location", {})
+                    .get("address", {})
+                    .get("postal_code", "")
+                    or ""
+                )
+                pc_sv = _pc_sv
+                _po_fi = str(
+                    place.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_fi = _po_fi
+                _po_sv = str(
+                    place_sv.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_sv = _po_sv
+
+                #
+                if _pc_fi.isdigit():
+                    pass
+                elif _po_fi.isdigit():
+                    pc_fi = _po_fi
+                    po_fi = _pc_fi
+
+                if _pc_sv.isdigit():
+                    pass
+                elif _po_sv.isdigit():
+                    pc_sv = _po_sv
+                    po_sv = _pc_sv
 
                 data = {
                     "organization": {},
                     "name": {
-                        "fi": fi_name if fi_name != "None" else "",
-                        "sv": sv_name if sv_name != "None" else "",
-                        "en": en_name if en_name != "None" else "",
+                        "fi": fi_name,
+                        "sv": sv_name,
+                        "en": en_name,
                     },
                     "location": [
                         lat,
@@ -330,24 +366,24 @@ class Command(BaseCommand):
                     "description": {
                         "short": {
                             "fi": str(
-                                place.get("description", {}).get("body", "")
+                                place.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "sv": str(
-                                place_sv.get("description", {}).get("body", "")
+                                place_sv.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "en": str(
-                                place_en.get("description", {}).get("body", "")
+                                place_en.get("description", {}).get("body", "") or ""
                             ).strip(),
                         },
                         "long": {
                             "fi": str(
-                                place.get("description", {}).get("body", "")
+                                place.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "sv": str(
-                                place_sv.get("description", {}).get("body", "")
+                                place_sv.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "en": str(
-                                place_en.get("description", {}).get("body", "")
+                                place_en.get("description", {}).get("body", "") or ""
                             ).strip(),
                         },
                     },
@@ -357,50 +393,39 @@ class Command(BaseCommand):
                                 place.get("location", {})
                                 .get("address", {})
                                 .get("street_address", "")
+                                or ""
                             ),
-                            "postal_code": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
-                            ),
-                            "post_office": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("locality", "")
-                            ),
+                            "postal_code": pc_fi,
+                            "post_office": po_fi,
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_fi,
                         },
                         "sv": {
-                            "street": self.extract_property(xml, "sv", "matko:address"),
-                            "postal_code": str(
-                                place_sv.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
+                            "street": self.extract_property(xml, "sv", "matko:address")
+                            or (
+                                str(
+                                    place.get("location", {})
+                                    .get("address", {})
+                                    .get("street_address", "")
+                                    or ""
+                                )
                             ),
+                            "postal_code": pc_sv,
                             "post_office": muni_translations.get(
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                ).upper(),
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                ),
+                                po_sv.upper(),
+                                po_sv,
                             ),
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_sv,
                         },
                     },
                     "businessid": "",
-                    "phone": self.extract_property(xml, "fi", "matko:phone"),
-                    "email": self.extract_property(xml, "fi", "matko:email"),
+                    "phone": self.extract_property(xml, "fi", "matko:phone") or "",
+                    "email": self.extract_property(xml, "fi", "matko:email") or "",
                     "website": {
-                        "fi": str(place.get("info_url", "")),
-                        "sv": str(place_sv.get("info_url", "")),
-                        "en": str(place_en.get("info_url", "")),
+                        "fi": str(place.get("info_url", "") or ""),
+                        "sv": str(place_sv.get("info_url", "") or ""),
+                        "en": str(place_en.get("info_url", "") or ""),
                     },
                     "images": images,
                     "opening_times": [],
@@ -429,12 +454,12 @@ class Command(BaseCommand):
                     tdata["name"] = zh_name.strip()
                     tdata["language"] = "zh"
                     tdata["description_short"] = str(
-                        place_zh.get("description", {}).get("body", "")
+                        place_zh.get("description", {}).get("body", "") or ""
                     ).strip()
                     tdata["description_long"] = str(
-                        place_zh.get("description", {}).get("body", "")
+                        place_zh.get("description", {}).get("body", "") or ""
                     ).strip()
-                    tdata["website"] = str(place_zh.get("info_url", ""))
+                    tdata["website"] = str(place_zh.get("info_url", "") or "")
                     # tdata["target_revision"] = target_revision
                     tdata["images"] = []
                     # images_dict = { i["uuid"]: i for i in images }
