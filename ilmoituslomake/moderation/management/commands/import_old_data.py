@@ -161,7 +161,7 @@ class Command(BaseCommand):
             return ""
         f = elems[lang].find(prop)
         if f:
-            return str(f.string)
+            return str(f.string or "")
         return ""
 
     def create_fake_image_request(self, place):
