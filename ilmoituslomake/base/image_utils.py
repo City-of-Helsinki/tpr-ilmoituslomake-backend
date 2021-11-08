@@ -17,6 +17,11 @@ import io
 import requests
 from PIL import Image
 
+#
+headers = {
+    "User-Agent": "tpr-ilmoituslomake-backend/1.0 (asiointi.hel.fi)",
+}
+
 
 def preprocess_images(request):
     try:
@@ -78,7 +83,7 @@ def process_images(model, instance, images):
                 # ):
                 if True:
                     # print(upload["url"], file=sys.stderr)
-                    response = requests.get(upload["url"], stream=True)
+                    response = requests.get(upload["url"], headers=headers, stream=True)
                     if response.status_code == 200:
                         response.raw.decode_content = True
                         data = response.raw.read()
