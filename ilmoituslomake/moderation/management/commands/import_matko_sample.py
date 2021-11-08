@@ -154,6 +154,7 @@ class Command(BaseCommand):
                                     "neighborhood": nhood_name_sv,
                                 },
                             },
+                            "businessid": "",
                             "phone": str(row[25]),
                             "email": str(row[26]),
                             "website": {
