@@ -1,9 +1,8 @@
+from os import error
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 import hashlib 
 import hmac 
-import urllib.parse
 import requests
-import json
 
 REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
 
@@ -61,7 +60,18 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
     Returns the response json
     '''
     # Get the existing data
-    response = requests.get(REQUEST_URL + old_id + ":" + origin_id + "/")
+    try:
+        response = requests.get(REQUEST_URL + old_id + ":" + origin_id + "/")
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as errh:
+        print ("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print ("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print ("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print ("OOps: Something Else", err)
+
     if response.status_code != 200:
         return response.json()
 
@@ -85,10 +95,19 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
     }
 
     # Partially update the resource
-    update_response = requests.patch(REQUEST_URL + old_id + ":" 
-        + origin_id + "/", json=update_params, headers=authorization_headers)
-
-    return update_response.json()
+    try: 
+        update_response = requests.patch(REQUEST_URL + old_id + ":" 
+            + origin_id + "/", json=update_params, headers=authorization_headers)
+        update_response.raise_for_status()
+        return update_response.json()
+    except requests.exceptions.HTTPError as errh:
+        print ("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print ("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print ("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print ("OOps: Something Else", err)
 
 
 def create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone):
@@ -103,6 +122,15 @@ def create_hauki_resource(name, description, address, resource_type, origins, is
         "timezone": timezone,
         "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
     }
-    create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", json=create_params, headers=authorization_headers)
-
-    return create_response.json()
+    try:
+        create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", json=create_params, headers=authorization_headers)
+        create_response.raise_for_status()
+        return create_response.json()
+    except requests.exceptions.HTTPError as errh:
+        print ("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print ("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print ("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print ("OOps: Something Else", err)

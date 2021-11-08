@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from opening_times.utils import create_url, update_origin
+from opening_times.utils import create_hauki_resource, create_url, update_origin
 from dateutil import tz
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
@@ -54,19 +54,7 @@ class CreateLink(UpdateAPIView):
                 update_origin(origin_id=id)
             else:
                 # Create data at v1_resource_create
-                create_params = {                
-                    "name": name,
-                    "description": description,
-                    "address": address,
-                    "resource_type": resource_type,
-                    "origins": origins,
-                    "is_public": is_public, 
-                    "timezone": timezone,
-                    "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
-                }
-                create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", 
-                                                json=create_params, headers=authorization_headers)
-
+                create_response = create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone)
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
         
@@ -98,3 +86,4 @@ class GetTimes(RetrieveAPIView):
         end_date = self.request.query_params.get("end_date", None)
         response = requests.get(REQUEST_URL + id + "/opening_hours/" + "?start_date=" + start_date + "&end_date=" + end_date)
         return Response(response.json(), status=status.HTTP_200_OK)
+ 
