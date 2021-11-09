@@ -3,6 +3,7 @@ from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 import hashlib 
 import hmac 
 import requests
+import json
 
 REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
 
@@ -62,7 +63,6 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
     # Get the existing data
     try:
         response = requests.get(REQUEST_URL + old_id + ":" + origin_id + "/")
-        response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -98,7 +98,6 @@ def update_origin(origin_id, id="kaupunkialusta", old_id="visithelsinki", name_f
     try: 
         update_response = requests.patch(REQUEST_URL + old_id + ":" 
             + origin_id + "/", json=update_params, headers=authorization_headers)
-        update_response.raise_for_status()
         return update_response.json()
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
@@ -124,7 +123,6 @@ def create_hauki_resource(name, description, address, resource_type, origins, is
     }
     try:
         create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", json=create_params, headers=authorization_headers)
-        create_response.raise_for_status()
         return create_response.json()
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
@@ -134,3 +132,8 @@ def create_hauki_resource(name, description, address, resource_type, origins, is
         print ("Timeout Error:", errt)
     except requests.exceptions.RequestException as err:
         print ("OOps: Something Else", err)
+
+
+def log_to_error_log(string):
+    with open('logfile.txt', 'w') as convert_file:
+        convert_file.write(json.dumps(string))
