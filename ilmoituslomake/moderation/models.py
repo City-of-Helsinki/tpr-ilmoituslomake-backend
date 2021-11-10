@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from django.shortcuts import get_object_or_404
+from opening_times.utils import log_to_error_log, partially_update_hauki_resource, update_origin
 
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField
@@ -29,6 +30,14 @@ class ModeratedNotification(BaseNotification):
                 if self.notification_id != 0:
                     notification = get_object_or_404(Notification, pk=self.notification_id)
                     self.hauki_id = notification.hauki_id
+                    # update_params = {
+                    #     "is_public": True,
+
+                    # }
+                    # partially_update_hauki_resource("https://hauki-api.dev.hel.ninja/v1/resource/" + notification.hauki_id + "/", update_params)
+                    log_to_error_log({"id": notification.moderated_notification_id, "hauki_id": notification.hauki_id})
+                    update_response_json = update_origin(self.id, notification.hauki_id)
+                    #log_to_error_log({"id": self.id, "hauki_id": notification.hauki_id})
             except Exception as e:
                 pass
         return super().save(*args, **kwargs)

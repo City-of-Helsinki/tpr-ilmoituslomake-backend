@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from opening_times.utils import create_hauki_resource, create_url, update_origin
+from opening_times.utils import create_hauki_resource, create_url, partially_update_hauki_resource, update_origin
 from dateutil import tz
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
 
@@ -21,9 +21,6 @@ class CreateLink(UpdateAPIView):
 
     def post(self, request, id=None, *args, **kwargs):
 
-        # Auth headers
-        authorization_headers = {'Authorization': 'APIToken ' + API_TOKEN}
-
         # Request params
         request_params = request.data
         name = request_params["name"]
@@ -34,6 +31,7 @@ class CreateLink(UpdateAPIView):
         is_public = True
         timezone = request_params["timezone"]
         id = str(id)
+        hauki_id = str(request_params["hauki_id"])
         
         # Check if resource exists
         response = requests.get(REQUEST_URL + "kaupunkialusta:" + id + "/")
@@ -44,15 +42,12 @@ class CreateLink(UpdateAPIView):
                 "name": name,
                 "address": address,
             }
-            update_response = requests.patch(REQUEST_URL + "kaupunkialusta:" + id + "/", 
-                                             data=update_params, headers=authorization_headers)
+            update_response = partially_update_hauki_resource(REQUEST_URL + "kaupunkialusta:" + id + "/", update_params)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
         else:
-            visithelsinki_response = requests.get(REQUEST_URL + "visithelsinki:" + id + "/")
-            if visithelsinki_response.status_code == 200: # or temporary_response == 200:
-                update_origin(origin_id=id)
-            else:
+            hauki_id_response = requests.get(REQUEST_URL + hauki_id + "/")
+            if hauki_id_response.status_code != 200: 
                 # Create data at v1_resource_create
                 create_response = create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone)
                 if create_response.status_code != 201:
