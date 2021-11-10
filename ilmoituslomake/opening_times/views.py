@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework import response, status
 from rest_framework import permissions
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
+from notification_form.models import Notification
 from opening_times.utils import create_hauki_resource, create_url, partially_update_hauki_resource, update_origin
 from dateutil import tz
 from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
@@ -47,7 +48,10 @@ class CreateLink(UpdateAPIView):
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
         else:
             hauki_id_response = requests.get(REQUEST_URL + hauki_id + "/")
-            if hauki_id_response.status_code != 200: 
+            notification = get_object_or_404(Notification, pk=id)
+            if hauki_id_response.status_code == 200 and notification.moderated_notification_id != 0: 
+                update_origin(id, notification.moderated_notification_id )
+            else:
                 # Create data at v1_resource_create
                 create_response = create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone)
                 if create_response.status_code != 201:

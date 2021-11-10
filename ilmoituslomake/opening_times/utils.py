@@ -129,7 +129,7 @@ def partially_update_hauki_resource(url, update_params):
 
     try: 
         update_response = requests.patch(url, json=update_params, headers=authorization_headers)
-        return update_response.json()
+        return update_response
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
