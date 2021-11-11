@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 import requests
-from ilmoituslomake.ilmoituslomake.settings import HAUKI_API_URL
+from ilmoituslomake.settings import HAUKI_API_URL
 from opening_times.utils import log_to_error_log, update_origin
 
 from notification_form.models import Notification
