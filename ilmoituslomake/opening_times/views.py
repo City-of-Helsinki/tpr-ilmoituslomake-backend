@@ -28,7 +28,6 @@ class CreateLink(UpdateAPIView):
         description = request_params["description"]
         address = request_params["address"]
         resource_type = request_params["resource_type"]
-        origins = request_params["origins"]
         is_public = True
         timezone = request_params["timezone"]
         id = str(id)
@@ -51,8 +50,14 @@ class CreateLink(UpdateAPIView):
             notification = get_object_or_404(Notification, pk=id)
             if hauki_id_response.status_code == 200 and notification.moderated_notification_id != 0: 
                 update_origin(id, notification.moderated_notification_id )
-            else:
+            elif notification.moderated_notification_id > 0:
                 # Create data at v1_resource_create
+                origins = {
+                    "data_source": {
+                        "id": "kaupunkialusta",
+                    },
+                    "origin_id": notification.moderated_notification_id
+                }
                 create_response = create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone)
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
@@ -60,6 +65,7 @@ class CreateLink(UpdateAPIView):
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
 
+        hsa_resource = hauki_id
         # Construct the url
         url_data = {
             "hsa_source": "kaupunkialusta", 
@@ -67,7 +73,7 @@ class CreateLink(UpdateAPIView):
             "hsa_created_at": now.isoformat() + 'Z',
             "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + 'Z',
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
-            "hsa_resource": "kaupunkialusta:" + id,
+            "hsa_resource": hsa_resource,
             "hsa_has_organization_rights": ""
         }
         url = create_url(url_data)
