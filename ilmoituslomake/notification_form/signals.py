@@ -1,6 +1,6 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from opening_times.utils import create_hauki_resource, log_to_error_log
+from opening_times.utils import create_hauki_resource
 from notification_form.models import Notification
 
 @receiver(pre_save, sender=Notification)

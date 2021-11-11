@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.utils import translation
 
 from users import views as users_views
 from notification_form import views as notification_form_views

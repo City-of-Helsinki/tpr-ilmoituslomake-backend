@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 import requests
+from ilmoituslomake.ilmoituslomake.settings import HAUKI_API_URL
 from opening_times.utils import log_to_error_log, update_origin
 
 from notification_form.models import Notification
@@ -41,7 +42,7 @@ def post_save_update_hauki_origin(sender, instance, **kwargs):
             if instance.notification_id > 0:
                 notification = get_object_or_404(Notification, pk=instance.notification_id)
                 log_to_error_log({"id": instance.id, "hauki_id": notification.hauki_id})
-                response = requests.get("https://hauki-api.dev.hel.ninja/v1/resource/kaupunkialusta:" + str(instance.id) + "/")
+                response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/")
                 if response.status_code != 200:
                     update_response_json = update_origin(instance.id, notification.hauki_id)
         except Exception as e:

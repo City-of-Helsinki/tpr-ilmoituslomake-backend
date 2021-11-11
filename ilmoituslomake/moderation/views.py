@@ -4,8 +4,7 @@ import sys
 from datetime import datetime, timedelta
 
 from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 
 # Permissions
 from rest_framework.permissions import IsAdminUser
@@ -22,7 +21,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
 )
 
-from rest_framework import filters, serializers
+from rest_framework import filters
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 

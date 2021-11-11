@@ -1,11 +1,9 @@
 # import json
 # from datetime import datetime, timedelta
 
-from rest_framework.pagination import PageNumberPagination
 from translation.serializers import TranslationDataSerializer
 from translation.models import TranslationData, TranslationTask
 from django.shortcuts import render, get_object_or_404
-from django.utils import translation
 
 from ilmoituslomake.settings import API_KEY_CUSTOM_HEADER
 
@@ -13,8 +11,6 @@ from ilmoituslomake.settings import API_KEY_CUSTOM_HEADER
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.response import Response
-
-from rest_framework import filters
 
 from rest_framework.pagination import LimitOffsetPagination
 

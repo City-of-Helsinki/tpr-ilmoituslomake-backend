@@ -1,6 +1,5 @@
 from django.contrib.gis.db import models
 from django.shortcuts import get_object_or_404
-from opening_times.utils import log_to_error_log, partially_update_hauki_resource, update_origin
 
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField

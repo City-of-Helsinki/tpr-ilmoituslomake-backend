@@ -1,20 +1,15 @@
 from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
-from rest_framework import response, status
-from rest_framework import permissions
-from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework import status
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 import requests
 from datetime import datetime, timedelta
 # Permissions
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from notification_form.models import Notification
 from opening_times.utils import create_hauki_resource, create_url, partially_update_hauki_resource, update_origin
 from dateutil import tz
-from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
-
-# Create your views here.
-REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
+from ilmoituslomake.settings import HAUKI_API_URL
 
 class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -30,11 +25,11 @@ class CreateLink(UpdateAPIView):
         resource_type = request_params["resource_type"]
         is_public = True
         timezone = request_params["timezone"]
-        id = str(id)
         hauki_id = str(request_params["hauki_id"])
-        
         # Check if resource exists
-        response = requests.get(REQUEST_URL + "kaupunkialusta:" + id + "/")
+
+        id = str(id)
+        response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + id + "/")
 
         if response.status_code == 200:
             # Update data at v1_resource_partial_update
@@ -42,11 +37,11 @@ class CreateLink(UpdateAPIView):
                 "name": name,
                 "address": address,
             }
-            update_response = partially_update_hauki_resource(REQUEST_URL + "kaupunkialusta:" + id + "/", update_params)
+            update_response = partially_update_hauki_resource(HAUKI_API_URL + "kaupunkialusta:" + id + "/", update_params)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
         else:
-            hauki_id_response = requests.get(REQUEST_URL + hauki_id + "/")
+            hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/")
             notification = get_object_or_404(Notification, pk=id)
             if hauki_id_response.status_code == 200 and notification.moderated_notification_id != 0: 
                 update_origin(id, notification.moderated_notification_id )
@@ -89,6 +84,6 @@ class GetTimes(RetrieveAPIView):
             return Response(None, status=status.HTTP_403_FORBIDDEN)
         start_date = self.request.query_params.get("start_date", None)
         end_date = self.request.query_params.get("end_date", None)
-        response = requests.get(REQUEST_URL + id + "/opening_hours/" + "?start_date=" + start_date + "&end_date=" + end_date)
+        response = requests.get(HAUKI_API_URL + id + "/opening_hours/" + "?start_date=" + start_date + "&end_date=" + end_date)
         return Response(response.json(), status=status.HTTP_200_OK)
  

@@ -1,11 +1,9 @@
 from os import error
-from ilmoituslomake.settings import API_TOKEN, HAUKI_SECRET_KEY
+from ilmoituslomake.settings import API_TOKEN, HAUKI_API_URL, HAUKI_SECRET_KEY
 import hashlib 
 import hmac 
 import requests
 import json
-
-REQUEST_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
 
 REQUIRED_AUTH_PARAM_NAMES = [
     "hsa_source",
@@ -62,7 +60,7 @@ def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_s
     '''
     # Get the existing data
     try:
-        response = requests.get(REQUEST_URL + str(hauki_id) + "/")
+        response = requests.get(HAUKI_API_URL + str(hauki_id) + "/")
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -93,7 +91,7 @@ def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_s
     }
 
     # Partially update the resource
-    partially_update_hauki_resource(REQUEST_URL + str(hauki_id) + "/", update_params)
+    partially_update_hauki_resource(HAUKI_API_URL + str(hauki_id) + "/", update_params)
 
 
 def create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone):
@@ -109,7 +107,7 @@ def create_hauki_resource(name, description, address, resource_type, origins, is
         "organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
     }
     try:
-        create_response = requests.post("https://hauki-api.dev.hel.ninja/v1/resource/", json=create_params, headers=authorization_headers)
+        create_response = requests.post(HAUKI_API_URL, json=create_params, headers=authorization_headers)
         return create_response
     except requests.exceptions.HTTPError as errh:
         print ("Http Error:", errh)
