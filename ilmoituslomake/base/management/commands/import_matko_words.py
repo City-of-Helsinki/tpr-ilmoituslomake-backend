@@ -94,14 +94,15 @@ class Command(BaseCommand):
                         # print(f'Column names are {", ".join(row)}')
                     else:
                         # print(f'\t{row[0]} works in the {row[1]} department, and was born in {row[2]}.')
+                        # matko_type_id;type_name_matko;st;RUOTSIKSI;ENGLANNIKSI
                         save_array.append(
                             {
                                 "id": int(row[0]),
-                                "type_name": str(row[1]),
+                                "type_name": str(row[1]).strip(),
                                 "matkoword": {
-                                    "fi": str(row[2]),
-                                    "sv": str(row[3]),
-                                    "en": str(row[4]),
+                                    "fi": str(row[2]).strip(),
+                                    "sv": str(row[3]).strip(),
+                                    "en": str(row[4]).strip(),
                                 },
                             }
                         )
