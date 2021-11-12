@@ -159,6 +159,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+STATIC_ROOT = "/opt/tpr-ilmoituslomake-backend/static/"
 STATIC_URL = "/static/"
 
 # Authentication
@@ -226,10 +227,10 @@ PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
 PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
-# USE_X_FORWARDED_HOST = True
-# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-FORCE_SCRIPT_NAME = "/TPRalusta_testi"
-# FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# FORCE_SCRIPT_NAME = "/TPRalusta"
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
 FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
 
