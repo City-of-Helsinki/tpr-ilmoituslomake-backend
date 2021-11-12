@@ -345,12 +345,18 @@ class Command(BaseCommand):
                 elif _po_fi.isdigit():
                     pc_fi = _po_fi
                     po_fi = _pc_fi
+                else:
+                    po_fi = _pc_fi
+                    pc_fi = ""
 
                 if _pc_sv.isdigit():
                     pass
                 elif _po_sv.isdigit():
                     pc_sv = _po_sv
                     po_sv = _pc_sv
+                else:
+                    po_sv = _pc_sv
+                    pc_sv = ""
 
                 data = {
                     "organization": {},
@@ -423,9 +429,10 @@ class Command(BaseCommand):
                     "phone": self.extract_property(xml, "fi", "matko:phone") or "",
                     "email": self.extract_property(xml, "fi", "matko:email") or "",
                     "website": {
-                        "fi": str(place.get("info_url", "") or ""),
-                        "sv": str(place_sv.get("info_url", "") or ""),
-                        "en": str(place_en.get("info_url", "") or ""),
+                        "fi": self.extract_property(xml, "fi", "link")
+                        or "",  # str(place.get("info_url", "") or ""),
+                        "sv": self.extract_property(xml, "sv", "link") or "",  # ,
+                        "en": self.extract_property(xml, "en", "link") or "",  # ,
                     },
                     "images": images,
                     "opening_times": [],
