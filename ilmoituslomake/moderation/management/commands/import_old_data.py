@@ -146,6 +146,7 @@ class Command(BaseCommand):
         return {
             "fi": elems.get(str(id), None),
             "sv": elems_sv.get(str(id), None),
+            "en": elems_en.get(str(id), None),
         }
 
     def extract_property_list(self, elems, lang, prop):
