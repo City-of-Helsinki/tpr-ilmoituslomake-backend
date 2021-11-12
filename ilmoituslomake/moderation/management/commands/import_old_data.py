@@ -146,6 +146,7 @@ class Command(BaseCommand):
         return {
             "fi": elems.get(str(id), None),
             "sv": elems_sv.get(str(id), None),
+            "en": elems_en.get(str(id), None)
         }
 
     def extract_property_list(self, elems, lang, prop):
@@ -236,12 +237,17 @@ class Command(BaseCommand):
 
             data = response.json()["data"]
 
+            ids = list(map(lambda x: x.id, list(ModeratedNotification.objects.all())))
+
             ii = 0
             for loc in data:
                 # ii += 1
                 # if ii > 15:
                 #    break
                 id = int(loc["id"])
+
+                if id in ids:
+                    continue
 
                 # print(id)
                 xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
