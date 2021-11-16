@@ -159,11 +159,11 @@ urlpatterns += [
     ),
     path(
         "api/open/v1/auxiliarytourismcodes/<int:id>/",
-        api_views.ApiMatkoWordViewV1.as_view(),
+        api_views.ApiMatkoWordListViewV1.as_view(),
     ),
     path(
         "api/open/v1/ontologyids/<int:id>/",
-        api_views.ApiOntologyWordViewV1.as_view(),
+        api_views.ApiOntologyWordListViewV1.as_view(),
     ),
 ]
 
