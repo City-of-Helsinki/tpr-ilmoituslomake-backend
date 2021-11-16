@@ -23,8 +23,13 @@ from rest_framework.generics import (
     RetrieveAPIView,
 )
 
+from base.models import MatkoWord, OntologyWord
 from moderation.models import ModeratedNotification
-from api.serializers import ApiModeratedNotificationSerializerV1
+from api.serializers import (
+    ApiModeratedNotificationSerializerV1,
+    ApiMatkoWordSerializerV1,
+    ApiOntologyWordSerializerV1,
+)
 
 from django.db.models import Q
 
@@ -62,6 +67,28 @@ def modify_translation_data(old_data, new_data):
 class LargeResultsSetPagination(LimitOffsetPagination):
     default_limit = 200
     max_limit = 200
+
+
+class ApiOntologyWordListViewV1(ListAPIView):
+    """
+    Returns a collection of ontology words instances.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = OntologyWord.objects.all()
+    serializer_class = OntologyWordSerializer
+    pagination_class = None
+
+
+class ApiMatkoWordListViewV1(ListAPIView):
+    """
+    Returns a collection of matko words instances.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = MatkoWord.objects.all()
+    serializer_class = MatkoWordSerializer
+    pagination_class = None
 
 
 class ApiRetrieveViewV1(RetrieveAPIView):
