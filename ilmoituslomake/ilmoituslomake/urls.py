@@ -158,11 +158,11 @@ urlpatterns += [
         api_views.ApiRetrieveViewV1.as_view(),
     ),
     path(
-        "api/open/v1/auxiliarytourismcodes/<int:id>/",
+        "api/open/v1/auxiliarytourismcodes/",
         api_views.ApiMatkoWordListViewV1.as_view(),
     ),
     path(
-        "api/open/v1/ontologyids/<int:id>/",
+        "api/open/v1/ontologyids/",
         api_views.ApiOntologyWordListViewV1.as_view(),
     ),
 ]

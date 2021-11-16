@@ -76,7 +76,7 @@ class ApiOntologyWordListViewV1(ListAPIView):
 
     permission_classes = [AllowAny]
     queryset = OntologyWord.objects.all()
-    serializer_class = OntologyWordSerializer
+    serializer_class = ApiOntologyWordSerializerV1
     pagination_class = None
 
 
@@ -87,7 +87,7 @@ class ApiMatkoWordListViewV1(ListAPIView):
 
     permission_classes = [AllowAny]
     queryset = MatkoWord.objects.all()
-    serializer_class = MatkoWordSerializer
+    serializer_class = ApiMatkoWordSerializerV1
     pagination_class = None
 
 
