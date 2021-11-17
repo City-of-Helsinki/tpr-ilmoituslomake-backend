@@ -54,7 +54,7 @@ def create_url(url_data):
     return "https://hauki-admin-ui.dev.hel.ninja/resource/" + url_data.get("hsa_resource") + "/?" + param_string
 
 
-def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  
+def update_origin(origin_id, hauki_id, is_draft=False, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  
     '''
     Update origin of the given target.
     Returns the response json
@@ -74,6 +74,8 @@ def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_s
     if response.status_code != 200:
         return response.json()
 
+    if is_draft:
+        origin_id = "draft-" + str(origin_id)
     # Add the new origin to existing origins.
     origin = {
             "data_source": {
@@ -83,7 +85,8 @@ def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_s
         }
     origins = []
     for item in response.json()["origins"]:
-        origins.append(item)
+        if item["data_source"]["id"] != "kaupunkialusta":
+            origins.append(item)
         
     origins.append(origin)
 

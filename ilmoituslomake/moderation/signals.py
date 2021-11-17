@@ -33,6 +33,10 @@ def create_moderation_item(sender, instance, **kwargs):
             data=instance.data,
         )
         moderation_item.save()
+        try:
+            update_origin(instance.id, instance.hauki_id, is_draft=True)
+        except Exception as e:
+            pass
 
 
 @receiver(post_save, sender=ModeratedNotification)
