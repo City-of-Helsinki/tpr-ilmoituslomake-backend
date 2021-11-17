@@ -42,15 +42,16 @@ def create_url(url_data):
     calculated_signature = calculate_signature(data_string)
 
     param_string = "hsa_source=" + url_data.get("hsa_source") + "&hsa_username=" + url_data.get("hsa_username")
+    param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") 
     
-    if url_data.get("hsa_organization") != "":
-        param_string = param_string + "&hsa_organization=" + url_data.get("hsa_organization")
     if url_data.get("hsa_resource") != "":
         param_string = param_string + "&hsa_resource=" + url_data.get("hsa_resource")
-        
-    param_string = param_string + "&hsa_created_at=" + url_data.get("hsa_created_at") + "&hsa_valid_until=" + url_data.get("hsa_valid_until") + "&hsa_signature=" + calculated_signature
+    if url_data.get("hsa_organization") != "":
+        param_string = param_string + "&hsa_organization=" + url_data.get("hsa_organization")
 
-    return "https://hauki-admin-ui.dev.hel.ninja/" + url_data.get("hsa_resource") + "?" + param_string
+    param_string = param_string + "&hsa_has_organization_rights=" + url_data.get("hsa_has_organization_rights") + "&hsa_signature=" + calculated_signature
+
+    return "https://hauki-admin-ui.dev.hel.ninja/resource/" + url_data.get("hsa_resource") + "/?" + param_string
 
 
 def update_origin(origin_id, hauki_id, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  

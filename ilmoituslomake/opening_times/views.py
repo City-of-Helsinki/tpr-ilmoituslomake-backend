@@ -72,7 +72,7 @@ class CreateLink(UpdateAPIView):
             "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + 'Z',
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
             "hsa_resource": hsa_resource,
-            "hsa_has_organization_rights": ""
+            "hsa_has_organization_rights": "false"
         }
         url = create_url(url_data)
 
