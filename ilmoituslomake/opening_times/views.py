@@ -30,6 +30,7 @@ class CreateLink(UpdateAPIView):
 
         id = str(id)
         response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + id + "/")
+        hsa_resource = hauki_id
 
         if response.status_code == 200:
             # Update data at v1_resource_partial_update
@@ -37,14 +38,16 @@ class CreateLink(UpdateAPIView):
                 "name": name,
                 "address": address,
             }
+            hsa_resource = "kaupunkialusta:" + id
             update_response = partially_update_hauki_resource(HAUKI_API_URL + "kaupunkialusta:" + id + "/", update_params)
             if update_response.status_code != 200:
                 return Response(update_response.json(), status=status.HTTP_400_BAD_REQUEST)
         else:
             hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/")
             notification = get_object_or_404(Notification, pk=id)
-            if hauki_id_response.status_code == 200 and notification.moderated_notification_id != 0: 
+            if hauki_id_response.status_code == 200 and notification.moderated_notification_id > 0: 
                 update_origin(id, notification.moderated_notification_id )
+                hsa_resource = "kaupunkialusta:" + str(notification.moderated_notification_id)
             elif notification.moderated_notification_id > 0:
                 # Create data at v1_resource_create
                 origins = {
@@ -54,13 +57,13 @@ class CreateLink(UpdateAPIView):
                     "origin_id": notification.moderated_notification_id
                 }
                 create_response = create_hauki_resource(name, description, address, resource_type, origins, is_public, timezone)
+                hsa_resource = "kaupunkialusta:" + str(notification.moderated_notification_id)
                 if create_response.status_code != 201:
                     return Response(create_response.json(), status=status.HTTP_400_BAD_REQUEST)
         
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
 
-        hsa_resource = hauki_id
         # Construct the url
         url_data = {
             "hsa_source": "kaupunkialusta", 
@@ -86,4 +89,3 @@ class GetTimes(RetrieveAPIView):
         end_date = self.request.query_params.get("end_date", None)
         response = requests.get(HAUKI_API_URL + id + "/opening_hours/" + "?start_date=" + start_date + "&end_date=" + end_date)
         return Response(response.json(), status=status.HTTP_200_OK)
- 

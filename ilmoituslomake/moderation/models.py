@@ -29,6 +29,7 @@ class ModeratedNotification(BaseNotification):
                 if self.notification_id != 0:
                     notification = get_object_or_404(Notification, pk=self.notification_id)
                     self.hauki_id = notification.hauki_id
+                    # TODO: Update name etc. in hauki????
             except Exception as e:
                 pass
         return super().save(*args, **kwargs)
