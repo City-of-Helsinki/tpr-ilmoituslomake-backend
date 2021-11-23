@@ -241,4 +241,6 @@ JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
 
 API_KEY_CUSTOM_HEADER = "HTTP_OPEN_API_KEY"
 
-HAUKI_API_URL = "https://hauki-api.dev.hel.ninja/v1/resource/"
+HAUKI_API_URL = env("HAUKI_API_URL")
+
+HAUKI_UI_URL = env("HAUKI_UI_URL")

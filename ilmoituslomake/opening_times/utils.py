@@ -1,5 +1,5 @@
 from os import error
-from ilmoituslomake.settings import API_TOKEN, HAUKI_API_URL, HAUKI_SECRET_KEY
+from ilmoituslomake.settings import API_TOKEN, HAUKI_API_URL, HAUKI_SECRET_KEY, HAUKI_UI_URL
 import hashlib 
 import hmac 
 import requests
@@ -51,7 +51,7 @@ def create_url(url_data):
 
     param_string = param_string + "&hsa_has_organization_rights=" + url_data.get("hsa_has_organization_rights") + "&hsa_signature=" + calculated_signature
 
-    return "https://hauki-admin-ui.dev.hel.ninja/resource/" + url_data.get("hsa_resource") + "/?" + param_string
+    return HAUKI_UI_URL + url_data.get("hsa_resource") + "/?" + param_string
 
 
 def update_origin(origin_id, hauki_id, is_draft=False, id="kaupunkialusta", name_fi=None, name_sv=None, name_en=None):  
