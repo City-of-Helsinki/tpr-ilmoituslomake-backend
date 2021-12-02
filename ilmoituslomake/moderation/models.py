@@ -34,6 +34,12 @@ class ModeratedNotification(BaseNotification):
                 pass
         return super().save(*args, **kwargs)
 
+    # works for fi, sv and end
+    def has_lang(self, lang):
+        if "name" in self.data and lang in self.data["name"]:
+            return self.data["name"][lang] != ""
+        return False
+
 
 def upload_image_to(instance, filename):
     #     return "{0}/{1}".format("1", filename)

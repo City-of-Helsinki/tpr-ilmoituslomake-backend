@@ -158,6 +158,14 @@ urlpatterns += [
         "api/open/v1/target/<int:id>/",
         api_views.ApiRetrieveViewV1.as_view(),
     ),
+    path(
+        "api/open/v1/auxiliarytourismcode/",
+        api_views.ApiMatkoWordListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/ontologyword/",
+        api_views.ApiOntologyWordListViewV1.as_view(),
+    ),
 ]
 
 # Translation

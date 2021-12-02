@@ -19,8 +19,13 @@ from rest_framework.generics import (
     RetrieveAPIView,
 )
 
+from base.models import MatkoWord, OntologyWord
 from moderation.models import ModeratedNotification
-from api.serializers import ApiModeratedNotificationSerializerV1
+from api.serializers import (
+    ApiModeratedNotificationSerializerV1,
+    ApiMatkoWordSerializerV1,
+    ApiOntologyWordSerializerV1,
+)
 
 from django.db.models import Q
 
@@ -60,6 +65,28 @@ class LargeResultsSetPagination(LimitOffsetPagination):
     max_limit = 200
 
 
+class ApiOntologyWordListViewV1(ListAPIView):
+    """
+    Returns a collection of ontology words instances.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = OntologyWord.objects.all()
+    serializer_class = ApiOntologyWordSerializerV1
+    pagination_class = None
+
+
+class ApiMatkoWordListViewV1(ListAPIView):
+    """
+    Returns a collection of matko words instances.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = MatkoWord.objects.all()
+    serializer_class = ApiMatkoWordSerializerV1
+    pagination_class = None
+
+
 class ApiRetrieveViewV1(RetrieveAPIView):
     """
     Returns a single ModeratedNotification instance
@@ -72,12 +99,20 @@ class ApiRetrieveViewV1(RetrieveAPIView):
 
     def get(self, request, id=None, *args, **kwargs):
         lang = request.GET.get("language", "fi")
-        moderated_notification = get_object_or_404(ModeratedNotification, pk=id, published=True)
+        moderated_notification = get_object_or_404(
+            ModeratedNotification, pk=id, published=True
+        )
 
         has_api_key = request_has_api_key(request)
 
         # If language is finnish, swedish or english, works with the serializer
         if lang in ["fi", "sv", "en"]:
+
+            if not moderated_notification.has_lang(lang):
+                return Response(
+                    "Ei löydy valitulla kielellä.", status=status.HTTP_404_NOT_FOUND
+                )
+
             serializer = ApiModeratedNotificationSerializerV1(
                 moderated_notification,
                 context={"lang": lang, "has_api_key": has_api_key},
@@ -108,7 +143,7 @@ class ApiListViewV1(ListAPIView):
     """
 
     permission_classes = [AllowAny]
-    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
+    # queryset = ModeratedNotification.objects.all().filter(Q(published=True))
     serializer_class = ApiModeratedNotificationSerializerV1
     # pagination_class = LargeResultsSetPagination
 
@@ -120,11 +155,19 @@ class ApiListViewV1(ListAPIView):
         modified_data = []
 
         pagination = LargeResultsSetPagination()
-        data = ModeratedNotification.objects.all().filter(Q(published=True))
+        data = []
+        if lang in ["fi", "sv", "en"]:
+            key = "data__name__" + str(lang)
+            data = ModeratedNotification.objects.all().filter(
+                Q(published=True), ~Q(**{key: ""})
+            )
+        else:
+            data = ModeratedNotification.objects.all().filter(Q(published=True))
         qs = pagination.paginate_queryset(data, request)
         serializer = ApiModeratedNotificationSerializerV1(
             qs, many=True, context={"lang": lang, "has_api_key": has_api_key}
         )
+
         modified_data = serializer.data
 
         # If language is not finnish, swedish or english, find the newest, published
@@ -154,7 +197,6 @@ class ApiListViewV1(ListAPIView):
                 modified_data[index] = None
             index += 1
 
-        
         # New pagination is needed there to be 200 entries on each page and the count to be correct
         modified_data = [i for i in modified_data if i]
         modified_data_ids = [task["id"] for task in modified_data]

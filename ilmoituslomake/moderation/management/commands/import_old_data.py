@@ -146,6 +146,7 @@ class Command(BaseCommand):
         return {
             "fi": elems.get(str(id), None),
             "sv": elems_sv.get(str(id), None),
+            "en": elems_en.get(str(id), None),
         }
 
     def extract_property_list(self, elems, lang, prop):
@@ -161,7 +162,7 @@ class Command(BaseCommand):
             return ""
         f = elems[lang].find(prop)
         if f:
-            return str(f.string)
+            return str(f.string or "")
         return ""
 
     def create_fake_image_request(self, place):
@@ -172,7 +173,7 @@ class Command(BaseCommand):
         if images != None and len(images) > 0:
             for image in images:
                 if image["license_type"]["id"] != 1:
-                    image_uuid = str(image["media_id"]) # str(uuid.uuid4())
+                    image_uuid = str(image["media_id"])  # str(uuid.uuid4())
                     data.append({"uuid": image_uuid, "url": image["url"]})
                     data_images.append(
                         {
@@ -267,7 +268,7 @@ class Command(BaseCommand):
                     + str(id)
                     + "?language_filter=en"
                 )
-                
+
                 if place_en_.status_code == 200:
                     place_en = place_en_.json()
 
@@ -312,12 +313,58 @@ class Command(BaseCommand):
                     id, place, xml, conversion_ids, ontology_words_for_id
                 )
 
+                fi_name = str(place.get("name", {}).get("fi", "") or "").strip()
+                sv_name = str(place.get("name", {}).get("sv", "") or "").strip()
+                en_name = str(place.get("name", {}).get("en", "") or "").strip()
+
+                _pc_fi = str(
+                    place.get("location", {}).get("address", {}).get("postal_code", "")
+                    or ""
+                )
+                pc_fi = _pc_fi
+                _pc_sv = str(
+                    place_sv.get("location", {})
+                    .get("address", {})
+                    .get("postal_code", "")
+                    or ""
+                )
+                pc_sv = _pc_sv
+                _po_fi = str(
+                    place.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_fi = _po_fi
+                _po_sv = str(
+                    place_sv.get("location", {}).get("address", {}).get("locality", "")
+                    or ""
+                )
+                po_sv = _po_sv
+
+                #
+                if _pc_fi.isdigit():
+                    pass
+                elif _po_fi.isdigit():
+                    pc_fi = _po_fi
+                    po_fi = _pc_fi
+                else:
+                    po_fi = _pc_fi
+                    pc_fi = ""
+
+                if _pc_sv.isdigit():
+                    pass
+                elif _po_sv.isdigit():
+                    pc_sv = _po_sv
+                    po_sv = _pc_sv
+                else:
+                    po_sv = _pc_sv
+                    pc_sv = ""
+
                 data = {
                     "organization": {},
                     "name": {
-                        "fi": str(place.get("name", {}).get("fi", "")).strip(),
-                        "sv": str(place.get("name", {}).get("sv", "")).strip(),
-                        "en": str(place.get("name", {}).get("en", "")).strip(),
+                        "fi": fi_name,
+                        "sv": sv_name,
+                        "en": en_name,
                     },
                     "location": [
                         lat,
@@ -326,24 +373,24 @@ class Command(BaseCommand):
                     "description": {
                         "short": {
                             "fi": str(
-                                place.get("description", {}).get("body", "")
+                                place.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "sv": str(
-                                place_sv.get("description", {}).get("body", "")
+                                place_sv.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "en": str(
-                                place_en.get("description", {}).get("body", "")
+                                place_en.get("description", {}).get("body", "") or ""
                             ).strip(),
                         },
                         "long": {
                             "fi": str(
-                                place.get("description", {}).get("body", "")
+                                place.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "sv": str(
-                                place_sv.get("description", {}).get("body", "")
+                                place_sv.get("description", {}).get("body", "") or ""
                             ).strip(),
                             "en": str(
-                                place_en.get("description", {}).get("body", "")
+                                place_en.get("description", {}).get("body", "") or ""
                             ).strip(),
                         },
                     },
@@ -353,56 +400,46 @@ class Command(BaseCommand):
                                 place.get("location", {})
                                 .get("address", {})
                                 .get("street_address", "")
+                                or ""
                             ),
-                            "postal_code": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
-                            ),
-                            "post_office": str(
-                                place.get("location", {})
-                                .get("address", {})
-                                .get("locality", "")
-                            ),
+                            "postal_code": pc_fi,
+                            "post_office": po_fi,
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_fi,
                         },
                         "sv": {
-                            "street": self.extract_property(xml, "sv", "matko:address"),
-                            "postal_code": str(
-                                place_sv.get("location", {})
-                                .get("address", {})
-                                .get("postal_code", "")
+                            "street": self.extract_property(xml, "sv", "matko:address")
+                            or (
+                                str(
+                                    place.get("location", {})
+                                    .get("address", {})
+                                    .get("street_address", "")
+                                    or ""
+                                )
                             ),
+                            "postal_code": pc_sv,
                             "post_office": muni_translations.get(
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                ).upper(),
-                                str(
-                                    place_sv.get("location", {})
-                                    .get("address", {})
-                                    .get("locality", "")
-                                ),
+                                po_sv.upper(),
+                                po_sv,
                             ),
                             "neighborhood_id": nhood_id,
                             "neighborhood": nhood_name_sv,
                         },
                     },
                     "businessid": "",
-                    "phone": self.extract_property(xml, "fi", "matko:phone"),
-                    "email": self.extract_property(xml, "fi", "matko:email"),
+                    "phone": self.extract_property(xml, "fi", "matko:phone") or "",
+                    "email": self.extract_property(xml, "fi", "matko:email") or "",
                     "website": {
-                        "fi": str(place.get("info_url", "")),
-                        "sv": str(place_sv.get("info_url", "")),
-                        "en": str(place_en.get("info_url", "")),
+                        "fi": self.extract_property(xml, "fi", "link")
+                        or "",  # str(place.get("info_url", "") or ""),
+                        "sv": self.extract_property(xml, "sv", "link") or "",  # ,
+                        "en": self.extract_property(xml, "en", "link") or "",  # ,
                     },
                     "images": images,
                     "opening_times": [],
                     "ontology_ids": ontology_array,
                     "matko_ids": matko_array,
-                    "extra_keywords": {"fi":[], "sv": [], "en": []},
+                    "extra_keywords": {"fi": [], "sv": [], "en": []},
                     "comments": "Tuotu ohjelmallisesti vanhoista järjestelmistä.",
                     "notifier": {
                         "notifier_type": "",
@@ -425,12 +462,12 @@ class Command(BaseCommand):
                     tdata["name"] = zh_name.strip()
                     tdata["language"] = "zh"
                     tdata["description_short"] = str(
-                        place_zh.get("description", {}).get("body", "")
+                        place_zh.get("description", {}).get("body", "") or ""
                     ).strip()
                     tdata["description_long"] = str(
-                        place_zh.get("description", {}).get("body", "")
+                        place_zh.get("description", {}).get("body", "") or ""
                     ).strip()
-                    tdata["website"] = str(place_zh.get("info_url", ""))
+                    tdata["website"] = str(place_zh.get("info_url", "") or "")
                     # tdata["target_revision"] = target_revision
                     tdata["images"] = []
                     # images_dict = { i["uuid"]: i for i in images }
@@ -512,13 +549,13 @@ class Command(BaseCommand):
         # return
 
         # Alter sequence so that it wont break
-        with connection.cursor() as cursor:
-            query = (
-                "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
-                + str(max_id + 100)
-                + ";"
-            )
-            cursor.execute(query)
+        # with connection.cursor() as cursor:
+        #    query = (
+        #        "ALTER SEQUENCE moderation_moderatednotification_id_seq RESTART WITH "
+        #        + str(max_id + 100)
+        #        + ";"
+        #    )
+        #    cursor.execute(query)
 
         # Success
         self.stdout.write(self.style.SUCCESS("Data loaded successfully."))
