@@ -1,4 +1,4 @@
-from requests.models import Response
+from rest_framework.response import Response
 from rest_framework import status
 from ilmoituslomake.settings import (
     API_TOKEN,
@@ -102,7 +102,7 @@ def update_origin(
     """
     # Get the existing data
     try:
-        response = requests.get(HAUKI_API_URL + str(hauki_id) + "/")
+        response = requests.get(HAUKI_API_URL + str(hauki_id) + "/", timeout=5)
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -162,7 +162,7 @@ def create_hauki_resource(
 
     try:
         create_response = requests.post(
-            HAUKI_API_URL, json=create_params, headers=authorization_headers
+            HAUKI_API_URL, json=create_params, headers=authorization_headers, timeout=5
         )
         return create_response
     except requests.exceptions.HTTPError as errh:
@@ -185,7 +185,7 @@ def partially_update_hauki_resource(url, update_params):
 
     try:
         update_response = requests.patch(
-            url, json=update_params, headers=authorization_headers
+            url, json=update_params, headers=authorization_headers, timeout=5
         )
         return update_response
     except requests.exceptions.HTTPError as errh:

@@ -33,6 +33,8 @@ def create_moderation_item(sender, instance, **kwargs):
             data=instance.data,
         )
         moderation_item.save()
+
+    if instance.status in ["created"]:
         try:
             update_origin(instance.id, instance.hauki_id, is_draft=True)
         except Exception as e:
@@ -44,9 +46,7 @@ def post_save_update_hauki_origin(sender, instance, **kwargs):
     if instance.published:
         try:
             if instance.notification_id > 0:
-                notification = get_object_or_404(
-                    Notification, pk=instance.notification_id
-                )
+                notification = Notification.objects.get(pk=instance.notification_id)
                 response = requests.get(
                     HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/"
                 )

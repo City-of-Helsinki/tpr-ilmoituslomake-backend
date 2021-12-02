@@ -40,7 +40,7 @@ class CreateLink(UpdateAPIView):
         hsa_resource = hauki_id
 
         # Check if resource exists
-        response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + id + "/")
+        response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + id + "/", timeout=5)
 
         if response.status_code == 200:
             # Update hsa_resource for the url creation.
@@ -59,7 +59,7 @@ class CreateLink(UpdateAPIView):
                 return update_response
         else:
             # If kaupunkialusta:id cannot be found in hauki, search for the pure hauki_id.
-            hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/")
+            hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/", timeout=5)
             # Find the notification from the kaupunkialusta db.
             notification = get_object_or_404(Notification, pk=id)
             # If the hauki_id can be found from hauki and the notification is moderated,
@@ -120,10 +120,9 @@ class GetTimes(RetrieveAPIView):
     """
 
     queryset = ""
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None, *args, **kwargs):
-        if not request.user:
-            return Response(None, status=status.HTTP_403_FORBIDDEN)
         start_date = self.request.query_params.get("start_date", None)
         end_date = self.request.query_params.get("end_date", None)
         response = requests.get(
@@ -133,6 +132,7 @@ class GetTimes(RetrieveAPIView):
             + "?start_date="
             + start_date
             + "&end_date="
-            + end_date
+            + end_date,
+            timeout=5,
         )
         return Response(response.json(), status=status.HTTP_200_OK)
