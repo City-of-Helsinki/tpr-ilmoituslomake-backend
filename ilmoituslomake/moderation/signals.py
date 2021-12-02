@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 import requests
 from ilmoituslomake.settings import HAUKI_API_URL
-from opening_times.utils import log_to_error_log, update_origin
+from opening_times.utils import update_origin
 
 from notification_form.models import Notification
 from moderation.models import ModerationItem, ModeratedNotification
@@ -44,9 +44,15 @@ def post_save_update_hauki_origin(sender, instance, **kwargs):
     if instance.published:
         try:
             if instance.notification_id > 0:
-                notification = get_object_or_404(Notification, pk=instance.notification_id)
-                response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/")
+                notification = get_object_or_404(
+                    Notification, pk=instance.notification_id
+                )
+                response = requests.get(
+                    HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/"
+                )
                 if response.status_code != 200:
-                    update_response_json = update_origin(instance.id, notification.hauki_id)
+                    update_response_json = update_origin(
+                        instance.id, notification.hauki_id
+                    )
         except Exception as e:
             pass
