@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
-from base.models import MatkoWord
+from base.models import MatkoWord, OntologyWord
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -195,3 +195,23 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ret
+
+
+class ApiOntologyWordSerializerV1(serializers.ModelSerializer):
+    class Meta:
+        model = OntologyWord
+        fields = ("data",)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        return ret["data"]
+
+
+class ApiMatkoWordSerializerV1(serializers.ModelSerializer):
+    class Meta:
+        model = MatkoWord
+        fields = ("data",)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        return ret["data"]
