@@ -162,36 +162,61 @@ urlpatterns += [
 
 # Translation
 urlpatterns += [
-    # path("api/moderation/translation/task/", 
+    # path("api/moderation/translation/task/",
     #      translation_views.TranslationTaskListView.as_view()),
-    path("api/moderation/translation/task/<int:id>/", 
-         translation_views.TranslationTaskRetrieveView.as_view()),
-    path("api/moderation/translation/save_request/",
-         translation_views.TranslationRequestEditCreateView.as_view()),
-    path("api/moderation/translation/request/<int:request_id>/",
-         translation_views.TranslationRequestRetrieveView.as_view()),
-    path("api/moderation/translation/task/find/",
-         translation_views.ModerationTranslationTaskSearchListView.as_view()),
-    path("api/moderation/translation/request/find/",
-         translation_views.TranslationRequestSearchListView.as_view()),
-    # path("api/moderation/translationdata/", 
+    path(
+        "api/moderation/translation/task/<int:id>/",
+        translation_views.TranslationTaskRetrieveView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/save_request/",
+        translation_views.TranslationRequestEditCreateView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/request/<int:request_id>/",
+        translation_views.TranslationRequestRetrieveView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/task/find/",
+        translation_views.ModerationTranslationTaskSearchListView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/request/find/",
+        translation_views.TranslationRequestSearchListView.as_view(),
+    ),
+    # path("api/moderation/translationdata/",
     #      translation_views.TranslationDataListView.as_view()),
-    path("api/moderation/translation/save_task/<int:id>/",
-         translation_views.ModerationTranslationTaskEditCreateView.as_view()),
-    path("api/translation/todos/<int:id>/",
-         translation_views.TranslationTodoRetrieveView.as_view()),
-    path("api/translation/todos/find/",
-         translation_views.TranslationTaskSearchListView.as_view()),
-    path("api/translation/save/<int:id>/",
-         translation_views.TranslationTaskEditCreateView.as_view()),
-    path("api/moderation/translation/cancel_request/<int:id>/",
-         translation_views.ModerationTranslationRequestDeleteView.as_view()),
-    path("api/moderation/translation/translators/",
-         translation_views.TranslationUsersListView.as_view())
-]   
+    path(
+        "api/moderation/translation/save_task/<int:id>/",
+        translation_views.ModerationTranslationTaskEditCreateView.as_view(),
+    ),
+    path(
+        "api/translation/todos/<int:id>/",
+        translation_views.TranslationTodoRetrieveView.as_view(),
+    ),
+    path(
+        "api/translation/todos/find/",
+        translation_views.TranslationTaskSearchListView.as_view(),
+    ),
+    path(
+        "api/translation/save/<int:id>/",
+        translation_views.TranslationTaskEditCreateView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/cancel_request/<int:id>/",
+        translation_views.ModerationTranslationRequestDeleteView.as_view(),
+    ),
+    path(
+        "api/moderation/translation/translators/",
+        translation_views.TranslationUsersListView.as_view(),
+    ),
+]
 
 # Opening times
 urlpatterns += [
-    path("api/openingtimes/createlink/<int:id>/", opening_times_views.CreateLink.as_view()),
-    path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view())
+    path(
+        "api/openingtimes/createlink/<int:id>/",
+        opening_times_views.CreateLink.as_view(),
+    ),
+    path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view()),
 ]
