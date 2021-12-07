@@ -4,10 +4,12 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
 import requests
 from datetime import datetime, timedelta
+from moderation.models import ModeratedNotification
 from notification_form.models import Notification
 from opening_times.utils import (
     create_hauki_resource,
     create_url,
+    log_to_error_log,
     partially_update_hauki_resource,
     update_origin,
 )
@@ -15,6 +17,15 @@ from ilmoituslomake.settings import HAUKI_API_URL
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated
+
+
+def update_name_and_address(name, address, url):
+    update_params = {
+        "name": name,
+        "address": address,
+    }
+    update_response = partially_update_hauki_resource(url, update_params)
+    return update_response
 
 
 class CreateLink(UpdateAPIView):
@@ -36,51 +47,71 @@ class CreateLink(UpdateAPIView):
         hauki_id = str(request_params["hauki_id"])
         id = str(id)
 
-        # hsa_resource is hauki_id if "kaupunkialusta:id" does not exist in hauki.
         hsa_resource = hauki_id
 
-        # Check if resource exists
-        response = requests.get(HAUKI_API_URL + "kaupunkialusta:" + id + "/", timeout=5)
+        # Search for the pure hauki_id from Hauki.
+        hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/", timeout=10)
+        # Find the notification from the kaupunkialusta db.
+        # If the hauki_id can be found from hauki and the notification is moderated,
+        # update the origin of the hauki resource, otherwise create a new hauki resource.
+        moderated_notification_id_response = requests.get(
+            HAUKI_API_URL + "kaupunkialusta:" + id + "/", timeout=10
+        )
+        referer_last_part = request.headers["Referer"].rsplit("/", 3)[-3]
 
-        if response.status_code == 200:
-            # Update hsa_resource for the url creation.
+        if (
+            moderated_notification_id_response.status_code == 200
+            and referer_last_part == "info"
+        ):
             hsa_resource = "kaupunkialusta:" + id
-            # Update data at v1_resource_partial_update
-            update_params = {
-                "name": name,
-                "address": address,
-            }
-            update_response = partially_update_hauki_resource(
-                HAUKI_API_URL + "kaupunkialusta:" + id + "/", update_params
+            update_response = update_name_and_address(
+                name, address, HAUKI_API_URL + "kaupunkialusta:" + id + "/"
             )
-
-            # If the update fails, return the response
+            if update_response.status_code != 200:
+                return Response(update_response)
+        elif (
+            hauki_id_response.status_code == 200
+            and moderated_notification_id_response.status_code != 200
+            and referer_last_part == "info"
+        ):
+            hsa_resource = "kaupunkialusta:" + id
+            update_response = update_origin(id, hauki_id)
             if update_response.status_code != 200:
                 return update_response
-        else:
-            # If kaupunkialusta:id cannot be found in hauki, search for the pure hauki_id.
-            hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/", timeout=5)
-            # Find the notification from the kaupunkialusta db.
-            notification = get_object_or_404(Notification, pk=id)
-            # If the hauki_id can be found from hauki and the notification is moderated,
-            # update the origin of the hauki resource, otherwise create a new hauki resource.
-            if (
-                hauki_id_response.status_code == 200
-                and notification.moderated_notification_id > 0
-            ):
-                update_origin(id, notification.moderated_notification_id)
-                # Update hsa_resource for the url creation.
-                hsa_resource = "kaupunkialusta:" + str(
-                    notification.moderated_notification_id
-                )
-            elif notification.moderated_notification_id > 0:
-                # Create data at v1_resource_create
-                origins = {
-                    "data_source": {
-                        "id": "kaupunkialusta",
-                    },
-                    "origin_id": notification.moderated_notification_id,
-                }
+            update_response = update_name_and_address(
+                name, address, HAUKI_API_URL + hauki_id + "/"
+            )
+            if update_response.status_code != 200:
+                return Response(update_response)
+        elif (
+            referer_last_part != "info"
+            and Notification.objects.get(pk=id).moderated_notification_id > 0
+        ):
+            moderated_notification_id = str(
+                Notification.objects.get(pk=id).moderated_notification_id
+            )
+            hsa_resource = "kaupunkialusta:" + moderated_notification_id
+            update_response = update_name_and_address(
+                name,
+                address,
+                HAUKI_API_URL + "kaupunkialusta:" + moderated_notification_id + "/",
+            )
+            if update_response.status_code != 200:
+                return Response(update_response)
+        elif referer_last_part != "info":
+            # Create data at v1_resource_create
+            draft_response = requests.get(
+                HAUKI_API_URL + "kaupunkialusta:draft-" + id + "/", timeout=10
+            )
+            if draft_response != 200:
+                origins = [
+                    {
+                        "data_source": {
+                            "id": "kaupunkialusta",
+                        },
+                        "origin_id": "draft-" + id,
+                    }
+                ]
                 create_response = create_hauki_resource(
                     name,
                     description,
@@ -90,11 +121,14 @@ class CreateLink(UpdateAPIView):
                     is_public,
                     timezone,
                 )
-                hsa_resource = "kaupunkialusta:" + str(
-                    notification.moderated_notification_id
-                )
+                notification = Notification.objects.get(pk=id)
                 if create_response.status_code != 201:
-                    return create_response
+                    return Response(create_response)
+                notification.hauki_id = create_response.json()["id"]
+                notification.save()
+                hsa_resource = str(notification.hauki_id)
+            else:
+                hsa_resource = str(draft_response.json()["id"])
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
@@ -133,6 +167,6 @@ class GetTimes(RetrieveAPIView):
             + start_date
             + "&end_date="
             + end_date,
-            timeout=5,
+            timeout=10,
         )
         return Response(response.json(), status=status.HTTP_200_OK)

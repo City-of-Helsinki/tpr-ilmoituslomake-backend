@@ -114,7 +114,7 @@ def update_origin(
 
     # Check if response is successful
     if response.status_code != 200:
-        return response.json()
+        return response
 
     # If the notification is a draft add "draft-" -prefix.
     if is_draft:
@@ -182,19 +182,23 @@ def partially_update_hauki_resource(url, update_params):
     Function for updating hauki resources
     """
     authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
-
+    errormessage = ""
     try:
         update_response = requests.patch(
-            url, json=update_params, headers=authorization_headers, timeout=5
+            url, json=update_params, headers=authorization_headers, timeout=10
         )
         return update_response
     except requests.exceptions.HTTPError as errh:
+        errormessage = errh
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
+        errormessage = errc
         print("Error Connecting:", errc)
     except requests.exceptions.Timeout as errt:
+        errormessage = errt
         print("Timeout Error:", errt)
     except requests.exceptions.RequestException as err:
+        errormessage = err
         print("OOps: Something Else", err)
     # If try fails, return 400.
     return Response("Hauki update failed.", status=status.HTTP_400_BAD_REQUEST)

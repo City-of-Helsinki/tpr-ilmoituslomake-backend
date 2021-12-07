@@ -51,8 +51,6 @@ def post_save_update_hauki_origin(sender, instance, **kwargs):
                     HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/"
                 )
                 if response.status_code != 200:
-                    update_response_json = update_origin(
-                        instance.id, notification.hauki_id
-                    )
+                    update_origin(instance.id, notification.hauki_id)
         except Exception as e:
             pass
