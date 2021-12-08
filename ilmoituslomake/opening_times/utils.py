@@ -201,7 +201,9 @@ def partially_update_hauki_resource(url, update_params):
         errormessage = err
         print("OOps: Something Else", err)
     # If try fails, return 400.
-    return Response("Hauki update failed.", status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        "Hauki update failed." + str(errormessage), status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 def log_to_error_log(string):
