@@ -28,6 +28,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.contrib.postgres.search import SearchVector
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from moderation.utils import get_query
 
 #
 # from base.models import Notification
@@ -169,7 +170,7 @@ class ModeratorEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        
+
         copy_data = request.data.copy()
         copy_data["category"] = "moderator_edit"
 
@@ -448,7 +449,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.published = True
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+                if (
+                    moderation_item.category not in ["change_request", "moderator_edit"]
+                    and notification
+                ):
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -457,7 +461,10 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+            if (
+                moderation_item.category not in ["change_request", "moderator_edit"]
+                and notification
+            ):
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
@@ -484,7 +491,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
         published = True
         #
         search = {
-            "search_name__contains": "",
+            "search_name": "",
             "search_address__contains": "",
             "data__ontology_ids__contains": [],
             "data__matko_ids__contains": [],
@@ -518,13 +525,26 @@ class ModeratedNotificationSearchListView(ListAPIView):
         for key in delete:
             del search_data[key]
 
-        queryset = (
-            ModeratedNotification.objects.annotate(
-                search_name=SearchVector(
-                    KeyTextTransform(lang, KeyTextTransform("name", "data"))
+        query_string = ""
+        if "search_name" in search_data:
+            query_string = search_data["search_name"]
+        found_entries = None
+        if ("q" in request.GET) and request.GET["q"].strip():
+            if query_string == "":
+                found_entries = ModeratedNotification.objects.all()
+            else:
+                entry_query = get_query(
+                    query_string,
+                    [
+                        "data__name",
+                    ],
                 )
-            )
-            .annotate(
+                found_entries = ModeratedNotification.objects.filter(entry_query)
+
+        del search_data["search_name"]
+
+        queryset = (
+            found_entries.annotate(
                 search_address=SearchVector(
                     KeyTextTransform(
                         "street",
