@@ -96,7 +96,7 @@ class ModerationItemSearchListView(ListAPIView):
     """
 
     permission_classes = [IsAdminUser]
-    queryset = ModerationItem.objects.all().filter(~Q(status="closed"))
+    queryset = ModerationItem.objects.all()
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",
@@ -169,7 +169,7 @@ class ModeratorEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        
+
         copy_data = request.data.copy()
         copy_data["category"] = "moderator_edit"
 
@@ -448,7 +448,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.published = True
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+                if (
+                    moderation_item.category not in ["change_request", "moderator_edit"]
+                    and notification
+                ):
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -457,7 +460,10 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+            if (
+                moderation_item.category not in ["change_request", "moderator_edit"]
+                and notification
+            ):
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
