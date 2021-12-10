@@ -541,7 +541,8 @@ class ModeratedNotificationSearchListView(ListAPIView):
                 )
                 found_entries = ModeratedNotification.objects.filter(entry_query)
 
-        del search_data["search_name"]
+        if "search_name" in search_data:
+            del search_data["search_name"]
 
         queryset = (
             found_entries.annotate(
