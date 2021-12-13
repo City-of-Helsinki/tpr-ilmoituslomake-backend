@@ -97,13 +97,6 @@ class ModerationItemSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if ret["target"] != None and instance.target.status == "rejected":
-
-            ret["status"] = "rejected"
-        return ret
-
 
 class ChangeRequestSerializer(serializers.ModelSerializer):
     class Meta:
@@ -188,10 +181,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={
-                "id": instance.pk,
-                "images": {image["uuid"]: image for image in ret["data"]["images"]},
-            },
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -245,10 +235,7 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={
-                "id": instance.pk,
-                "images": {image["uuid"]: image for image in ret["data"]["images"]},
-            },
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -370,10 +357,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={
-                "id": instance.pk,
-                "images": {image["uuid"]: image for image in ret["data"]["images"]},
-            },
+            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
         )
         del ret["data"]["images"]
         ret["data"]["images"] = serializer.data
