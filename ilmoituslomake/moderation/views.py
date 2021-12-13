@@ -280,10 +280,7 @@ class RejectModerationItemView(DestroyAPIView):
         if moderation_item.moderator != request.user:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
-        if moderation_item.status == "rejected":
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
-
-        moderation_item.status = "rejected"
+        moderation_item.status = "closed"
         moderation_item.save()
 
         #

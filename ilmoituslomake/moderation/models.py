@@ -92,7 +92,6 @@ class ModerationItem(models.Model):
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
-        ("rejected", "rejected"),
     ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
