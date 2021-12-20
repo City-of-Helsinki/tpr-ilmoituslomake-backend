@@ -92,6 +92,7 @@ class ModerationItem(models.Model):
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
+        ("rejected", "rejected"),
     ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
@@ -114,3 +115,6 @@ class ModerationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+    def is_completed(self):
+        return self.status == "closed" or self.status == "rejected"

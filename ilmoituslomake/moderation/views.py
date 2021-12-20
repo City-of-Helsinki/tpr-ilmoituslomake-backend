@@ -96,7 +96,7 @@ class ModerationItemSearchListView(ListAPIView):
     """
 
     permission_classes = [IsAdminUser]
-    queryset = ModerationItem.objects.all().filter(~Q(status="closed"))
+    queryset = ModerationItem.objects.all()
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
         "target__data__name__fi",
@@ -169,7 +169,7 @@ class ModeratorEditCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         headers = None
-        
+
         copy_data = request.data.copy()
         copy_data["category"] = "moderator_edit"
 
@@ -219,7 +219,7 @@ class AssignModerationItemView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator == request.user:
@@ -248,7 +248,7 @@ class UnassignModerationItemView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != None:
@@ -274,13 +274,13 @@ class RejectModerationItemView(DestroyAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
-        moderation_item.status = "closed"
+        moderation_item.status = "rejected"
         moderation_item.save()
 
         #
@@ -307,7 +307,7 @@ class DeleteNotificationView(DestroyAPIView):
     def delete(self, request, id=None, *args, **kwargs):
         moderation_item = get_object_or_404(ModerationItem, pk=id)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         # Only assigned moderator can delete
@@ -342,7 +342,7 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:
@@ -374,7 +374,7 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:
@@ -448,7 +448,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.published = True
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
-                if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+                if (
+                    moderation_item.category not in ["change_request", "moderator_edit"]
+                    and notification
+                ):
                     notification.save()
             # process images
             images = preprocess_images(request)
@@ -457,7 +460,10 @@ class ModerationItemUpdateView(UpdateAPIView):
             process_images(ModeratedNotificationImage, moderated_notification, images)
             unpublish_images(ModeratedNotificationImage, moderated_notification)
             #
-            if moderation_item.category not in ["change_request", "moderator_edit"] and notification:
+            if (
+                moderation_item.category not in ["change_request", "moderator_edit"]
+                and notification
+            ):
                 unpublish_all_images(NotificationImage, notification)
         except Exception as e:
             print(e, file=sys.stderr)
