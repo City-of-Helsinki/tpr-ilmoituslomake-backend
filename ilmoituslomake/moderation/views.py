@@ -501,7 +501,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
         }
 
         search_data = {}
-        if request.GET.get("q"):
+        if request.GET.get("q") and request.GET["q"].strip():
             try:
                 search_data = json.loads(request.GET.get("q"))
             except Exception as e:
@@ -529,17 +529,17 @@ class ModeratedNotificationSearchListView(ListAPIView):
         if "search_name" in search_data:
             query_string = search_data["search_name"]
         found_entries = None
-        if ("q" in request.GET) and request.GET["q"].strip():
-            if query_string == "":
-                found_entries = ModeratedNotification.objects.all()
-            else:
-                entry_query = get_query(
-                    query_string,
-                    [
-                        "data__name",
-                    ],
-                )
-                found_entries = ModeratedNotification.objects.filter(entry_query)
+
+        if query_string == "":
+            found_entries = ModeratedNotification.objects.all()
+        else:
+            entry_query = get_query(
+                query_string,
+                [
+                    "data__name",
+                ],
+            )
+            found_entries = ModeratedNotification.objects.filter(entry_query)
 
         if "search_name" in search_data:
             del search_data["search_name"]
