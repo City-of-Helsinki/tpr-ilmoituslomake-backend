@@ -219,7 +219,7 @@ class AssignModerationItemView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator == request.user:
@@ -248,7 +248,7 @@ class UnassignModerationItemView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != None:
@@ -274,14 +274,11 @@ class RejectModerationItemView(DestroyAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:
             return Response(None, status=status.HTTP_400_BAD_REQUEST)
-
-        if moderation_item.status == "rejected":
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         moderation_item.status = "rejected"
         moderation_item.save()
@@ -310,7 +307,7 @@ class DeleteNotificationView(DestroyAPIView):
     def delete(self, request, id=None, *args, **kwargs):
         moderation_item = get_object_or_404(ModerationItem, pk=id)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         # Only assigned moderator can delete
@@ -345,7 +342,7 @@ class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:
@@ -377,7 +374,7 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         serializer = self.get_serializer(moderation_item)
 
-        if moderation_item.status == "closed":
+        if moderation_item.is_completed():
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
         if moderation_item.moderator != request.user:

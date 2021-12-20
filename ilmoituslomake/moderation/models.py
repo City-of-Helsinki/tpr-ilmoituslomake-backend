@@ -115,3 +115,6 @@ class ModerationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+    def is_completed(self):
+        return self.status == "closed" or self.status == "rejected"
