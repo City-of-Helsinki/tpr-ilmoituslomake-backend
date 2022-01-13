@@ -146,6 +146,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             # "moderated_notification_id",
             "updated_at",
             "created_at",
+            "hauki_id"
         )
         read_only_fields = (
             "id",
@@ -155,6 +156,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             # "moderated_notification_id",
             "updated_at",
             "created_at",
+            "hauki_id"
         )
 
     def validate_data(self, data):
@@ -296,6 +298,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
             "data",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
         read_only_fields = (
             "id",
@@ -306,6 +309,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
             "data",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
 
     def validate_data(self, data):

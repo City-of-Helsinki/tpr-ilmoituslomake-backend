@@ -38,8 +38,7 @@ from moderation.serializers import (
 )
 
 from django.db.models import Q
-
-# from image_utils import preprocess_images, process_images
+# from image_utils import preprocess_images, process_images   
 
 
 class NotificationSchemaCreateView(CreateAPIView):
