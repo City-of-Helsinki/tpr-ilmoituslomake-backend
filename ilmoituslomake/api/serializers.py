@@ -160,7 +160,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def get_modified_time(self, obj):
         return obj.updated_at.strftime("%Y-%m-%dT%H:%M:%S")
 
-    openinghours = serializers.SerializerMethodField()
+    #openinghours = serializers.SerializerMethodField()
 
     def get_openinghours(self, obj):
         return []
@@ -188,7 +188,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             "images",
             "created_time",
             "modified_time",
-            "openinghours",
+            #"openinghours",
         )
         read_only_fields = fields
 

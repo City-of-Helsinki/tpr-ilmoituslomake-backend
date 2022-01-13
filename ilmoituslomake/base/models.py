@@ -44,6 +44,9 @@ class BaseNotification(models.Model):
     # revision number
     revision = models.IntegerField(default=0, db_index=True)
 
+    # the id of the resource in Hauki
+    hauki_id = models.IntegerField(default=0)
+
     # notification status
     STATUS_CHOICES = [
         ("created", "created"),
