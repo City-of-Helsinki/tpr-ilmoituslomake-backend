@@ -147,12 +147,14 @@ class CreateLink(UpdateAPIView):
                     is_public,
                     timezone,
                 )
-                notification = Notification.objects.get(pk=id)
+                notification = Notification.objects.filter(pk=id)
                 if create_response.status_code != 201:
                     return Response(create_response)
-                notification.hauki_id = create_response.json()["id"]
-                notification.save()
-                hsa_resource = str(notification.hauki_id)
+                notification.update(hauki_id=create_response.json()["id"])
+                # FOR SOME REASON .save() CREATES A NEW INSTANCE INSTEAD OF UPDATING THE CURRENT ONE
+                # notification.hauki_id = create_response.json()["id"]
+                # notification.save()
+                hsa_resource = str(create_response.json()["id"])
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
