@@ -543,7 +543,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
         found_entries = None
 
         if query_string == "":
-            found_entries = ModeratedNotification.objects.all()
+            found_entries = ModeratedNotification.objects.all().order_by('-updated_at')
         else:
             entry_query = get_query(
                 query_string,
@@ -551,7 +551,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
                     "data__name",
                 ],
             )
-            found_entries = ModeratedNotification.objects.filter(entry_query)
+            found_entries = ModeratedNotification.objects.filter(entry_query).order_by('-updated_at')
 
         if "search_name" in search_data:
             del search_data["search_name"]
