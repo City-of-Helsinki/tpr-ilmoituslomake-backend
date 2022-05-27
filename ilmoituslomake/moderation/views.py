@@ -107,6 +107,19 @@ class ModerationItemSearchListView(ListAPIView):
     filter_fields = ("category",)
     serializer_class = ModerationItemSerializer
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        queryset = queryset.order_by('-created_at')  # change is here  >> sorted with order of 'created_ats'
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class NewModerationItemListView(ListAPIView):
     """"""
@@ -530,7 +543,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
         found_entries = None
 
         if query_string == "":
-            found_entries = ModeratedNotification.objects.all()
+            found_entries = ModeratedNotification.objects.all().order_by('-updated_at')
         else:
             entry_query = get_query(
                 query_string,
@@ -538,7 +551,7 @@ class ModeratedNotificationSearchListView(ListAPIView):
                     "data__name",
                 ],
             )
-            found_entries = ModeratedNotification.objects.filter(entry_query)
+            found_entries = ModeratedNotification.objects.filter(entry_query).order_by('-updated_at')
 
         if "search_name" in search_data:
             del search_data["search_name"]
