@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "api",
     "social_django",
     "translation",
+    "opening_times"
     # "huey.contrib.djhuey",
 ]
 
@@ -174,7 +175,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 SOCIAL_AUTH_TUNNISTAMO_KEY = env("TUNNISTAMO_CLIENT_ID")
 SOCIAL_AUTH_TUNNISTAMO_SECRET = env("TUNNISTAMO_CLIENT_SECRET")
-SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso/"
+SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso"
 
 SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
     "ui_locales": "fi"
@@ -240,3 +241,6 @@ JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
 
 API_KEY_CUSTOM_HEADER = "HTTP_OPEN_API_KEY"
 
+HAUKI_API_URL = env("HAUKI_API_URL")
+
+HAUKI_UI_URL = env("HAUKI_UI_URL")

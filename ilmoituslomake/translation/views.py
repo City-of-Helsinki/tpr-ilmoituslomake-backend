@@ -234,7 +234,7 @@ class TranslationTaskSearchListView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return TranslationTask.objects.filter(translator=self.request.user)
+        return TranslationTask.objects.filter(translator=self.request.user).order_by('-updated_at')
 
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = (
@@ -263,6 +263,19 @@ class ModerationTranslationTaskSearchListView(ListAPIView):
     )
     filter_fields = ("category",)
     serializer_class = TranslationTaskSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        queryset = queryset.order_by('-updated_at')  # change is here  >> sorted with order of 'updated_at'
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class TranslationRequestSearchListView(ListAPIView):

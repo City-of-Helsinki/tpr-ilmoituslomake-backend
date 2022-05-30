@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.utils import translation
 
 from users import views as users_views
 from notification_form import views as notification_form_views
 from moderation import views as moderation_views
 from translation import views as translation_views
+from opening_times import views as opening_times_views
+
 from api import views as api_views
 
 from ilmoituslomake.settings import DEBUG
@@ -217,4 +218,13 @@ urlpatterns += [
         "api/moderation/translation/translators/",
         translation_views.TranslationUsersListView.as_view(),
     ),
+]
+
+# Opening times
+urlpatterns += [
+    path(
+        "api/openingtimes/createlink/<int:id>/",
+        opening_times_views.CreateLink.as_view(),
+    ),
+    path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view()),
 ]
