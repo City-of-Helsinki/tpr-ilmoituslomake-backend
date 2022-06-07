@@ -38,7 +38,7 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["137.163.56.7", "localhost", "tpr-ilmoituslomake", "asiointi.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi"]
 
 
 # Application definition
@@ -160,7 +160,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/TPRalusta_testi/static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Authentication
