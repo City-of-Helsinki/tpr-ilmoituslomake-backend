@@ -85,7 +85,7 @@ class Command(BaseCommand):
             # validate(instance=transformed_word, schema=ontology_save_schema)
             save_array = []
 
-            with open("/app/base/management/commands/matko_ids.csv") as csv_file:
+            with open("base/management/commands/matko_ids.csv") as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=";")
                 line_count = 0
                 for row in csv_reader:

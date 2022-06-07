@@ -68,10 +68,7 @@ class NotificationTargetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name", "hauki_id")
         read_only_fields = fields
 
 
@@ -146,6 +143,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             # "moderated_notification_id",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
         read_only_fields = (
             "id",
@@ -155,6 +153,7 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
             # "moderated_notification_id",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
 
     def validate_data(self, data):
@@ -181,7 +180,10 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
+            context={
+                "id": instance.pk,
+                "images": {image["uuid"]: image for image in ret["data"]["images"]},
+            },
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -235,7 +237,10 @@ class PrivateModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
+            context={
+                "id": instance.pk,
+                "images": {image["uuid"]: image for image in ret["data"]["images"]},
+            },
         )  # TODO
         ret["data"]["images"] = serializer.data
         return ret
@@ -296,6 +301,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
             "data",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
         read_only_fields = (
             "id",
@@ -306,6 +312,7 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
             "data",
             "updated_at",
             "created_at",
+            "hauki_id",
         )
 
     def validate_data(self, data):
@@ -357,7 +364,10 @@ class PublicModeratedNotificationSerializer(serializers.ModelSerializer):
                 uuid__in=list(map(lambda i: i["uuid"], ret["data"]["images"])),
             ),
             many=True,
-            context={"id": instance.pk, "images": { image["uuid"] : image for image in ret["data"]["images"] }},
+            context={
+                "id": instance.pk,
+                "images": {image["uuid"]: image for image in ret["data"]["images"]},
+            },
         )
         del ret["data"]["images"]
         ret["data"]["images"] = serializer.data

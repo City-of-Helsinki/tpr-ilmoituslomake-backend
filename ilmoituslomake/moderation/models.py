@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.shortcuts import get_object_or_404
 
 from simple_history.models import HistoricalRecords
 from django.contrib.postgres.fields import JSONField
@@ -21,6 +22,17 @@ class ModeratedNotification(BaseNotification):
 
     #
     notification_id = models.IntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        if self.hauki_id == 0:
+            try:
+                if self.notification_id != 0:
+                    notification = Notification.objects.get(pk=self.notification_id)
+                    self.hauki_id = notification.hauki_id
+                    # TODO: Update name etc. in hauki????
+            except Exception as e:
+                pass
+        return super().save(*args, **kwargs)
 
     # works for fi, sv and end
     def has_lang(self, lang):
@@ -92,6 +104,7 @@ class ModerationItem(models.Model):
         ("open", "open"),
         ("in_progress", "in_progress"),
         ("closed", "closed"),
+        ("rejected", "rejected"),
     ]
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default="open", db_index=True
@@ -114,3 +127,6 @@ class ModerationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+
+    def is_completed(self):
+        return self.status == "closed" or self.status == "rejected"
