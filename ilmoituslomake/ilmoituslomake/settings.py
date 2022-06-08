@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "api",
     "social_django",
     "translation",
+    "opening_times"
     # "huey.contrib.djhuey",
 ]
 
@@ -161,6 +162,7 @@ USE_TZ = True
 
 STATIC_ROOT = "/opt/tpr-ilmoituslomake-backend/static/"
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Authentication
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
@@ -174,7 +176,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 SOCIAL_AUTH_TUNNISTAMO_KEY = env("TUNNISTAMO_CLIENT_ID")
 SOCIAL_AUTH_TUNNISTAMO_SECRET = env("TUNNISTAMO_CLIENT_SECRET")
-SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso/"
+SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso"
 
 SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
     "ui_locales": "fi"
@@ -229,6 +231,7 @@ PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 # Setup support for proxy headers
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # FORCE_SCRIPT_NAME = "/TPRalusta"
 FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
@@ -236,7 +239,10 @@ FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440 * 10
 
-
 JWT_IMAGE_SECRET = env("JWT_IMAGE_SECRET")
 
 API_KEY_CUSTOM_HEADER = "HTTP_OPEN_API_KEY"
+
+HAUKI_API_URL = env("HAUKI_API_URL")
+
+HAUKI_UI_URL = env("HAUKI_UI_URL")

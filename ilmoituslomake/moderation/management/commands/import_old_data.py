@@ -247,7 +247,10 @@ class Command(BaseCommand):
                 id = int(loc["id"])
 
                 if id in ids:
+                    # print("Skip %s" % id)
                     continue
+                else:
+                    print(str(id))
 
                 # print(id)
                 xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
@@ -435,8 +438,7 @@ class Command(BaseCommand):
                     "phone": self.extract_property(xml, "fi", "matko:phone") or "",
                     "email": self.extract_property(xml, "fi", "matko:email") or "",
                     "website": {
-                        "fi": self.extract_property(xml, "fi", "link")
-                        or "",  # str(place.get("info_url", "") or ""),
+                        "fi": self.extract_property(xml, "fi", "link") or "",
                         "sv": self.extract_property(xml, "sv", "link") or "",  # ,
                         "en": self.extract_property(xml, "en", "link") or "",  # ,
                     },
@@ -549,6 +551,7 @@ class Command(BaseCommand):
                     translation_data.save()
 
         except Exception as e:
+            # print(data)
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
         # return
