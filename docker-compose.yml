@@ -5,7 +5,6 @@ services:
         build:
             context: ./local_dev
             dockerfile: Dockerfile.database
-        restart: always
         environment: 
             - POSTGRES_PASSWORD=plop123
             - PGDATA=/pgdata
@@ -23,7 +22,6 @@ services:
             context: .
             dockerfile: Dockerfile
         command: bash -c "./run_web.sh"
-        restart: always
         depends_on:
             - tpr-ilmoituslomake-db
         env_file:
@@ -56,7 +54,6 @@ services:
             dockerfile: Dockerfile.nginx
         environment:
             - HOSTIP=$HOSTIP
-        restart: always
         depends_on:
             - tpr-ilmoituslomake
             - tpr-ilmoituslomake-db
