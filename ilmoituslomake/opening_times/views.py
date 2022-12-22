@@ -12,7 +12,7 @@ from opening_times.utils import (
     partially_update_hauki_resource,
     update_origin,
 )
-from ilmoituslomake.settings import HAUKI_API_URL
+from ilmoituslomake.settings import HAUKI_API_URL, HAUKI_API_DATE_URL
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated
@@ -183,16 +183,10 @@ class GetTimes(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None, *args, **kwargs):
-        start_date = self.request.query_params.get("start_date", None)
-        end_date = self.request.query_params.get("end_date", None)
         response = requests.get(
-            HAUKI_API_URL
-            + id
-            + "/opening_hours/"
-            + "?start_date="
-            + start_date
-            + "&end_date="
-            + end_date,
+            HAUKI_API_DATE_URL
+            + "?resource="
+            + "kaupunkialusta:" + id,
             timeout=10,
         )
         return Response(response.json(), status=status.HTTP_200_OK)
