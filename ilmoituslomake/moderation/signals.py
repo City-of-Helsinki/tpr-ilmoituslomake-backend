@@ -42,7 +42,7 @@ def post_save_update_hauki_origin(sender, instance, **kwargs):
             if instance.notification_id > 0:
                 notification = Notification.objects.get(pk=instance.notification_id)
                 response = requests.get(
-                    HAUKI_API_URL + "kaupunkialusta:" + str(instance.id) + "/"
+                    HAUKI_API_URL + "resource/kaupunkialusta:" + str(instance.id) + "/"
                 )
                 if response.status_code != 200:
                     update_origin(instance.id, notification.hauki_id)

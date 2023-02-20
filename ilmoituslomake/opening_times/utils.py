@@ -102,7 +102,7 @@ def update_origin(
     """
     # Get the existing data
     try:
-        response = requests.get(HAUKI_API_URL + str(hauki_id) + "/", timeout=5)
+        response = requests.get(HAUKI_API_URL + "resource/" + str(hauki_id) + "/", timeout=5)
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -140,7 +140,15 @@ def update_origin(
     }
 
     # Partially update the resource
-    partially_update_hauki_resource(HAUKI_API_URL + str(hauki_id) + "/", update_params)
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + str(hauki_id) + "/", update_params)
+
+
+def update_name_and_address(name, address, hsa_resource):
+    update_params = {
+        "name": name,
+        "address": address,
+    }
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + hsa_resource + "/", update_params)
 
 
 def create_hauki_resource(
@@ -162,7 +170,7 @@ def create_hauki_resource(
 
     try:
         create_response = requests.post(
-            HAUKI_API_URL, json=create_params, headers=authorization_headers, timeout=5
+            HAUKI_API_URL + "resource/", json=create_params, headers=authorization_headers, timeout=5
         )
         return create_response
     except requests.exceptions.HTTPError as errh:
@@ -175,6 +183,48 @@ def create_hauki_resource(
         print("OOps: Something Else", err)
     # If try fails, return 400.
     return Response("Hauki creation failed.", status=status.HTTP_400_BAD_REQUEST)
+
+
+def copy_hauki_resource(hauki_id):
+    # Authorization header.
+    authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
+
+    try:
+        create_response = requests.post(
+            HAUKI_API_URL + "resource/" + str(hauki_id) + "/copy_date_periods", headers=authorization_headers, timeout=5
+        )
+        return create_response
+    except requests.exceptions.HTTPError as errh:
+        print("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("OOps: Something Else", err)
+    # If try fails, return 400.
+    return Response("Hauki copy failed.", status=status.HTTP_400_BAD_REQUEST)
+
+
+def delete_hauki_resource(hauki_id):
+    # Authorization header.
+    authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
+
+    try:
+        create_response = requests.delete(
+            HAUKI_API_URL + "resource/" + str(hauki_id), headers=authorization_headers, timeout=5
+        )
+        return create_response
+    except requests.exceptions.HTTPError as errh:
+        print("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("OOps: Something Else", err)
+    # If try fails, return 400.
+    return Response("Hauki delete failed.", status=status.HTTP_400_BAD_REQUEST)
 
 
 def partially_update_hauki_resource(url, update_params):
