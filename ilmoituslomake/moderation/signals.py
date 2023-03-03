@@ -120,8 +120,9 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
                 timezone,
             )
 
-        # Copy the draft date periods to the published resource
-        copy_response = copy_hauki_date_periods(draft_resource, published_resource)
+        if instance.hauki_id > 0:
+            # Copy the draft date periods to the published resource
+            copy_response = copy_hauki_date_periods(draft_resource, published_resource)
 
     # Delete the draft resource
     delete_hauki_resource(draft_resource)
