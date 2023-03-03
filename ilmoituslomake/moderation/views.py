@@ -426,6 +426,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                         data=moderation_item.data,
                         published=True,
                         notification_id=notification.pk,
+                        status = "approved",
                     )
                     moderated_notification.save()
                     moderation_item.target = moderated_notification
@@ -445,6 +446,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                         data=moderation_item.data,
                         published=True,
                         notification_id=notification.pk,
+                        status = "approved",
                     )
                     moderated_notification.save()
                     moderation_item.target = moderated_notification
@@ -459,6 +461,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
                 moderated_notification.published = True
+                moderated_notification.status = "approved"
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
                 if (
@@ -466,6 +469,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                     and notification
                 ):
                     notification.save()
+
             # process images
             images = preprocess_images(request)
             if notification:
