@@ -7,10 +7,11 @@ from datetime import datetime, timedelta
 from moderation.models import ModeratedNotification
 from notification_form.models import Notification
 from opening_times.utils import (
-    copy_hauki_resource,
+    copy_hauki_date_periods,
     create_hauki_resource,
     create_url,
     delete_hauki_resource,
+    get_hauki_data_from_notification,
     partially_update_hauki_resource,
     update_name_and_address,
     update_origin,
@@ -21,15 +22,6 @@ from ilmoituslomake.settings import HAUKI_API_URL, HAUKI_API_DATE_URL
 from rest_framework.permissions import IsAuthenticated
 
 
-# def update_name_and_address(name, address, url):
-#     update_params = {
-#         "name": name,
-#         "address": address,
-#     }
-#     update_response = partially_update_hauki_resource(url, update_params)
-#     return update_response
-
-
 class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     # permission_classes = (permissions.AllowAny,)
@@ -38,48 +30,53 @@ class CreateLink(UpdateAPIView):
 
         # Request params
         request_params = request.data
-        name = request_params["name"]
-        description = request_params["description"]
-        address = request_params["address"]
-        resource_type = request_params["resource_type"]
-        is_public = True
-        timezone = request_params["timezone"]
-        published = request_params["published"]
-        # id and hauki_id must be string
-        hauki_id = str(request_params["hauki_id"])
+
+        # ids must be string
+        # hauki_id = str(request_params["hauki_id"])
         notification_id = str(id)
         published_id = str(request_params["published_id"])
-        draft_id = "draft-" + notification_id
+        draft_id = "ilmoitus-" + notification_id
 
-        # hsa_resource = hauki_id
-        hsa_resource = "kaupunkialusta:" + draft_id
+        published_resource = "kaupunkialusta:" + published_id
+        draft_resource = "kaupunkialusta:" + draft_id
 
-        # Search for the pure hauki_id from Hauki.
-        hauki_id_response = requests.get(HAUKI_API_URL + "resource/" + hauki_id + "/", timeout=10)
+        try:
+            notification = Notification.objects.get(pk = notification_id)
+        except Exception as e:
+            return Response("Hauki link creation failed, notification does not exist.", status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the data from the draft notification
+        data_response = get_hauki_data_from_notification(draft_id, notification.data)
+
+        name = data_response["name"]
+        description = data_response["description"]
+        address = data_response["address"]
+        resource_type = data_response["resource_type"]
+        origins = data_response["origins"]
+        is_public = data_response["is_public"]
+        timezone = data_response["timezone"]
+
+        # Search for the pure hauki_id from Hauki. - TODO - CHECK IF THIS IS NEEDED ?
+        # hauki_id_response = requests.get(HAUKI_API_URL + "resource/" + hauki_id + "/", timeout=10)
         # Search for published id from Hauki
         published_id_response = requests.get(
-            HAUKI_API_URL + "resource/kaupunkialusta:" + published_id + "/", timeout=10
+            HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
         )
         # Search for draft id from Hauki
         draft_id_response = requests.get(
-            HAUKI_API_URL + "resource/kaupunkialusta:" + draft_id + "/", timeout=10
+            HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
         )
 
         if draft_id_response.status_code == 200:
             # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
             update_response = update_name_and_address(
-                name, address, hsa_resource
+                name, address, draft_resource
             )
+
             if update_response.status_code != 200:
                 return Response(update_response)
         else:
             # Draft kaupunkialusta id does not exist in Hauki, so create it
-            origins = [{
-                "data_source": {
-                    "id": "kaupunkialusta",
-                },
-                "origin_id": draft_id,
-            }]
             create_response = create_hauki_resource(
                 name,
                 description,
@@ -89,13 +86,13 @@ class CreateLink(UpdateAPIView):
                 is_public,
                 timezone,
             )
+
             if create_response.status_code != 201:
                 return Response(create_response)
 
             if published_id_response.status_code == 200:
                 # Kaupunkialusta id already exists in Hauki, so copy the existing date periods
-                hauki_id_from_search = published_id_response.json()["id"]
-                copy_response = copy_hauki_resource(hauki_id_from_search)
+                copy_response = copy_hauki_date_periods(published_resource, draft_resource)
 
                 if copy_response.status_code != 200:
                     return Response(copy_response)
@@ -211,7 +208,7 @@ class CreateLink(UpdateAPIView):
             "hsa_created_at": now.isoformat() + "Z",
             "hsa_valid_until": (now + timedelta(hours=1)).isoformat() + "Z",
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
-            "hsa_resource": hsa_resource,
+            "hsa_resource": draft_resource,
             "hsa_has_organization_rights": "false",
         }
         url = create_url(url_data)

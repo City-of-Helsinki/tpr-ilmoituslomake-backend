@@ -89,7 +89,7 @@ def create_url(url_data):
 
 def update_origin(
     origin_id,
-    hauki_id,
+    resource,
     is_draft=False,
     id="kaupunkialusta",
     name_fi=None,
@@ -102,7 +102,7 @@ def update_origin(
     """
     # Get the existing data
     try:
-        response = requests.get(HAUKI_API_URL + "resource/" + str(hauki_id) + "/", timeout=5)
+        response = requests.get(HAUKI_API_URL + "resource/" + str(resource) + "/", timeout=5)
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -116,9 +116,9 @@ def update_origin(
     if response.status_code != 200:
         return response
 
-    # If the notification is a draft add "draft-" -prefix.
+    # If the notification is a draft add "ilmoitus-" -prefix.
     if is_draft:
-        origin_id = "draft-" + str(origin_id)
+        origin_id = "ilmoitus-" + str(origin_id)
     # Add the new origin to existing origins.
     origin = {
         "data_source": {
@@ -140,15 +140,67 @@ def update_origin(
     }
 
     # Partially update the resource
-    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + str(hauki_id) + "/", update_params)
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + str(resource) + "/", update_params)
 
 
-def update_name_and_address(name, address, hsa_resource):
+def update_name_and_address(name, address, resource):
     update_params = {
         "name": name,
         "address": address,
     }
-    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + hsa_resource + "/", update_params)
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + resource + "/", update_params)
+
+
+def get_hauki_data_from_notification(origin_id, notification_data):
+    # Get the name and description from the notification
+    name = {
+        "fi": notification_data["name"]["fi"],
+        "sv": notification_data["name"]["sv"],
+        "en": notification_data["name"]["en"]
+    }
+    description = {
+        "fi": notification_data["description"]["short"]["fi"],
+        "sv": notification_data["description"]["short"]["sv"],
+        "en": notification_data["description"]["short"]["en"]
+    }
+
+    # Get the address from the notification
+    addressFi = notification_data["address"]["fi"]
+    addressSv = notification_data["address"]["sv"]
+    if len(addressFi["street"]) > 0:
+        addressStrFi = addressFi["street"] + ", " + addressFi["postal_code"] + " " + addressFi["post_office"]
+    else:
+        addressStrFi = ""
+    if len(addressSv["street"]) > 0:
+        addressStrSv = addressSv["street"] + ", " + addressSv["postal_code"] + " " + addressSv["post_office"]
+    else:
+        addressStrSv = ""
+    address = {
+        "fi": addressStrFi,
+        "sv": addressStrSv,
+        "en": addressStrFi,
+    }
+
+    # Get the other data
+    resource_type = "unit"
+    origins = [{
+        "data_source": {
+            "id": "kaupunkialusta",
+        },
+        "origin_id": origin_id,
+    }]
+    is_public = True
+    timezone = "Europe/Helsinki"
+
+    return {
+        "name": name,
+        "description": description,
+        "address": address,
+        "resource_type": resource_type,
+        "origins": origins,
+        "is_public": is_public,
+        "timezone": timezone
+    }
 
 
 def create_hauki_resource(
@@ -170,7 +222,10 @@ def create_hauki_resource(
 
     try:
         create_response = requests.post(
-            HAUKI_API_URL + "resource/", json=create_params, headers=authorization_headers, timeout=5
+            HAUKI_API_URL + "resource/",
+            json=create_params,
+            headers=authorization_headers,
+            timeout=5
         )
         return create_response
     except requests.exceptions.HTTPError as errh:
@@ -185,15 +240,17 @@ def create_hauki_resource(
     return Response("Hauki creation failed.", status=status.HTTP_400_BAD_REQUEST)
 
 
-def copy_hauki_resource(hauki_id):
+def copy_hauki_date_periods(from_resource, to_resource):
     # Authorization header.
     authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
 
     try:
-        create_response = requests.post(
-            HAUKI_API_URL + "resource/" + str(hauki_id) + "/copy_date_periods", headers=authorization_headers, timeout=5
+        copy_response = requests.post(
+            HAUKI_API_URL + "resource/" + str(from_resource) + "/copy_date_periods/?replace=true&target_resources=" + str(to_resource),
+            headers=authorization_headers,
+            timeout=5
         )
-        return create_response
+        return copy_response
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -206,15 +263,15 @@ def copy_hauki_resource(hauki_id):
     return Response("Hauki copy failed.", status=status.HTTP_400_BAD_REQUEST)
 
 
-def delete_hauki_resource(hauki_id):
+def delete_hauki_resource(resource):
     # Authorization header.
     authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
 
     try:
-        create_response = requests.delete(
-            HAUKI_API_URL + "resource/" + str(hauki_id), headers=authorization_headers, timeout=5
+        delete_response = requests.delete(
+            HAUKI_API_URL + "resource/" + str(resource), headers=authorization_headers, timeout=5
         )
-        return create_response
+        return delete_response
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
