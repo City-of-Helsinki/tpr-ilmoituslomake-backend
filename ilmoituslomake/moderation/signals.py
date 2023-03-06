@@ -47,19 +47,36 @@ def create_moderation_item(sender, instance, **kwargs):
             is_public = data_response["is_public"]
             timezone = data_response["timezone"]
 
-            # Create draft kaupunkialusta id in Hauki
-            create_response = create_hauki_resource(
-                name,
-                description,
-                address,
-                resource_type,
-                origins,
-                is_public,
-                timezone,
+            # Search for published id from Hauki
+            published_id_response = requests.get(
+                HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
+            )
+            # Search for draft id from Hauki
+            draft_id_response = requests.get(
+                HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
             )
 
-            # Copy the published date periods to the draft resource
-            copy_response = copy_hauki_date_periods(published_resource, draft_resource)
+            if draft_id_response.status_code == 200:
+                # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
+                update_response = update_name_and_address(
+                    name, address, draft_resource
+                )
+            else:
+                # Draft kaupunkialusta id does not exist in Hauki, so create it
+                create_response = create_hauki_resource(
+                    name,
+                    description,
+                    address,
+                    resource_type,
+                    origins,
+                    is_public,
+                    timezone,
+                )
+
+                if published_id_response.status_code == 200:
+                    # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource
+                    copy_response = copy_hauki_date_periods(published_resource, draft_resource)
+
 
         moderation_item = ModerationItem(
             target=moderated_notification,
@@ -121,7 +138,7 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
             )
 
         if instance.hauki_id > 0:
-            # Copy the draft date periods to the published resource
+            # The date periods themselves were approved, so copy the draft date periods to the published resource
             copy_response = copy_hauki_date_periods(draft_resource, published_resource)
 
     # Delete the draft resource
