@@ -19,12 +19,11 @@ from opening_times.utils import (
 from ilmoituslomake.settings import HAUKI_API_URL, HAUKI_API_DATE_URL
 
 # Permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    # permission_classes = (permissions.AllowAny,)
 
     def post(self, request, id=None, *args, **kwargs):
 
@@ -121,7 +120,7 @@ class GetTimes(RetrieveAPIView):
     """
 
     queryset = ""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, id=None, *args, **kwargs):
         response = requests.get(
