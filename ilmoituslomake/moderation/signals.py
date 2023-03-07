@@ -47,21 +47,30 @@ def create_moderation_item(sender, instance, **kwargs):
             is_public = data_response["is_public"]
             timezone = data_response["timezone"]
 
-            # Search for published id from Hauki
-            published_id_response = requests.get(
-                HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
-            )
-            # Search for draft id from Hauki
-            draft_id_response = requests.get(
-                HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
-            )
+            published_id_response = None
+            try:
+                # Search for published id from Hauki
+                published_id_response = requests.get(
+                    HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
+                )
+            except Exception as e:
+                pass
 
-            if draft_id_response.status_code == 200:
+            draft_id_response = None
+            try:
+                # Search for draft id from Hauki
+                draft_id_response = requests.get(
+                    HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
+                )
+            except Exception as e:
+                pass
+
+            if draft_id_response != None and draft_id_response.status_code == 200:
                 # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
                 update_response = update_name_and_address(
                     name, address, draft_resource
                 )
-            else:
+            elif draft_id_response != None:
                 # Draft kaupunkialusta id does not exist in Hauki, so create it
                 create_response = create_hauki_resource(
                     name,
@@ -112,6 +121,7 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
         is_public = data_response["is_public"]
         timezone = data_response["timezone"]
 
+        published_id_response = None
         try:
             # Search for published id from Hauki
             published_id_response = requests.get(
@@ -120,12 +130,12 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
         except Exception as e:
             pass
 
-        if published_id_response.status_code == 200:
+        if published_id_response != None and published_id_response.status_code == 200:
             # Published kaupunkialusta id already exists in Hauki, so just update the name and address
             update_response = update_name_and_address(
                 name, address, published_resource
             )
-        else:
+        elif published_id_response != None:
             # Published kaupunkialusta id does not exist in Hauki, so create it
             create_response = create_hauki_resource(
                 name,
