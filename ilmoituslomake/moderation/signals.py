@@ -151,5 +151,15 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
             # The date periods themselves were approved, so copy the draft date periods to the published resource
             copy_response = copy_hauki_date_periods(draft_resource, published_resource)
 
-    # Delete the draft resource
-    delete_hauki_resource(draft_resource)
+    if instance.notification_id > 0:
+        # Check if the draft resource is still needed by an open moderation item
+        # There may be two or more moderation items for the same notification target, so the draft date periods are needed for all of them
+        moderation_item_count = 0
+        try:
+            moderation_item_count = ModerationItem.objects.filter(notification_target_id = instance.notification_id, status = "open").count()
+        except Exception as e:
+            pass
+
+        if moderation_item_count <= 1:
+            # There are no open moderation items for this draft resource (apart from this one), so delete it
+            delete_hauki_resource(draft_resource)
