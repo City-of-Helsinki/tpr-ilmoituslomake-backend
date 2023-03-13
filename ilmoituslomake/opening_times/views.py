@@ -42,7 +42,7 @@ class CreateLink(UpdateAPIView):
         try:
             notification = Notification.objects.get(pk = notification_id)
         except Exception as e:
-            return Response("Hauki link creation failed, notification does not exist.", status=status.HTTP_400_BAD_REQUEST)
+            return Response("Hauki link creation failed, notification " + notification_id + " does not exist.", status=status.HTTP_400_BAD_REQUEST)
 
         # Get the data from the draft notification
         data_response = get_hauki_data_from_notification(draft_id, notification.data)
