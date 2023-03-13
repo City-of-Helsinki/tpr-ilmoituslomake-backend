@@ -16,7 +16,7 @@ from opening_times.utils import (
     update_name_and_address,
     update_origin,
 )
-from ilmoituslomake.settings import HAUKI_API_URL, HAUKI_API_DATE_URL
+from ilmoituslomake.settings import HAUKI_API_URL
 
 # Permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
