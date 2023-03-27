@@ -35,7 +35,7 @@ def create_moderation_item(sender, instance, **kwargs):
             draft_id = "ilmoitus-" + str(instance.id)
 
             # Create or update draft opening times in Hauki using the draft notification data and published opening times if possible
-            create_or_update_draft_hauki_data(published_id, draft_id, instance.data, False)
+            create_or_update_draft_hauki_data(True, published_id, draft_id, instance.data, False)
 
         moderation_item = ModerationItem(
             target=moderated_notification,
@@ -53,13 +53,24 @@ def create_moderation_item(sender, instance, **kwargs):
 
 @receiver(post_save, sender=ModeratedNotification)
 def update_hauki_after_moderation(sender, instance, **kwargs):
+    # Use cases with examples:
+    #
+    # 1. Add notification for new place - published_id '0', draft_id 'ilmoitus-143'
+    #   - Moderator approves opening times -> 'kaupunkialusta:5103' added to hauki, 'kaupunkialusta:ilmoitus-143' deleted from hauki
+    # 2. Update notification for existing place - published_id '5103', draft_id 'ilmoitus-143'
+    #   - Moderator approves opening times -> 'kaupunkialusta:5103' updated in hauki, 'kaupunkialusta:ilmoitus-143' deleted from hauki
+    # 3. Change request for new place - published_id '0', draft_id '0'
+    #   - Moderator approves opening times -> 'kaupunkialusta:5104' added to hauki but opening times are empty
+    # 4. Change request for existing place - published_id '5103', draft_id '0'
+    #   - Moderator approves opening times -> 'kaupunkialusta:5103' updated in hauki
+
     published_id = str(instance.id)
     draft_id = "ilmoitus-" + str(instance.notification_id)
 
     published_resource = "kaupunkialusta:" + published_id
     draft_resource = "kaupunkialusta:" + draft_id
 
-    if instance.status == "approved" and instance.notification_id > 0:
+    if instance.status == "approved":
         # Get the data from the approved notification
         data_response = get_hauki_data_from_notification(published_id, instance.data)
 
@@ -97,6 +108,7 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
                 timezone,
             )
 
+        # If the notification times are rejected, or this is a change request or moderator edit, then hauki_id is 0
         if instance.hauki_id > 0:
             # The date periods themselves were approved, so copy the draft date periods to the published resource
             copy_response = copy_hauki_date_periods(draft_resource, published_resource)
