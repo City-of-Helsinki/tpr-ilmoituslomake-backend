@@ -68,12 +68,6 @@ class CreateLink(UpdateAPIView):
             except Exception as e:
                 return Response("Hauki link creation failed, notification " + notification_id + " does not exist.", status=status.HTTP_400_BAD_REQUEST)
 
-        # Search for the pure hauki_id from Hauki. - TODO - CHECK IF THIS IS NEEDED ?
-        # hauki_id_response = requests.get(HAUKI_API_URL + "resource/" + hauki_id + "/", timeout=10)
-
-
-
-
         if id > 0:
             # Create or update draft opening times in Hauki using the draft notification data and published opening times if possible
             create_or_update_response = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True)
