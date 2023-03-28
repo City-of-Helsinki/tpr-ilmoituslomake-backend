@@ -408,6 +408,7 @@ class ModerationItemUpdateView(UpdateAPIView):
             return Response(None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         moderation_item.data = request.data["data"]
+        moderation_hauki_id = request.data["hauki_id"]
 
         #
         try:
@@ -426,6 +427,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                         data=moderation_item.data,
                         published=True,
                         notification_id=notification.pk,
+                        status = "approved",
+                        hauki_id = moderation_hauki_id,
                     )
                     moderated_notification.save()
                     moderation_item.target = moderated_notification
@@ -445,6 +448,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                         data=moderation_item.data,
                         published=True,
                         notification_id=notification.pk,
+                        status = "approved",
+                        hauki_id = moderation_hauki_id,
                     )
                     moderated_notification.save()
                     moderation_item.target = moderated_notification
@@ -459,6 +464,8 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification = moderation_item.target
                 moderated_notification.data = moderation_item.data
                 moderated_notification.published = True
+                moderated_notification.status = "approved"
+                moderated_notification.hauki_id = moderation_hauki_id
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
                 if (
@@ -466,6 +473,7 @@ class ModerationItemUpdateView(UpdateAPIView):
                     and notification
                 ):
                     notification.save()
+
             # process images
             images = preprocess_images(request)
             if notification:
