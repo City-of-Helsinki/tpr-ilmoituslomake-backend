@@ -7,154 +7,73 @@ from datetime import datetime, timedelta
 from moderation.models import ModeratedNotification
 from notification_form.models import Notification
 from opening_times.utils import (
+    copy_hauki_date_periods,
     create_hauki_resource,
+    create_or_update_draft_hauki_data,
     create_url,
+    delete_hauki_resource,
+    get_hauki_data_from_notification,
     partially_update_hauki_resource,
-    update_origin,
+    update_name_and_address,
 )
 from ilmoituslomake.settings import HAUKI_API_URL
 
 # Permissions
-from rest_framework.permissions import IsAuthenticated
-
-
-def update_name_and_address(name, address, url):
-    update_params = {
-        "name": name,
-        "address": address,
-    }
-    update_response = partially_update_hauki_resource(url, update_params)
-    return update_response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CreateLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    # permission_classes = (permissions.AllowAny,)
 
     def post(self, request, id=None, *args, **kwargs):
+        # Use cases with examples:
+        #
+        # 1. Add notification for new place - published_id '0', draft_id 'ilmoitus-143'
+        #   a. User adds opening times or sends notification -> 'kaupunkialusta:ilmoitus-143' added to hauki
+        #   b. Moderator changes opening times -> 'kaupunkialusta:ilmoitus-143' updated in hauki
+        # 2. Update notification for existing place - published_id '5103', draft_id 'ilmoitus-143'
+        #   a. User changes opening times or sends notification -> 'kaupunkialusta:ilmoitus-143' added to hauki
+        #   b. Moderator changes opening times -> 'kaupunkialusta:ilmoitus-143' updated in hauki
+        # 3. Change request for new place - published_id '0', draft_id '0'
+        #   a. No user changes
+        #   b. No moderator changes
+        # 4. Change request for existing place - published_id '5103', draft_id '0'
+        #   a. No user changes
+        #   b. Moderator changes opening times -> 'kaupunkialusta:5103' updated in hauki
 
         # Request params
         request_params = request.data
-        name = request_params["name"]
-        description = request_params["description"]
-        address = request_params["address"]
-        resource_type = request_params["resource_type"]
-        is_public = True
-        timezone = request_params["timezone"]
+
+        # ids must be string
+        # hauki_id = str(request_params["hauki_id"])
         published = request_params["published"]
-        # id and hauki_id must be string
-        hauki_id = str(request_params["hauki_id"])
-        id = str(id)
+        notification_id = str(id)
+        published_id = str(request_params["published_id"])
+        draft_id = "ilmoitus-" + notification_id
 
-        hsa_resource = hauki_id
-
-        # Search for the pure hauki_id from Hauki.
-        hauki_id_response = requests.get(HAUKI_API_URL + hauki_id + "/", timeout=10)
-        # Search for id from Hauki
-        id_response = requests.get(
-            HAUKI_API_URL + "kaupunkialusta:" + id + "/", timeout=10
-        )
-
-        # CASE PUBLISHED
-        # IF MODERATION ID IN HAUKI -> UPDATE NAME -> hsa_resource = kaupunkialusta:id
-        # IF HAUKI ID IN HAUKI -> UPDATE ORIGIN AND NAME -> hsa_resource = kaupunkialusta:id
-        # IF NEITHER IN HAUKI -> CREATE RESOURCE -> hsa_resource = kaupunkialusta:id
-        if published:
-            if id_response.status_code == 200:
-                hsa_resource = "kaupunkialusta:" + id
-                update_response = update_name_and_address(
-                    name, address, HAUKI_API_URL + "kaupunkialusta:" + id + "/"
-                )
-                if update_response.status_code != 200:
-                    return update_response
-            elif hauki_id_response.status_code == 200:
-                hsa_resource = "kaupunkialusta:" + id
-                update_response = update_origin(id, hauki_id)
-                if update_response.status_code != 200:
-                    return Response(update_response)
-                update_response = update_name_and_address(
-                    name, address, HAUKI_API_URL + hauki_id + "/"
-                )
-                if update_response.status_code != 200:
-                    return Response(update_response)
-            else:
-                moderated_notification = ModeratedNotification.objects.get(pk=id)
-                hsa_resource = "kaupunkialusta:" + id
-                # Create new hauki resource
-                origins = [
-                    {
-                        "data_source": {
-                            "id": "kaupunkialusta",
-                        },
-                        "origin_id": id,
-                    }
-                ]
-
-                create_response = create_hauki_resource(
-                    name,
-                    description,
-                    address,
-                    resource_type,
-                    origins,
-                    is_public,
-                    timezone,
-                )
-                if create_response.status_code != 201:
-                    return Response(create_response)
-                moderated_notification.hauki_id = create_response.json()["id"]
-                moderated_notification.save()
-
-        # CASE NOT PUBLISHED
-        # IF DRAFT IN HAUKI -> UPDATE NAME -> hsa_resource = kaupunkialusta:draft-id
-        # IF HAUKI ID IN HAUKI -> UPDATE ORIGIN AND NAME -> hsa_resource = hauki_id
-        # ELSE -> CREATE DRAFT -> hsa_resource = hauki_id
+        published_resource = "kaupunkialusta:" + published_id
+        draft_resource = "kaupunkialusta:" + draft_id
+        if id > 0:
+            hsa_resource = draft_resource
         else:
-            hauki_draft_response = requests.get(
-                HAUKI_API_URL + "kaupunkialusta:draft-" + id + "/", timeout=10
-            )
-            if hauki_draft_response.status_code == 200:
-                hsa_resource = "kaupunkialusta:draft-" + id
-                update_response = update_name_and_address(
-                    name, address, HAUKI_API_URL + "kaupunkialusta:draft-" + id + "/"
-                )
-                if update_response.status_code != 200:
-                    return Response(update_response)
-            elif hauki_id_response.status_code == 200:
-                hsa_resource = hauki_id
-                update_response = update_origin(id, hauki_id)
-                if update_response.status_code != 200:
-                    return Response(update_response)
-                update_response = update_name_and_address(
-                    name, address, HAUKI_API_URL + hauki_id + "/"
-                )
-                if update_response.status_code != 200:
-                    return Response(update_response)
-            else:
-                origins = [
-                    {
-                        "data_source": {
-                            "id": "kaupunkialusta",
-                        },
-                        "origin_id": "draft-" + id,
-                    }
-                ]
-                create_response = create_hauki_resource(
-                    name,
-                    description,
-                    address,
-                    resource_type,
-                    origins,
-                    is_public,
-                    timezone,
-                )
-                notification = Notification.objects.filter(pk=id)
-                if create_response.status_code != 201:
-                    return Response(create_response)
-                notification.update(hauki_id=create_response.json()["id"])
-                # FOR SOME REASON .save() CREATES A NEW INSTANCE INSTEAD OF UPDATING THE CURRENT ONE
-                # notification.hauki_id = create_response.json()["id"]
-                # notification.save()
-                hsa_resource = str(create_response.json()["id"])
+            hsa_resource = published_resource
+
+        # Fetch the draft notification data if there is a notification id
+        # For change requests, notification id may be 0
+        notification_data = None
+        if id > 0:
+            try:
+                notification = Notification.objects.get(pk = notification_id)
+                notification_data = notification.data
+            except Exception as e:
+                return Response("Hauki link creation failed, notification " + notification_id + " does not exist.", status=status.HTTP_400_BAD_REQUEST)
+
+        if id > 0:
+            # Create or update draft opening times in Hauki using the draft notification data and published opening times if possible
+            create_or_update_response = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True)
+
+            if create_or_update_response != None:
+                return create_or_update_response
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
@@ -180,19 +99,13 @@ class GetTimes(RetrieveAPIView):
     """
 
     queryset = ""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, id=None, *args, **kwargs):
-        start_date = self.request.query_params.get("start_date", None)
-        end_date = self.request.query_params.get("end_date", None)
         response = requests.get(
             HAUKI_API_URL
-            + id
-            + "/opening_hours/"
-            + "?start_date="
-            + start_date
-            + "&end_date="
-            + end_date,
+            + "date_periods_as_text_for_tprek/?resource="
+            + "kaupunkialusta:" + id,
             timeout=10,
         )
         return Response(response.json(), status=status.HTTP_200_OK)

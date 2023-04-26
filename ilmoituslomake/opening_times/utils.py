@@ -87,9 +87,75 @@ def create_url(url_data):
     return HAUKI_UI_URL + url_data.get("hsa_resource") + "/?" + param_string
 
 
+def create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, stop_on_error):
+    published_resource = "kaupunkialusta:" + published_id
+    draft_resource = "kaupunkialusta:" + draft_id
+
+    published_id_response = None
+    if (published == True):
+        try:
+            # Search for published id from Hauki
+            published_id_response = requests.get(
+                HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
+            )
+        except Exception as e:
+            pass
+
+    draft_id_response = None
+    try:
+        # Search for draft id from Hauki
+        draft_id_response = requests.get(
+            HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
+        )
+    except Exception as e:
+        pass
+
+    if draft_id_response != None:
+        # Get the data values from the notification
+        data_response = get_hauki_data_from_notification(draft_id, notification_data)
+
+        name = data_response["name"]
+        description = data_response["description"]
+        address = data_response["address"]
+        resource_type = data_response["resource_type"]
+        origins = data_response["origins"]
+        is_public = data_response["is_public"]
+        timezone = data_response["timezone"]
+
+        if draft_id_response.status_code == 200:
+            # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
+            update_response = update_name_and_address(
+                name, address, draft_resource
+            )
+
+            if stop_on_error == True and update_response.status_code != 200:
+                return Response(update_response)
+        else:
+            # Draft kaupunkialusta id does not exist in Hauki, so create it
+            create_response = create_hauki_resource(
+                name,
+                description,
+                address,
+                resource_type,
+                origins,
+                is_public,
+                timezone,
+            )
+
+            if stop_on_error == True and create_response.status_code != 201:
+                return Response(create_response)
+
+            if published_id_response != None and published_id_response.status_code == 200:
+                # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource
+                copy_response = copy_hauki_date_periods(published_resource, draft_resource)
+
+                if stop_on_error == True and copy_response.status_code != 200:
+                    return Response(copy_response)
+
+
 def update_origin(
     origin_id,
-    hauki_id,
+    resource,
     is_draft=False,
     id="kaupunkialusta",
     name_fi=None,
@@ -102,7 +168,7 @@ def update_origin(
     """
     # Get the existing data
     try:
-        response = requests.get(HAUKI_API_URL + str(hauki_id) + "/", timeout=5)
+        response = requests.get(HAUKI_API_URL + "resource/" + str(resource) + "/", timeout=5)
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
@@ -116,9 +182,9 @@ def update_origin(
     if response.status_code != 200:
         return response
 
-    # If the notification is a draft add "draft-" -prefix.
+    # If the notification is a draft add "ilmoitus-" -prefix.
     if is_draft:
-        origin_id = "draft-" + str(origin_id)
+        origin_id = "ilmoitus-" + str(origin_id)
     # Add the new origin to existing origins.
     origin = {
         "data_source": {
@@ -140,7 +206,67 @@ def update_origin(
     }
 
     # Partially update the resource
-    partially_update_hauki_resource(HAUKI_API_URL + str(hauki_id) + "/", update_params)
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + str(resource) + "/", update_params)
+
+
+def update_name_and_address(name, address, resource):
+    update_params = {
+        "name": name,
+        "address": address,
+    }
+    return partially_update_hauki_resource(HAUKI_API_URL + "resource/" + resource + "/", update_params)
+
+
+def get_hauki_data_from_notification(origin_id, notification_data):
+    # Get the name and description from the notification
+    name = {
+        "fi": notification_data["name"]["fi"],
+        "sv": notification_data["name"]["sv"],
+        "en": notification_data["name"]["en"]
+    }
+    description = {
+        "fi": notification_data["description"]["short"]["fi"],
+        "sv": notification_data["description"]["short"]["sv"],
+        "en": notification_data["description"]["short"]["en"]
+    }
+
+    # Get the address from the notification
+    addressFi = notification_data["address"]["fi"]
+    addressSv = notification_data["address"]["sv"]
+    if len(addressFi["street"]) > 0:
+        addressStrFi = addressFi["street"] + ", " + addressFi["postal_code"] + " " + addressFi["post_office"]
+    else:
+        addressStrFi = ""
+    if len(addressSv["street"]) > 0:
+        addressStrSv = addressSv["street"] + ", " + addressSv["postal_code"] + " " + addressSv["post_office"]
+    else:
+        addressStrSv = ""
+    address = {
+        "fi": addressStrFi,
+        "sv": addressStrSv,
+        "en": addressStrFi,
+    }
+
+    # Get the other data
+    resource_type = "unit"
+    origins = [{
+        "data_source": {
+            "id": "kaupunkialusta",
+        },
+        "origin_id": origin_id,
+    }]
+    is_public = True
+    timezone = "Europe/Helsinki"
+
+    return {
+        "name": name,
+        "description": description,
+        "address": address,
+        "resource_type": resource_type,
+        "origins": origins,
+        "is_public": is_public,
+        "timezone": timezone
+    }
 
 
 def create_hauki_resource(
@@ -162,7 +288,10 @@ def create_hauki_resource(
 
     try:
         create_response = requests.post(
-            HAUKI_API_URL, json=create_params, headers=authorization_headers, timeout=5
+            HAUKI_API_URL + "resource/",
+            json=create_params,
+            headers=authorization_headers,
+            timeout=5
         )
         return create_response
     except requests.exceptions.HTTPError as errh:
@@ -175,6 +304,50 @@ def create_hauki_resource(
         print("OOps: Something Else", err)
     # If try fails, return 400.
     return Response("Hauki creation failed.", status=status.HTTP_400_BAD_REQUEST)
+
+
+def copy_hauki_date_periods(from_resource, to_resource):
+    # Authorization header.
+    authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
+
+    try:
+        copy_response = requests.post(
+            HAUKI_API_URL + "resource/" + str(from_resource) + "/copy_date_periods/?replace=true&target_resources=" + str(to_resource),
+            headers=authorization_headers,
+            timeout=5
+        )
+        return copy_response
+    except requests.exceptions.HTTPError as errh:
+        print("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("OOps: Something Else", err)
+    # If try fails, return 400.
+    return Response("Hauki copy failed.", status=status.HTTP_400_BAD_REQUEST)
+
+
+def delete_hauki_resource(resource):
+    # Authorization header.
+    authorization_headers = {"Authorization": "APIToken " + API_TOKEN}
+
+    try:
+        delete_response = requests.delete(
+            HAUKI_API_URL + "resource/" + str(resource), headers=authorization_headers, timeout=5
+        )
+        return delete_response
+    except requests.exceptions.HTTPError as errh:
+        print("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("OOps: Something Else", err)
+    # If try fails, return 400.
+    return Response("Hauki delete failed.", status=status.HTTP_400_BAD_REQUEST)
 
 
 def partially_update_hauki_resource(url, update_params):
