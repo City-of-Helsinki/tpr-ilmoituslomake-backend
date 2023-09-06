@@ -38,7 +38,7 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
 
 
 # Application definition
@@ -226,7 +226,7 @@ PRIVATE_AZURE_CONNECTION_STRING = env("PRIVATE_AZURE_CONNECTION_STRING")
 PRIVATE_AZURE_READ_KEY = env("PRIVATE_AZURE_READ_KEY")
 PUBLIC_AZURE_CONTAINER = env("PUBLIC_AZURE_CONTAINER")
 PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
-PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
+# PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
 USE_X_FORWARDED_HOST = True
