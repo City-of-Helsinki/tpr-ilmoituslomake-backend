@@ -145,6 +145,15 @@ urlpatterns += [
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
     # matko words
     path("api/matkowords/", notification_form_views.MatkoWordListView.as_view()),
+    # Esteettömyyssovellus integration
+    path(
+        "api/id_mapping_all/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingAllRetrieveView.as_view(),
+    ),
+    path(
+        "api/id_mapping_kaupunkialusta_master/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingKaupunkialustaMasterRetrieveView.as_view(),
+    ),
 ]
 
 

@@ -24,13 +24,21 @@ from moderation.serializers import ChangeRequestSerializer
 
 from notification_form.models import Notification, NotificationImage
 from moderation.models import ModeratedNotification
-from base.models import NotificationSchema, OntologyWord, MatkoWord
+from base.models import (
+    NotificationSchema,
+    OntologyWord,
+    MatkoWord,
+    IdMappingAll,
+    IdMappingKaupunkialustaMaster,
+)
 
 # from notification_form.serializers import NotificationImageSerializer
 from base.serializers import (
     NotificationSchemaSerializer,
     OntologyWordSerializer,
     MatkoWordSerializer,
+    IdMappingAllSerializer,
+    IdMappingKaupunkialustaMasterSerializer,
 )
 from moderation.serializers import (
     PublicModeratedNotificationSerializer,
@@ -237,3 +245,25 @@ class MatkoWordListView(ListAPIView):
     queryset = MatkoWord.objects.all()
     serializer_class = MatkoWordSerializer
     pagination_class = None
+
+
+class IdMappingAllRetrieveView(RetrieveAPIView):
+    """
+    Returns a single IdMappingAll instance
+    """
+
+    permission_classes = [AllowAny]
+    lookup_field = "kaupunkialusta_id"
+    queryset = IdMappingAll.objects.all()
+    serializer_class = IdMappingAllSerializer
+
+
+class IdMappingKaupunkialustaMasterRetrieveView(RetrieveAPIView):
+    """
+    Returns a single IdMappingKaupunkialustaMaster instance
+    """
+
+    permission_classes = [AllowAny]
+    lookup_field = "kaupunkialusta_id"
+    queryset = IdMappingKaupunkialustaMaster.objects.all()
+    serializer_class = IdMappingKaupunkialustaMasterSerializer
