@@ -40,7 +40,7 @@ def get_valid_tpr_internal_id(kaupunkialusta_id):
     elif id_mapping_all != None and id_mapping_all.tpr_internal_id == None:
         return Response("Esteettömyyssovellus link creation failed, not allowed to manage accessibility info for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id)
+    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id, status=status.HTTP_200_OK))
 
 
 def get_valid_until_next_day():
@@ -51,9 +51,9 @@ def get_valid_until_next_day():
     return valid_until
 
 
-def add_accessibility_external_reference(kaupunkialusta_id, kaupunkialusta_user, id_mapping_kaupunkialusta_master):
+def add_accessibility_external_reference(kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id):
     # Add the published notification id to Esteettömyyssovellus as an external reference
-    tpr_servicepoint_id = str(id_mapping_kaupunkialusta_master.tpr_internal_id)
+    tpr_servicepoint_id = str(tpr_internal_id)
     kaupunkialusta_servicepoint_id = str(kaupunkialusta_id)
     valid_until = get_valid_until_next_day()
 

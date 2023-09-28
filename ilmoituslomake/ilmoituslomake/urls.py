@@ -145,15 +145,6 @@ urlpatterns += [
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
     # matko words
     path("api/matkowords/", notification_form_views.MatkoWordListView.as_view()),
-    # Esteettömyyssovellus integration
-    path(
-        "api/id_mapping_all/get/<int:kaupunkialusta_id>/",
-        notification_form_views.IdMappingAllRetrieveView.as_view(),
-    ),
-    path(
-        "api/id_mapping_kaupunkialusta_master/get/<int:kaupunkialusta_id>/",
-        notification_form_views.IdMappingKaupunkialustaMasterRetrieveView.as_view(),
-    ),
 ]
 
 
@@ -236,4 +227,20 @@ urlpatterns += [
         opening_times_views.CreateLink.as_view(),
     ),
     path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view()),
+]
+
+urlpatterns += [
+    # Esteettömyyssovellus integration
+    path(
+        "api/accessibility/id_mapping_all/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingAllRetrieveView.as_view(),
+    ),
+    path(
+        "api/accessibility/id_mapping_kaupunkialusta_master/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingKaupunkialustaMasterRetrieveView.as_view(),
+    ),
+    path(
+        "api/accessibility/createlink/<int:kaupunkialusta_id>/",
+        notification_form_views.CreateAccessibilityLink.as_view(),
+    ),
 ]

@@ -48,6 +48,12 @@ from moderation.serializers import (
 from django.db.models import Q
 # from image_utils import preprocess_images, process_images   
 
+from notification_form.utils import (
+    add_accessibility_external_reference,
+    get_accessibility_url,
+    get_valid_tpr_internal_id,
+)
+
 
 class NotificationSchemaCreateView(CreateAPIView):
     """
@@ -267,3 +273,51 @@ class IdMappingKaupunkialustaMasterRetrieveView(RetrieveAPIView):
     lookup_field = "kaupunkialusta_id"
     queryset = IdMappingKaupunkialustaMaster.objects.all()
     serializer_class = IdMappingKaupunkialustaMasterSerializer
+
+
+class CreateAccessibilityLink(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, kaupunkialusta_id=None, *args, **kwargs):
+        # The rules for creating the accessibility link to access esteettömyyssovellus are as follows:
+        #
+        # 1. If the moderated notification is not published, then the accessibility info cannot be added for this place yet.
+        # 2. If the moderated notification id (kaupunkialusta id) exists in id_mapping_all, but not in id_mapping_kaupunkialusta_master, then the
+        #    accessibility info cannot be added via kaupunkialusta, since it is not the master of the place, for example 'Helsingin kaupunginmuseo'.
+        # 3. Otherwise the accessibility info can be added.
+
+        # Get the request params
+        published = request.data["published"]
+        notification_id = str(request.data["notification_id"])
+        kaupunkialusta_user = str(request.user)
+
+        # Get the moderated notification to check the published status
+        moderated_notification = None
+        moderated_data = None
+        if kaupunkialusta_id > 0:
+            try:
+                moderated_notification = ModeratedNotification.objects.get(pk = kaupunkialusta_id)
+                moderated_data = moderated_notification.data
+            except Exception as e:
+                return Response("Esteettömyyssovellus link creation failed, id " + str(kaupunkialusta_id) + " does not exist.", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Esteettömyyssovellus link creation failed, id " + str(kaupunkialusta_id) + " is not valid.", status=status.HTTP_400_BAD_REQUEST)
+
+        if moderated_notification == None or moderated_notification.published != True or published != True:
+            return Response("Esteettömyyssovellus link creation failed, id " + str(kaupunkialusta_id) + " is not published.", status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the tpr internal id corresponding to the published notification id (kaupunkialusta id)
+        tpr_internal_id_response = get_valid_tpr_internal_id(kaupunkialusta_id)
+        if tpr_internal_id_response != None and tpr_internal_id_response.status_code != 200:
+            return tpr_internal_id_response
+
+        # Add the published notification id to Esteettömyyssovellus as an external reference
+        tpr_internal_id = tpr_internal_id_response.data
+        create_response = add_accessibility_external_reference(kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id)
+        if create_response != None and create_response.status_code != 200:
+            return create_response
+
+        # Return the url for opening Esteettömyyssovellus to show and edit accessibility info
+        accessibility_url = get_accessibility_url(kaupunkialusta_id, kaupunkialusta_user, moderated_data)
+
+        return Response(accessibility_url, status=status.HTTP_200_OK)
