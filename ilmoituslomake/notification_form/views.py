@@ -275,6 +275,19 @@ class IdMappingKaupunkialustaMasterRetrieveView(RetrieveAPIView):
     serializer_class = IdMappingKaupunkialustaMasterSerializer
 
 
+class GetValidAccessibilityId(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, kaupunkialusta_id=None, *args, **kwargs):
+        # Get the tpr internal id corresponding to the published notification id (kaupunkialusta id)
+        # If an error occurs due to the validation, just return -1
+        tpr_internal_id_response = get_valid_tpr_internal_id(kaupunkialusta_id)
+        if tpr_internal_id_response == None or tpr_internal_id_response.status_code != 200:
+            return Response(-1, status=status.HTTP_200_OK)
+
+        return Response(tpr_internal_id_response.data, status=status.HTTP_200_OK)
+
+
 class CreateAccessibilityLink(UpdateAPIView):
     permission_classes = [IsAuthenticated]
 

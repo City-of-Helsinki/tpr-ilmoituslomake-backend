@@ -40,7 +40,7 @@ def get_valid_tpr_internal_id(kaupunkialusta_id):
     elif id_mapping_all != None and id_mapping_all.tpr_internal_id == None:
         return Response("Esteettömyyssovellus link creation failed, not allowed to manage accessibility info for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id, status=status.HTTP_200_OK))
+    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id, status=status.HTTP_200_OK)
 
 
 def get_valid_until_next_day():

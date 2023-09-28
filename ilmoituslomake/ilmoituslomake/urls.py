@@ -240,7 +240,11 @@ urlpatterns += [
         notification_form_views.IdMappingKaupunkialustaMasterRetrieveView.as_view(),
     ),
     path(
-        "api/accessibility/createlink/<int:kaupunkialusta_id>/",
+        "api/accessibility/get_valid_internal_id/<int:kaupunkialusta_id>/",
+        notification_form_views.GetValidAccessibilityId.as_view(),
+    ),
+    path(
+        "api/accessibility/create_link/<int:kaupunkialusta_id>/",
         notification_form_views.CreateAccessibilityLink.as_view(),
     ),
 ]
