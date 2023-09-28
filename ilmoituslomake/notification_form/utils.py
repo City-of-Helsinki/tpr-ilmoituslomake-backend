@@ -3,6 +3,10 @@ from rest_framework import status
 from datetime import datetime, timedelta
 from pyproj import Transformer
 from urllib.parse import quote_plus
+from base.models import (
+    IdMappingAll,
+    IdMappingKaupunkialustaMaster,
+)
 from ilmoituslomake.settings import (
     ACCESSIBILITY_API_URL,
     ACCESSIBILITY_APP_URL,
@@ -13,6 +17,30 @@ from ilmoituslomake.settings import (
 )
 import hashlib
 import requests
+
+
+def get_valid_tpr_internal_id(kaupunkialusta_id):
+    # Get the id mapping data to determine the esteettömyyssovellus servicepoint to link to
+    id_mapping_all = None
+    id_mapping_kaupunkialusta_master = None
+    try:
+        id_mapping_all = IdMappingAll.objects.get(kaupunkialusta_id = kaupunkialusta_id)
+    except Exception as e:
+        return Response("Esteettömyyssovellus link creation failed, could not get mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        id_mapping_kaupunkialusta_master = IdMappingKaupunkialustaMaster.objects.get(kaupunkialusta_id = kaupunkialusta_id)
+    except Exception as e:
+        return Response("Esteettömyyssovellus link creation failed, could not get master mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+
+    # If the moderated notification id (kaupunkialusta id) exists in id_mapping_all, but not in id_mapping_kaupunkialusta_master, then the
+    # accessibility info cannot be added via kaupunkialusta, since it is not the master of the place, for example 'Helsingin kaupunginmuseo'.
+    if id_mapping_kaupunkialusta_master == None or id_mapping_kaupunkialusta_master.tpr_internal_id == None:
+        return Response("Esteettömyyssovellus link creation failed, no mapping available for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+    elif id_mapping_all != None and id_mapping_all.tpr_internal_id == None:
+        return Response("Esteettömyyssovellus link creation failed, not allowed to manage accessibility info for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id)
 
 
 def get_valid_until_next_day():
