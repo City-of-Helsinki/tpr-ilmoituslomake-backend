@@ -26,21 +26,27 @@ def get_valid_tpr_internal_id(kaupunkialusta_id):
     try:
         id_mapping_all = IdMappingAll.objects.get(kaupunkialusta_id = kaupunkialusta_id)
     except Exception as e:
-        return Response("Esteettömyyssovellus link creation failed, could not get mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+        # return Response("Esteettömyyssovellus link creation failed, could not get mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+        pass
 
     try:
         id_mapping_kaupunkialusta_master = IdMappingKaupunkialustaMaster.objects.get(kaupunkialusta_id = kaupunkialusta_id)
     except Exception as e:
-        return Response("Esteettömyyssovellus link creation failed, could not get master mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+        # return Response("Esteettömyyssovellus link creation failed, could not get master mapping for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+        pass
 
     # If the moderated notification id (kaupunkialusta id) exists in id_mapping_all, but not in id_mapping_kaupunkialusta_master, then the
     # accessibility info cannot be added via kaupunkialusta, since it is not the master of the place, for example 'Helsingin kaupunginmuseo'.
-    if id_mapping_kaupunkialusta_master == None or id_mapping_kaupunkialusta_master.tpr_internal_id == None:
-        return Response("Esteettömyyssovellus link creation failed, no mapping available for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
-    elif id_mapping_all != None and id_mapping_all.tpr_internal_id == None:
+    # Otherwise return the tpr internal id found, or -1 if no ids are found to indicate this is a new place in kaupunkialusta
+    valid_tpr_internal_id = None
+    if id_mapping_all != None and id_mapping_kaupunkialusta_master == None:
         return Response("Esteettömyyssovellus link creation failed, not allowed to manage accessibility info for id " + str(kaupunkialusta_id) + ".", status=status.HTTP_400_BAD_REQUEST)
+    elif id_mapping_kaupunkialusta_master != None:
+        valid_tpr_internal_id = id_mapping_kaupunkialusta_master.tpr_internal_id
+    elif id_mapping_kaupunkialusta_master == None or id_mapping_kaupunkialusta_master.tpr_internal_id == None:
+        valid_tpr_internal_id = -1
 
-    return Response(id_mapping_kaupunkialusta_master.tpr_internal_id, status=status.HTTP_200_OK)
+    return Response(valid_tpr_internal_id, status=status.HTTP_200_OK)
 
 
 def get_valid_until_next_day():

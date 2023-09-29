@@ -282,10 +282,8 @@ class GetValidAccessibilityId(RetrieveAPIView):
         # Get the tpr internal id corresponding to the published notification id (kaupunkialusta id)
         # If an error occurs due to the validation, just return -1
         tpr_internal_id_response = get_valid_tpr_internal_id(kaupunkialusta_id)
-        if tpr_internal_id_response == None or tpr_internal_id_response.status_code != 200:
-            return Response(-1, status=status.HTTP_200_OK)
 
-        return Response(tpr_internal_id_response.data, status=status.HTTP_200_OK)
+        return tpr_internal_id_response
 
 
 class CreateAccessibilityLink(UpdateAPIView):
@@ -325,10 +323,12 @@ class CreateAccessibilityLink(UpdateAPIView):
             return tpr_internal_id_response
 
         # Add the published notification id to Esteettömyyssovellus as an external reference
+        # If the tpr internal id is -1, then this is a valid but new notification id, so don't add an external reference
         tpr_internal_id = tpr_internal_id_response.data
-        create_response = add_accessibility_external_reference(kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id)
-        if create_response != None and create_response.status_code != 200:
-            return create_response
+        if tpr_internal_id > 0:
+            create_response = add_accessibility_external_reference(kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id)
+            if create_response != None and create_response.status_code != 200:
+                return create_response
 
         # Return the url for opening Esteettömyyssovellus to show and edit accessibility info
         accessibility_url = get_accessibility_url(kaupunkialusta_id, kaupunkialusta_user, moderated_data)
