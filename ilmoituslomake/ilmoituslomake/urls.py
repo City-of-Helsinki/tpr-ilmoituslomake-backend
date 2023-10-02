@@ -120,6 +120,10 @@ urlpatterns += [
         "api/moderation/search/",
         moderation_views.ModeratedNotificationSearchListView.as_view(),
     ),
+    path(
+        "api/moderation/send_accessibility_email/<int:id>/",
+        moderation_views.SendAccessibilityEmail.as_view(),
+    ),
 ]
 
 
@@ -229,8 +233,8 @@ urlpatterns += [
     path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view()),
 ]
 
+# Esteettömyyssovellus integration
 urlpatterns += [
-    # Esteettömyyssovellus integration
     path(
         "api/accessibility/id_mapping_all/get/<int:kaupunkialusta_id>/",
         notification_form_views.IdMappingAllRetrieveView.as_view(),
