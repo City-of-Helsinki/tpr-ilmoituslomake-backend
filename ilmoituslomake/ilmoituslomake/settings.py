@@ -217,6 +217,12 @@ HUEY = {
     },
 }
 
+# relay.hel.fi service
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Use the following in development to write emails to the console instead:
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Azure storage
 AZURE_STORAGE = env("AZURE_STORAGE")
@@ -243,3 +249,11 @@ API_KEY_CUSTOM_HEADER = "HTTP_OPEN_API_KEY"
 
 HAUKI_API_URL = env("HAUKI_API_URL")
 HAUKI_UI_URL = env("HAUKI_UI_URL")
+
+ACCESSIBILITY_API_URL = env("ACCESSIBILITY_API_URL")
+ACCESSIBILITY_APP_URL = env("ACCESSIBILITY_APP_URL")
+KAUPUNKIALUSTA_URL = env("KAUPUNKIALUSTA_URL")
+TPR_SYSTEM_ID = env("TPR_SYSTEM_ID")
+TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
+KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
+KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")

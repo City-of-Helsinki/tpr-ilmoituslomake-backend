@@ -27,7 +27,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.contrib.postgres.search import SearchVector
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
-from moderation.utils import get_query
+from moderation.utils import get_query, send_accessibility_email
 
 #
 # from base.models import Notification
@@ -611,3 +611,17 @@ class ModeratedNotificationSearchListView(ListAPIView):
         qs = pagination.paginate_queryset(queryset, request)
         serializer = PrivateModeratedNotificationSerializer(qs, many=True)
         return pagination.get_paginated_response(serializer.data)
+
+
+class SendAccessibilityEmail(RetrieveAPIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, id=None, *args, **kwargs):
+        moderation_item = get_object_or_404(ModerationItem, pk = id)
+
+        if moderation_item.target_id != None:
+            moderation_notification = get_object_or_404(ModeratedNotification, pk = moderation_item.target_id)
+
+            # Send an email to the notifier informing that their place has been published and about adding accessibility info
+            # Note: this email is only intended to be sent for new places, but this is handled in the client side
+            return send_accessibility_email(moderation_notification)

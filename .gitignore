@@ -110,3 +110,7 @@ media/
 
 # pgdata
 pgdata/
+
+# Import data
+**/commands/*.csv
+**/commands/*.json
