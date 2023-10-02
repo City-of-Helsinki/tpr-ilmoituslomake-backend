@@ -52,7 +52,7 @@ def get_query(query_string, search_fields):
 
 def send_accessibility_email(moderation_notification):
     try:
-        # Send an email to the notifier informing that their place has been published and about adding accessbility info
+        # Send an email to the notifier informing that their place has been published and about adding accessibility info
         # Note: this email is only intended to be sent for new places, but the place status is checked outside of this function
         published_id = str(moderation_notification.id)
         moderated_data = moderation_notification.data

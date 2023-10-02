@@ -622,6 +622,6 @@ class SendAccessibilityEmail(RetrieveAPIView):
         if moderation_item.target_id != None:
             moderation_notification = get_object_or_404(ModeratedNotification, pk = moderation_item.target_id)
 
-            # Send an email to the notifier informing that their place has been published and about adding accessbility info
+            # Send an email to the notifier informing that their place has been published and about adding accessibility info
             # Note: this email is only intended to be sent for new places, but this is handled in the client side
             return send_accessibility_email(moderation_notification)
