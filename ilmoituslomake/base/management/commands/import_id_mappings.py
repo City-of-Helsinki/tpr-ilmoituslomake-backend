@@ -65,7 +65,7 @@ class Command(BaseCommand):
         try:
             # Fetch all the id mappings into a json file
             remote_url = "https://www.hel.fi/palvelukarttaws/rest/v4/unit/?official=yes"
-            local_file = "/app/base/management/commands/id_mapping_all.json"
+            local_file = "./base/management/commands/id_mapping_all.json"
 
             request.urlretrieve(remote_url, local_file)
 
@@ -86,7 +86,7 @@ class Command(BaseCommand):
         try:
             # Fetch the kaupunkialusta id mappings into a json file
             remote_url = "https://www.hel.fi/palvelukarttaws/rest/v4/unit/?official=yes&suborganization=0c71aa86-f76c-466b-b6f3-81143bd9eecc"
-            local_file = "/app/base/management/commands/id_mapping_kaupunkialusta_master.json"
+            local_file = "./base/management/commands/id_mapping_kaupunkialusta_master.json"
 
             request.urlretrieve(remote_url, local_file)
 
