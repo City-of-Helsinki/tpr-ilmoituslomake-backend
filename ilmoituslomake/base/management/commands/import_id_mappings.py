@@ -4,6 +4,7 @@ from itertools import islice
 from urllib import request
 import json
 
+
 # Import the id mappings needed to integrate Kaupunkialusta with Esteettömyyssovellus
 class Command(BaseCommand):
     def extract_data(self, item):
@@ -103,4 +104,4 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(str(e)))
 
         # Success
-        self.stdout.write(self.style.SUCCESS("Import from servicemap completed successfully."))
+        self.stdout.write(self.style.SUCCESS("Import from servicemap completed"))
