@@ -43,13 +43,12 @@ from django.db.models import Q
 
 class NotificationSchemaCreateView(CreateAPIView):
     """
-    Create a Notification instance
+    Create a Notification schema instance
     """
 
     permission_classes = [IsAdminUser]
     queryset = NotificationSchema.objects.all()
     serializer_class = NotificationSchemaSerializer
-    # permission_classes =
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -62,6 +61,29 @@ class NotificationSchemaCreateView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class NotificationSchemaUpdateView(UpdateAPIView):
+    """
+    Update a Notification schema instance
+    """
+
+    permission_classes = [IsAdminUser]
+    lookup_field = "id"
+    queryset = NotificationSchema.objects.all()
+    serializer_class = NotificationSchemaSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(
+            serializer.data
+        )
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
 
 class NotificationSchemaRetrieveView(RetrieveAPIView):

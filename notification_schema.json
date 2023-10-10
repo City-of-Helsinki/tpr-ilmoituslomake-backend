@@ -352,6 +352,21 @@
                 }
             },
             "required": ["notifier_type", "full_name", "email", "phone"]
+        },
+        "social_media": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    }
+                },
+                "required": ["title", "link"]
+            }
         }
     },
 	"required": [
