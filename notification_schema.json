@@ -358,6 +358,9 @@
             "items": {
                 "type": "object",
                 "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
                     "title": {
                         "type": "string"
                     },
@@ -365,7 +368,7 @@
                         "type": "string"
                     }
                 },
-                "required": ["title", "link"]
+                "required": ["uuid", "title", "link"]
             }
         }
     },
