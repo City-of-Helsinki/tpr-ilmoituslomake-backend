@@ -69,7 +69,7 @@ def send_accessibility_email(moderation_notification):
             message = EmailMultiAlternatives(
                 subject="Palvelusi on nyt julkaistu, Din tjänst har publicerats, Your services have been published",
                 body=html_message,
-                from_email="kaupunkialusta@hel.fi",
+                from_email="palvelukartta@hel.fi",
                 to=[notifier_email]
             )
             message.content_subtype = "html"
