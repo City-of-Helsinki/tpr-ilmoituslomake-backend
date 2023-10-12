@@ -352,6 +352,24 @@
                 }
             },
             "required": ["notifier_type", "full_name", "email", "phone"]
+        },
+        "social_media": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    }
+                },
+                "required": ["uuid", "title", "link"]
+            }
         }
     },
 	"required": [
