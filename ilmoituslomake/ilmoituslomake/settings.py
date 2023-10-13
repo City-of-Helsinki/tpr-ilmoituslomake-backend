@@ -38,7 +38,7 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["137.163.56.7", "localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
 
 
 # Application definition
@@ -160,7 +160,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/TPRalusta_testi/static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Authentication
@@ -220,9 +220,9 @@ HUEY = {
 # relay.hel.fi service
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # Use the following in development to write emails to the console instead:
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Azure storage
 AZURE_STORAGE = env("AZURE_STORAGE")
@@ -234,10 +234,10 @@ PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
 #PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-FORCE_SCRIPT_NAME = "/TPRalusta_testi"
+FORCE_SCRIPT_NAME = ""
 
 FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
 
