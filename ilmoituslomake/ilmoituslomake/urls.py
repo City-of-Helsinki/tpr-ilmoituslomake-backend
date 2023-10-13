@@ -41,6 +41,10 @@ if DEBUG:
             "api/schema/create/",
             notification_form_views.NotificationSchemaCreateView.as_view(),
         ),
+        path(
+            "api/schema/update/<int:id>/",
+            notification_form_views.NotificationSchemaUpdateView.as_view(),
+        ),
     ]
 
 

@@ -339,7 +339,7 @@ class DeleteNotificationView(DestroyAPIView):
         return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Get or Save in progress, not checked -> this will be removed!
+# Get or Save in progress
 class ModerationItemRetrieveUpdateView(RetrieveUpdateAPIView):
     """
     Save moderation item as a draft
