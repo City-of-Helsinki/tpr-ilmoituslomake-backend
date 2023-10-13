@@ -118,3 +118,19 @@ class BaseNotificationImage(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+class IdMappingAll(models.Model):
+    palvelukartta_id = models.IntegerField(primary_key=True)
+    palvelukartta_name_fi = models.TextField(null=True, blank=True)
+
+    tpr_internal_id = models.IntegerField(null=True, blank=True)
+    kaupunkialusta_id = models.IntegerField(null=True, blank=True)
+
+
+class IdMappingKaupunkialustaMaster(models.Model):
+    palvelukartta_id = models.IntegerField(primary_key=True)
+    palvelukartta_name_fi = models.TextField(null=True, blank=True)
+
+    tpr_internal_id = models.IntegerField(null=True, blank=True)
+    kaupunkialusta_id = models.IntegerField(null=True, blank=True)

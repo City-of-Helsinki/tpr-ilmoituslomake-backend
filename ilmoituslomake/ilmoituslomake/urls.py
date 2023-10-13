@@ -120,6 +120,10 @@ urlpatterns += [
         "api/moderation/search/",
         moderation_views.ModeratedNotificationSearchListView.as_view(),
     ),
+    path(
+        "api/moderation/send_accessibility_email/<int:id>/",
+        moderation_views.SendAccessibilityEmail.as_view(),
+    ),
 ]
 
 
@@ -227,4 +231,24 @@ urlpatterns += [
         opening_times_views.CreateLink.as_view(),
     ),
     path("api/openingtimes/get/<str:id>/", opening_times_views.GetTimes.as_view()),
+]
+
+# Esteettömyyssovellus integration
+urlpatterns += [
+    path(
+        "api/accessibility/id_mapping_all/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingAllRetrieveView.as_view(),
+    ),
+    path(
+        "api/accessibility/id_mapping_kaupunkialusta_master/get/<int:kaupunkialusta_id>/",
+        notification_form_views.IdMappingKaupunkialustaMasterRetrieveView.as_view(),
+    ),
+    path(
+        "api/accessibility/get_valid_internal_id/<int:kaupunkialusta_id>/",
+        notification_form_views.GetValidAccessibilityId.as_view(),
+    ),
+    path(
+        "api/accessibility/create_link/<int:kaupunkialusta_id>/",
+        notification_form_views.CreateAccessibilityLink.as_view(),
+    ),
 ]
