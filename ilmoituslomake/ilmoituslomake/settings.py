@@ -38,7 +38,7 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["137.163.56.7", "localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
 
 
 # Application definition
@@ -160,7 +160,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/TPRalusta_testi/static/"
+STATIC_ROOT = "/opt/tpr-ilmoituslomake-backend/static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Authentication
@@ -231,13 +232,14 @@ PRIVATE_AZURE_CONNECTION_STRING = env("PRIVATE_AZURE_CONNECTION_STRING")
 PRIVATE_AZURE_READ_KEY = env("PRIVATE_AZURE_READ_KEY")
 PUBLIC_AZURE_CONTAINER = env("PUBLIC_AZURE_CONTAINER")
 PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
-#PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
+# PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-FORCE_SCRIPT_NAME = "/TPRalusta_testi"
+# FORCE_SCRIPT_NAME = "/TPRalusta"
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
 FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
 
