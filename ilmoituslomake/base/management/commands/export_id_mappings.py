@@ -8,6 +8,7 @@ from ilmoituslomake.settings import (
     KAUPUNKIALUSTA_SYSTEM_ID,
 )
 import hashlib
+import requests
 
 
 # Export the id mappings needed to integrate Kaupunkialusta with Esteettömyyssovellus
@@ -56,20 +57,24 @@ class Command(BaseCommand):
                 # headers=authorization_headers,
                 timeout=5
             )
+
+            self.stdout.write("Response for kaupunkialusta_id " + str(kaupunkialusta_id) + " tpr_internal_id " + str(tpr_internal_id) + ": " + str(create_response.status_code) + " - " + str(create_response.content))
         except Exception as e:
             self.stdout.write(self.style.ERROR(str(e)))
 
 
     def handle(self, *args, **options):
-        self.stdout.write("Exporting data to esteettömyyssovellus")
+        self.stdout.write("Exporting data to esteettomyyssovellus")
 
         try:
             # Export the kaupunkialusta id mappings using the Esteettömyyssovellus API
             for id_mapping in IdMappingAll.objects.all().filter(kaupunkialusta_id__isnull = False):
+                self.stdout.write("Adding external reference for kaupunkialusta_id " + str(id_mapping.kaupunkialusta_id) + " tpr_internal_id " + str(id_mapping.tpr_internal_id))
+
                 self.add_accessibility_external_reference(id_mapping.kaupunkialusta_id, "kaupunkialusta@hel.fi", id_mapping.tpr_internal_id)
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(str(e)))
 
         # Success
-        self.stdout.write(self.style.SUCCESS("Export to esteettömyyssovellus completed"))
+        self.stdout.write(self.style.SUCCESS("Export to esteettomyyssovellus completed"))
