@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.7-buster
 
 RUN apt update
 # https://docs.djangoproject.com/en/2.2/ref/contrib/gis/install/geolibs/
