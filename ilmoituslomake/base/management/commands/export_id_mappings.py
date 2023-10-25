@@ -6,6 +6,7 @@ from ilmoituslomake.settings import (
     TPR_SYSTEM_ID,
     TPR_CHECKSUM_SECRET,
     KAUPUNKIALUSTA_SYSTEM_ID,
+    KAUPUNKIALUSTA_CHECKSUM_SECRET,
 )
 import hashlib
 import requests
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         return valid_until
 
 
-    def add_accessibility_external_reference(self, kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id):
+    def add_accessibility_external_reference_kaupunkialusta_to_tpr(self, kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id):
         # Add the published notification id to Esteettömyyssovellus as an external reference
         tpr_servicepoint_id = str(tpr_internal_id)
         kaupunkialusta_servicepoint_id = str(kaupunkialusta_id)
@@ -58,7 +59,49 @@ class Command(BaseCommand):
                 timeout=5
             )
 
-            self.stdout.write("Response for kaupunkialusta_id " + str(kaupunkialusta_id) + " tpr_internal_id " + str(tpr_internal_id) + ": " + str(create_response.status_code) + " - " + str(create_response.content))
+            self.stdout.write("Response for kaupunkialusta_id " + str(kaupunkialusta_id) + " -> tpr_internal_id " + str(tpr_internal_id) + ": " + str(create_response.status_code) + " - " + str(create_response.content))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(str(e)))
+
+
+    def add_accessibility_external_reference_tpr_to_kaupunkialusta(self, kaupunkialusta_id, kaupunkialusta_user, tpr_internal_id):
+        # Add the TPR id to Esteettömyyssovellus as an external reference for servicepoints added via Kaupunkialusta
+        tpr_servicepoint_id = str(tpr_internal_id)
+        kaupunkialusta_servicepoint_id = str(kaupunkialusta_id)
+        valid_until = self.get_valid_until_next_day()
+
+        # Calculate the checksum using the values
+        externalservicepoint_checksum_string = (
+            str(KAUPUNKIALUSTA_CHECKSUM_SECRET)
+            + str(KAUPUNKIALUSTA_SYSTEM_ID)
+            + str(kaupunkialusta_servicepoint_id)
+            + str(kaupunkialusta_user)
+            + str(valid_until)
+            + str(TPR_SYSTEM_ID)
+            + str(tpr_servicepoint_id)
+        )
+        externalservicepoint_checksum = hashlib.sha256(externalservicepoint_checksum_string.encode("utf-8")).hexdigest()
+
+        # Determine the data to post to the accessibility API
+        externalservicepoint_data = {
+            "ServicePointId": tpr_servicepoint_id,
+            "SystemId": TPR_SYSTEM_ID,
+            "User": kaupunkialusta_user,
+            "ValidUntil": valid_until,
+            "Checksum": externalservicepoint_checksum,
+        }
+        externalservicepoint_url = ACCESSIBILITY_API_URL + "servicepoints/" + KAUPUNKIALUSTA_SYSTEM_ID + "/" + kaupunkialusta_servicepoint_id + "/externalservicepoint/"
+
+        # Create the external servicepoint reference in Esteettömyyssovellus
+        try:
+            create_response = requests.post(
+                externalservicepoint_url,
+                json=externalservicepoint_data,
+                # headers=authorization_headers,
+                timeout=5
+            )
+
+            self.stdout.write("Response for tpr_internal_id " + str(tpr_internal_id) + " -> kaupunkialusta_id " + str(kaupunkialusta_id) + ": " + str(create_response.status_code) + " - " + str(create_response.content))
         except Exception as e:
             self.stdout.write(self.style.ERROR(str(e)))
 
@@ -68,10 +111,12 @@ class Command(BaseCommand):
 
         try:
             # Export the kaupunkialusta id mappings using the Esteettömyyssovellus API
+            # Add the id mappings both ways (kaupunkialusta -> tpr and tpr -> kaupunkialusta) to make sure both are included in Esteettömyyssovellus
             for id_mapping in IdMappingAll.objects.all().filter(kaupunkialusta_id__isnull = False):
-                self.stdout.write("Adding external reference for kaupunkialusta_id " + str(id_mapping.kaupunkialusta_id) + " tpr_internal_id " + str(id_mapping.tpr_internal_id))
+                self.stdout.write("Adding external references for kaupunkialusta_id " + str(id_mapping.kaupunkialusta_id) + " tpr_internal_id " + str(id_mapping.tpr_internal_id))
 
-                self.add_accessibility_external_reference(id_mapping.kaupunkialusta_id, "kaupunkialusta@hel.fi", id_mapping.tpr_internal_id)
+                self.add_accessibility_external_reference_kaupunkialusta_to_tpr(id_mapping.kaupunkialusta_id, "kaupunkialusta@hel.fi", id_mapping.tpr_internal_id)
+                self.add_accessibility_external_reference_tpr_to_kaupunkialusta(id_mapping.kaupunkialusta_id, "kaupunkialusta@hel.fi", id_mapping.tpr_internal_id)
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(str(e)))
