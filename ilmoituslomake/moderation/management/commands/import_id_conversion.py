@@ -45,7 +45,7 @@ class Command(BaseCommand):
             ns = ModeratedNotification.objects.all()
             data = {}
             with open(
-                "/app/moderation/management/commands/ontology_conversion.csv"
+                "/opt/tpr-ilmoituslomake-backend/ilmoituslomake/moderation/management/commands/ontology_conversion.csv"
             ) as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=";")
                 line_count = 0
