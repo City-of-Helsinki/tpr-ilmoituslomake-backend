@@ -259,3 +259,53 @@ TPR_SYSTEM_ID = env("TPR_SYSTEM_ID")
 TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
 KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
 KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")
+
+OIDC_API_TOKEN_AUTH = {
+    # Audience that must be present in the token for it to be
+    # accepted. Value must be agreed between your SSO service and your
+    # application instance. Essentially this allows your application to
+    # know that the token is meant to be used with it.
+    # Multiple acceptable audiences are supported,
+    # so this setting can also be a list of strings.
+    # This setting is required.
+    #"AUDIENCE": "https://api.hel.fi/auth/projects",
+    #"AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE"),
+    "AUDIENCE": None,
+
+    # Who we trust to sign the tokens. The library will request the
+    # public signature keys from standard locations below this URL.
+    # Multiple issuers are supported, so this
+    # setting can also be a list of strings.
+    # Default is https://tunnistamo.hel.fi.
+    #"ISSUER": "https://api.hel.fi/sso/openid",
+    #"ISSUER": env("TOKEN_AUTH_AUTHSERVER_URL"),
+
+    # The following can be used if you need certain scopes for any
+    # functionality of the API. Usually this is not needed, as checking
+    # the audience is enough. Default is False.
+    #"REQUIRE_API_SCOPE_FOR_AUTHENTICATION": True,
+    #"REQUIRE_API_SCOPE_FOR_AUTHENTICATION": env("TOKEN_AUTH_REQUIRE_SCOPE_PREFIX"),
+    "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": False,
+    # The name of the claim that is used to read in the scopes from the JWT.
+    # Supports multiple fields as a list. If the field is deeper in the claims
+    # use dot notation. e.g. "authorization.permissions.scopes"
+    # Default is https://api.hel.fi/auth.
+    #"API_AUTHORIZATION_FIELD": "scope_field",
+    #"API_AUTHORIZATION_FIELD": env("TOKEN_AUTH_FIELD_FOR_CONSENTS"),
+    # The request will be denied if scopes don't contain anything starting
+    # with the value provided here. Supports multiple scope prefixes as a list.
+    # Only one scope needs to match if multiple prefixes are provided.
+    #"API_SCOPE_PREFIX": "projects",
+    #"API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX"),
+    "API_SCOPE_PREFIX": None,
+    # In order to do the authentication the token authentication classes need
+    # some facts from the authorization server, mainly its public keys for
+    # verifying the JWT's signature. This setting controls the time how long
+    # authorization server configuration and public keys are "remembered".
+    # The value is in seconds. Default is 24 hours.
+    "OIDC_CONFIG_EXPIRATION_TIME": 600,
+
+    # Allow only algorithms that we actually use. In case of tunnistamo and
+    # tunnistus only RS256 is used with API access tokens.
+    "ALLOWED_ALGORITHMS": ["RS256"],
+}

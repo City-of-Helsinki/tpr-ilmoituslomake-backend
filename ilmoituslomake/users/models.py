@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.db import models
 from helusers.models import AbstractUser
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from rest_framework.permissions import BasePermission
 
 
