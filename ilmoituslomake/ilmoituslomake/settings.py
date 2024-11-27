@@ -182,7 +182,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 SOCIAL_AUTH_TUNNISTAMO_KEY = env("TUNNISTAMO_CLIENT_ID")
 SOCIAL_AUTH_TUNNISTAMO_SECRET = env("TUNNISTAMO_CLIENT_SECRET")
-SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso"
+SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = env("TUNNISTAMO_CLIENT_OIDC_ENDPOINT", default="https://api.hel.fi/sso")
 
 SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
     "ui_locales": "fi"
@@ -266,6 +266,9 @@ TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
 KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
 KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")
 
+# enable back channel logout
+HELUSERS_BACK_CHANNEL_LOGOUT_ENABLED = True
+
 OIDC_API_TOKEN_AUTH = {
     # Audience that must be present in the token for it to be
     # accepted. Value must be agreed between your SSO service and your
@@ -275,7 +278,7 @@ OIDC_API_TOKEN_AUTH = {
     # so this setting can also be a list of strings.
     # This setting is required.
     #"AUDIENCE": "https://api.hel.fi/auth/projects",
-    "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE"),
+    "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE", default=None),
 
     # Who we trust to sign the tokens. The library will request the
     # public signature keys from standard locations below this URL.
@@ -300,7 +303,7 @@ OIDC_API_TOKEN_AUTH = {
     # with the value provided here. Supports multiple scope prefixes as a list.
     # Only one scope needs to match if multiple prefixes are provided.
     #"API_SCOPE_PREFIX": "projects",
-    "API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX"),
+    "API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX", default=None),
     # In order to do the authentication the token authentication classes need
     # some facts from the authorization server, mainly its public keys for
     # verifying the JWT's signature. This setting controls the time how long
