@@ -2,7 +2,7 @@ from typing import Dict
 from django.db import models
 from moderation.models import ModeratedNotification
 from simple_history.models import HistoricalRecords
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from users.models import User
 

@@ -26,7 +26,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
 from django.contrib.postgres.search import SearchVector
-from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models.fields.json import KeyTextTransform
 from moderation.utils import get_query, send_accessibility_email
 
 #

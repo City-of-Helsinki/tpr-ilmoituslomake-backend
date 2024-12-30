@@ -19,6 +19,12 @@ env = environ.Env(
     DEBUG=(bool, False),
     FORCE_SCRIPT_NAME=(str, ""),
     FULL_WEB_ADDRESS=(str, "http://localhost"),
+    # defaults to use Tunnistamo
+    TOKEN_AUTH_ACCEPTED_AUDIENCE=(list, None),
+    TOKEN_AUTH_AUTHSERVER_URL=(list, ["https://tunnistamo.hel.fi"]),
+    TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, False),
+    TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(list, None),
+    TOKEN_AUTH_FIELD_FOR_CONSENTS=(list, ["https://api.hel.fi/auth"])
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -176,7 +182,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 SOCIAL_AUTH_TUNNISTAMO_KEY = env("TUNNISTAMO_CLIENT_ID")
 SOCIAL_AUTH_TUNNISTAMO_SECRET = env("TUNNISTAMO_CLIENT_SECRET")
-SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = "https://api.hel.fi/sso"
+SOCIAL_AUTH_TUNNISTAMO_OIDC_ENDPOINT = env("TUNNISTAMO_CLIENT_OIDC_ENDPOINT", default="https://api.hel.fi/sso")
 
 SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
     "ui_locales": "fi"
@@ -259,3 +265,61 @@ TPR_SYSTEM_ID = env("TPR_SYSTEM_ID")
 TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
 KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
 KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")
+
+# enable back channel logout
+HELUSERS_BACK_CHANNEL_LOGOUT_ENABLED = True
+
+OIDC_API_TOKEN_AUTH = {
+    # Audience that must be present in the token for it to be
+    # accepted. Value must be agreed between your SSO service and your
+    # application instance. Essentially this allows your application to
+    # know that the token is meant to be used with it.
+    # Multiple acceptable audiences are supported,
+    # so this setting can also be a list of strings.
+    # This setting is required.
+    "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE", default=None),
+
+    # Who we trust to sign the tokens. The library will request the
+    # public signature keys from standard locations below this URL.
+    # Multiple issuers are supported, so this
+    # setting can also be a list of strings.
+    # Default is https://tunnistamo.hel.fi.
+    "ISSUER": env("TOKEN_AUTH_AUTHSERVER_URL"),
+
+    # The following can be used if you need certain scopes for any
+    # functionality of the API. Usually this is not needed, as checking
+    # the audience is enough. Default is False.
+    "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": env("TOKEN_AUTH_REQUIRE_SCOPE_PREFIX"),
+    # The name of the claim that is used to read in the scopes from the JWT.
+    # Supports multiple fields as a list. If the field is deeper in the claims
+    # use dot notation. e.g. "authorization.permissions.scopes"
+    # Default is https://api.hel.fi/auth.
+    "API_AUTHORIZATION_FIELD": env("TOKEN_AUTH_FIELD_FOR_CONSENTS"),
+    # The request will be denied if scopes don't contain anything starting
+    # with the value provided here. Supports multiple scope prefixes as a list.
+    # Only one scope needs to match if multiple prefixes are provided.
+    "API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX", default=None),
+    # In order to do the authentication the token authentication classes need
+    # some facts from the authorization server, mainly its public keys for
+    # verifying the JWT's signature. This setting controls the time how long
+    # authorization server configuration and public keys are "remembered".
+    # The value is in seconds. Default is 24 hours.
+    "OIDC_CONFIG_EXPIRATION_TIME": 600,
+
+    # Allow only algorithms that we actually use. In case of tunnistamo and
+    # tunnistus only RS256 is used with API access tokens.
+    "ALLOWED_ALGORITHMS": ["RS256"],
+}
+
+GDPR_API_MODEL = AUTH_USER_MODEL
+GDPR_API_QUERY_SCOPE = "gdprquery"
+GDPR_API_DELETE_SCOPE = "gdprdelete"
+GDPR_API_MODEL_LOOKUP = "uuid"
+GDPR_API_USER_PROVIDER = "ilmoituslomake.users.gdpr.get_user"
+GDPR_API_DELETER = "ilmoituslomake.users.gdpr.delete_gdpr_data"
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
