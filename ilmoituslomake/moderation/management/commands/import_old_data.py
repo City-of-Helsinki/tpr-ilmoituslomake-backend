@@ -198,7 +198,7 @@ class Command(BaseCommand):
         try:
             ontology_words_for_id = {}
             with open(
-                "/app/moderation/management/commands/ontology_conversion.csv"
+                "/opt/tpr-ilmoituslomake-backend/ilmoituslomake/moderation/management/commands/ontology_conversion.csv"
             ) as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=";")
                 line_count = 0
@@ -237,12 +237,20 @@ class Command(BaseCommand):
 
             data = response.json()["data"]
 
+            ids = list(map(lambda x: x.id, list(ModeratedNotification.objects.all())))
+
             ii = 0
             for loc in data:
                 # ii += 1
                 # if ii > 15:
                 #    break
                 id = int(loc["id"])
+
+                if id in ids:
+                    # print("Skip %s" % id)
+                    continue
+                else:
+                    print(str(id))
 
                 # print(id)
                 xml = self.find_xml_element(id, xml_fi, xml_sv, xml_en)
@@ -430,8 +438,7 @@ class Command(BaseCommand):
                     "phone": self.extract_property(xml, "fi", "matko:phone") or "",
                     "email": self.extract_property(xml, "fi", "matko:email") or "",
                     "website": {
-                        "fi": self.extract_property(xml, "fi", "link")
-                        or "",  # str(place.get("info_url", "") or ""),
+                        "fi": self.extract_property(xml, "fi", "link") or "",
                         "sv": self.extract_property(xml, "sv", "link") or "",  # ,
                         "en": self.extract_property(xml, "en", "link") or "",  # ,
                     },
@@ -544,6 +551,7 @@ class Command(BaseCommand):
                     translation_data.save()
 
         except Exception as e:
+            # print(data)
             # raise CommandError('Poll "%s" does not exist' % poll_id)
             self.stdout.write(self.style.ERROR(str(e)))
         # return
