@@ -15,7 +15,7 @@ def get_user(user: get_user_model()) -> get_user_model():
 
 
 
-def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> Optional[ErrorResponse]:
+def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> ErrorResponse:
     """
     Function used by the Helsinki Profile GDPR API to delete all GDPR data collected of the user.
     The GDPR API package will run this within a transaction.
@@ -30,17 +30,32 @@ def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> Optional[ErrorRes
     :param dry_run: a boolean telling if this is a dry run of the function or not
     """  # noqa: E501
 
-    user.is_superuser = False
-    user.is_staff = False
-    user.is_translator = False
-    user.is_active = False
-    user.username = f"deleted-{user.id}"
-    user.first_name = ""
-    user.last_name = ""
-    user.email = ""
-    user.password = ""
-    #user.set_unusable_password()
-    user.save()
+    try:
+        #print(">>>about to delete user "+user.uuid);
+        user.is_superuser = False
+        user.is_staff = False
+        user.is_translator = False
+        user.is_active = False
+        user.username = f"deleted-{user.id}"
+        user.first_name = ""
+        user.last_name = ""
+        user.email = ""
+        user.password = ""
+        #user.set_unusable_password()
+        user.save()
 
-    return None
+        return None
+    except:
+        return ErrorResponse(
+            [
+                Error(
+                    "user not found",
+                    {
+                        "en": "User was not found",
+                        "fi": "Käyttäjää ei löydy",
+                        "sv": "Användaren hittades inte",
+                    },
+                )
+            ]
+        )
 
