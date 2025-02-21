@@ -266,6 +266,9 @@ TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
 KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
 KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")
 
+# configure social_django authentication pipeline to handle the users.
+from helusers.defaults import SOCIAL_AUTH_PIPELINE
+
 # enable back channel logout
 HELUSERS_BACK_CHANNEL_LOGOUT_ENABLED = True
 
