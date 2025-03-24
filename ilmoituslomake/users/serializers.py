@@ -10,6 +10,12 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class GdprSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
 class ModeratorSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

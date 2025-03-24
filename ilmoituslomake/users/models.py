@@ -1,8 +1,14 @@
+# Default primary key field type
+# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.db import models
 from helusers.models import AbstractUser
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from rest_framework.permissions import BasePermission
+from helsinki_gdpr.models import SerializableMixin
 
 
 class Organization(models.Model):
@@ -14,7 +20,12 @@ class Organization(models.Model):
         return self.full_name
 
 
-class User(AbstractUser):
+class User(AbstractUser, SerializableMixin):
+    serialize_fields = (
+        {"name": "first_name"},
+        {"name": "last_name"},
+        {"name": "email"},
+    )
     organization_membership = models.ForeignKey(
         Organization, null=True, related_name="members", on_delete=models.DO_NOTHING
     )

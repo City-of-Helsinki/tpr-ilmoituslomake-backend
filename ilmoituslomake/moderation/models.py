@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 from django.shortcuts import get_object_or_404
 
 from simple_history.models import HistoricalRecords
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from base.models import BaseNotification, BaseNotificationImage
 from notification_form.models import Notification
