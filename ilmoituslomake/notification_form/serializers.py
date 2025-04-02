@@ -44,6 +44,7 @@ class NotificationImageSerializer(serializers.ModelSerializer):
                 + "/"
                 + image
                 + "?token="
-                + token.decode("utf-8")
+                # + token.decode("utf-8") # python 2
+                + token # python 3
             )
         return ret["metadata"]
