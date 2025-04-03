@@ -90,7 +90,10 @@ class Command(BaseCommand):
         try:
             # Making a get request
             marketing_response = requests.get(
-                "https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/?category=tree0718"
+                # 2025-04-03 JPLa muutos Janne P. pyynnöstä
+                "https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/?category=MyHelsinki"
+
+                #"https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/?category=tree0718"
             )
             response = requests.get(
                 "https://www.hel.fi/palvelukarttaws/rest/v4/ontologyword/"
