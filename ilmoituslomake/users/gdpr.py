@@ -35,13 +35,13 @@ def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> ErrorResponse:
         user.is_superuser = False
         user.is_staff = False
         user.is_translator = False
-        user.is_active = False
         user.username = f"deleted-{user.id}"
         user.first_name = ""
         user.last_name = ""
         user.email = ""
         user.password = ""
         #user.set_unusable_password()
+	user.social_auth.all().delete()
         user.save()
 
         return None

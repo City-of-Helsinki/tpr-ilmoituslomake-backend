@@ -1,4 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
+from helusers.oidc import ApiTokenAuthentication
+from rest_framework.authentication import SessionAuthentication
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -15,6 +17,7 @@ class UserView(RetrieveAPIView):
     Returns the current user
     """
 
+    authentication_classes = [ApiTokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
