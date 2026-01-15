@@ -44,8 +44,9 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
-
+# 2025-06-02 jpla added backend to ALLOWED_HOSTS to avoid problems with forms
+#ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
 
 # Application definition
 
@@ -90,6 +91,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "request_logging.middleware.LoggingMiddleware",
     # History
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
@@ -193,6 +195,7 @@ SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
+    # 10.4.2025 jlasanen
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'helusers.oidc.ApiTokenAuthentication',
             'rest_framework.authentication.SessionAuthentication',
@@ -227,9 +230,9 @@ HUEY = {
 # relay.hel.fi service
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # Use the following in development to write emails to the console instead:
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Azure storage
 AZURE_STORAGE = env("AZURE_STORAGE")
@@ -241,10 +244,10 @@ PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
 # PUBLIC_AZURE_READ_KEY = env("PUBLIC_AZURE_READ_KEY")
 
 # Setup support for proxy headers
-# USE_X_FORWARDED_HOST = True
-# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# FORCE_SCRIPT_NAME = "/TPRalusta"
+# FORCE_SCRIPT_NAME = "/TPRalusta_testi"
 FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
 FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
@@ -266,6 +269,9 @@ TPR_CHECKSUM_SECRET = env("TPR_CHECKSUM_SECRET")
 KAUPUNKIALUSTA_SYSTEM_ID = env("KAUPUNKIALUSTA_SYSTEM_ID")
 KAUPUNKIALUSTA_CHECKSUM_SECRET = env("KAUPUNKIALUSTA_CHECKSUM_SECRET")
 
+# configure social_django authentication pipeline to handle the users.
+from helusers.defaults import SOCIAL_AUTH_PIPELINE
+
 # enable back channel logout
 HELUSERS_BACK_CHANNEL_LOGOUT_ENABLED = True
 
@@ -285,6 +291,24 @@ GDPR_API_URL_PATTERN = "v1/user/<uuid:uuid>"
 GDPR_API_MODEL_LOOKUP = "uuid"
 GDPR_API_USER_PROVIDER = "users.gdpr.get_user"
 GDPR_API_DELETER = "users.gdpr.delete_gdpr_data"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

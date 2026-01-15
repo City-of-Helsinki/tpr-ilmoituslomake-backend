@@ -22,7 +22,7 @@ class Command(BaseCommand):
             # validate(instance=transformed_word, schema=ontology_save_schema)
             # save_array = []
 
-            with open("/app/moderation/management/commands/tpr_data2.csv") as csv_file:
+            with open("/opt/tpr-ilmoituslomake-backend/ilmoituslomake/moderation/management/commands/tpr_data2.csv") as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=";")
                 line_count = 0
                 id = 4999
