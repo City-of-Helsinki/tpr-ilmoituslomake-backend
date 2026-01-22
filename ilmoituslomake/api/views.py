@@ -143,7 +143,7 @@ class ApiListViewV1(ListAPIView):
     """
 
     permission_classes = [AllowAny]
-    # queryset = ModeratedNotification.objects.all().filter(Q(published=True))
+    queryset = ModeratedNotification.objects.all().filter(Q(published=True))
     serializer_class = ApiModeratedNotificationSerializerV1
     # pagination_class = LargeResultsSetPagination
 
