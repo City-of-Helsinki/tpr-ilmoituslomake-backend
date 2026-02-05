@@ -17,6 +17,7 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
+    ENABLE_ADMIN=(bool, False),
     FORCE_SCRIPT_NAME=(str, ""),
     FULL_WEB_ADDRESS=(str, "http://localhost"),
     # defaults to use Tunnistamo
@@ -43,6 +44,8 @@ API_TOKEN = env("API_TOKEN")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+
+ENABLE_ADMIN=env("ENABLE_ADMIN")
 
 # 2025-06-02 jpla added backend to ALLOWED_HOSTS to avoid problems with forms
 #ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]

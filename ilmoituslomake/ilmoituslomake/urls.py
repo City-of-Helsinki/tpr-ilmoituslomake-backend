@@ -24,13 +24,13 @@ from opening_times import views as opening_times_views
 
 from api import views as api_views
 
-from ilmoituslomake.settings import DEBUG
+from ilmoituslomake.settings import ENABLE_ADMIN
 
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-if DEBUG:
+if ENABLE_ADMIN:
     urlpatterns += [
         path("admin/", admin.site.urls),
         path(
