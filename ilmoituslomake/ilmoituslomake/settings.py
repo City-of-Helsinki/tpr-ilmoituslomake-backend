@@ -50,6 +50,7 @@ ENABLE_ADMIN=env("ENABLE_ADMIN")
 # 2025-06-02 jpla added backend to ALLOWED_HOSTS to avoid problems with forms
 #ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
 ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+CSRF_TRUSTED_ORIGINS = ["https://localhost", "https://backend", "https://tpr-ilmoituslomake", "https://asiointi.hel.fi", "https://tpr.hel.fi"]
 
 # Application definition
 
