@@ -56,6 +56,7 @@ urlpatterns += [
     #path("api/user/", users_views.UserView.as_view()),
     path("api/gdpr-api/", include("helsinki_gdpr.urls")),
     path("api/user/", users_views.UserView.as_view()),
+    path("api/gdpr-api/", include("helsinki_gdpr.urls")),
 ]
 
 urlpatterns += [
