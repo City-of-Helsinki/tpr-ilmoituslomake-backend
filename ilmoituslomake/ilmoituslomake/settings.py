@@ -17,6 +17,7 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
+    ENABLE_ADMIN=(bool, False),
     FORCE_SCRIPT_NAME=(str, ""),
     FULL_WEB_ADDRESS=(str, "http://localhost"),
     # defaults to use Tunnistamo
@@ -44,8 +45,12 @@ API_TOKEN = env("API_TOKEN")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+ENABLE_ADMIN=env("ENABLE_ADMIN")
 
+# 2025-06-02 jpla added backend to ALLOWED_HOSTS to avoid problems with forms
+#ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+ALLOWED_HOSTS = ["localhost", "backend", "tpr-ilmoituslomake", "asiointi.hel.fi", "tpr.hel.fi"]
+CSRF_TRUSTED_ORIGINS = ["https://localhost", "https://backend", "https://tpr-ilmoituslomake", "https://asiointi.hel.fi", "https://tpr.hel.fi"]
 
 # Application definition
 
@@ -90,6 +95,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "request_logging.middleware.LoggingMiddleware",
     # History
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
@@ -193,10 +199,11 @@ SOCIAL_AUTH_TUNNISTAMO_AUTH_EXTRA_ARGUMENTS = {
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    #    'DEFAULT_AUTHENTICATION_CLASSES': (
-    #        'helusers.oidc.ApiTokenAuthentication',
-    #        'rest_framework.authentication.SessionAuthentication',
-    #    ),
+    # 10.4.2025 jlasanen
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'helusers.oidc.ApiTokenAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
+        ),
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 50,
@@ -244,7 +251,7 @@ PUBLIC_AZURE_CONNECTION_STRING = env("PUBLIC_AZURE_CONNECTION_STRING")
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# FORCE_SCRIPT_NAME = "/TPRalusta"
+# FORCE_SCRIPT_NAME = "/TPRalusta_testi"
 FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME")
 
 FULL_WEB_ADDRESS = env("FULL_WEB_ADDRESS") + FORCE_SCRIPT_NAME
@@ -273,62 +280,42 @@ from helusers.defaults import SOCIAL_AUTH_PIPELINE
 HELUSERS_BACK_CHANNEL_LOGOUT_ENABLED = True
 
 OIDC_API_TOKEN_AUTH = {
-    # Audience that must be present in the token for it to be
-    # accepted. Value must be agreed between your SSO service and your
-    # application instance. Essentially this allows your application to
-    # know that the token is meant to be used with it.
-    # Multiple acceptable audiences are supported,
-    # so this setting can also be a list of strings.
-    # This setting is required.
-    #"AUDIENCE": "https://api.hel.fi/auth/projects",
-    "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE", default=None),
-
-    # Who we trust to sign the tokens. The library will request the
-    # public signature keys from standard locations below this URL.
-    # Multiple issuers are supported, so this
-    # setting can also be a list of strings.
-    # Default is https://tunnistamo.hel.fi.
-    #"ISSUER": "https://api.hel.fi/sso/openid",
+    "AUDIENCE": env("TOKEN_AUTH_ACCEPTED_AUDIENCE"),
     "ISSUER": env("TOKEN_AUTH_AUTHSERVER_URL"),
-
-    # The following can be used if you need certain scopes for any
-    # functionality of the API. Usually this is not needed, as checking
-    # the audience is enough. Default is False.
-    #"REQUIRE_API_SCOPE_FOR_AUTHENTICATION": True,
     "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": env("TOKEN_AUTH_REQUIRE_SCOPE_PREFIX"),
-    # The name of the claim that is used to read in the scopes from the JWT.
-    # Supports multiple fields as a list. If the field is deeper in the claims
-    # use dot notation. e.g. "authorization.permissions.scopes"
-    # Default is https://api.hel.fi/auth.
-    #"API_AUTHORIZATION_FIELD": "scope_field",
     "API_AUTHORIZATION_FIELD": env("TOKEN_AUTH_FIELD_FOR_CONSENTS"),
-    # The request will be denied if scopes don't contain anything starting
-    # with the value provided here. Supports multiple scope prefixes as a list.
-    # Only one scope needs to match if multiple prefixes are provided.
-    #"API_SCOPE_PREFIX": "projects",
-    "API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX", default=None),
-    # In order to do the authentication the token authentication classes need
-    # some facts from the authorization server, mainly its public keys for
-    # verifying the JWT's signature. This setting controls the time how long
-    # authorization server configuration and public keys are "remembered".
-    # The value is in seconds. Default is 24 hours.
-    "OIDC_CONFIG_EXPIRATION_TIME": 600,
-
-    # Allow only algorithms that we actually use. In case of tunnistamo and
-    # tunnistus only RS256 is used with API access tokens.
-    "ALLOWED_ALGORITHMS": ["RS256"],
+    "API_SCOPE_PREFIX": env("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX"),
 }
+
 
 GDPR_API_MODEL = AUTH_USER_MODEL
 GDPR_API_QUERY_SCOPE = "gdprquery"
 GDPR_API_DELETE_SCOPE = "gdprdelete"
 GDPR_API_URL_PATTERN = "v1/user/<uuid:uuid>"
 GDPR_API_MODEL_LOOKUP = "uuid"
-GDPR_API_USER_PROVIDER = "ilmoituslomake.users.gdpr.get_user"
-GDPR_API_DELETER = "ilmoituslomake.users.gdpr.delete_gdpr_data"
+GDPR_API_USER_PROVIDER = "users.gdpr.get_user"
+GDPR_API_DELETER = "users.gdpr.delete_gdpr_data"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

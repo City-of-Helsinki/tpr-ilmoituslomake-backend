@@ -24,13 +24,13 @@ from opening_times import views as opening_times_views
 
 from api import views as api_views
 
-from ilmoituslomake.settings import DEBUG
+from ilmoituslomake.settings import ENABLE_ADMIN
 
 urlpatterns = []
 
 # Django Admin
 # TODO: Do not include in production deployment
-if DEBUG:
+if ENABLE_ADMIN:
     urlpatterns += [
         path("admin/", admin.site.urls),
         path(
@@ -53,6 +53,8 @@ urlpatterns += [
     path("auth/", include("social_django.urls", namespace="social")),
     path("helauth/", include("helusers.urls")),
     path("api/user/logout/", users_views.UserLogout.as_view()),
+    #path("api/user/", users_views.UserView.as_view()),
+    path("api/gdpr-api/", include("helsinki_gdpr.urls")),
     path("api/user/", users_views.UserView.as_view()),
     path("api/gdpr-api/", include("helsinki_gdpr.urls")),
 ]

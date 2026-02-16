@@ -114,3 +114,6 @@ pgdata/
 # Import data
 **/commands/*.csv
 **/commands/*.json
+
+# certifications (Zscaler)
+certificates/

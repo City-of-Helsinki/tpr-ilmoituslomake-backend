@@ -11,7 +11,6 @@ def get_user(user: get_user_model()) -> get_user_model():
     :param user: the User instance whose GDPR data is being queried
     :return: the same User instance
     """  # noqa: E501
-    print("get_user("+user+")")
     return user
 
 
@@ -30,23 +29,21 @@ def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> ErrorResponse:
     :param  user: the User instance to be deleted along with related GDPR data
     :param dry_run: a boolean telling if this is a dry run of the function or not
     """  # noqa: E501
-    
+
     try:
-        print(">>>about to delete user "+str(user.uuid));
+        #print(">>>about to delete user "+user.uuid);
         user.is_superuser = False
         user.is_staff = False
         user.is_translator = False
-        #user.is_active = False    # user must be active to be able to return
+        #user.is_active = False
         user.username = f"deleted-{user.id}"
         user.first_name = ""
         user.last_name = ""
         user.email = ""
         user.password = ""
         #user.set_unusable_password()
-        print(">>>deleting user's social data")
-        user.social_auth.all().delete()   # delete user's social data
+        user.social_auth.all().delete()
         user.save()
-        #user.delete()
 
         return None
     except:
