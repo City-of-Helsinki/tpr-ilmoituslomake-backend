@@ -28,6 +28,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.postgres.search import SearchVector
 from django.db.models.fields.json import KeyTextTransform
 from moderation.utils import get_query, send_accessibility_email
+from moderation.certificate_utils import enrich_certificates_data, save_customer_certificates
 
 #
 # from base.models import Notification
@@ -409,6 +410,12 @@ class ModerationItemUpdateView(UpdateAPIView):
 
         moderation_item.data = request.data["data"]
         moderation_hauki_id = request.data["hauki_id"]
+        
+        # Enrich certificate data from database - frontend only sends IDs
+        if 'certificates' in moderation_item.data:
+            moderation_item.data['certificates'] = enrich_certificates_data(
+                moderation_item.data['certificates']
+            )
 
         #
         try:
@@ -435,6 +442,14 @@ class ModerationItemUpdateView(UpdateAPIView):
                     # Update notification
                     notification.moderated_notification_id = moderated_notification.pk
                     notification.save()
+                    
+                    # Save certificates for the moderated notification
+                    try:
+                        if 'certificates' in moderation_item.data:
+                            save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                    except Exception as e:
+                        print(f"Error saving certificates: {str(e)}")
+                        pass
                 else:
 
                     # TODO: IMAGES!
@@ -456,6 +471,14 @@ class ModerationItemUpdateView(UpdateAPIView):
                     # Update notification
                     notification.moderated_notification_id = moderated_notification.pk
                     notification.save()
+                    
+                    # Save certificates for the moderated notification
+                    try:
+                        if 'certificates' in moderation_item.data:
+                            save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                    except Exception as e:
+                        print(f"Error saving certificates: {str(e)}")
+                        pass
             # elif moderation_item.item_type == "modified":
             elif moderation_item.target:
                 # moderated_notification = ModeratedNotification.objects.get(
@@ -468,6 +491,15 @@ class ModerationItemUpdateView(UpdateAPIView):
                 moderated_notification.hauki_id = moderation_hauki_id
                 moderated_notification.save()
                 moderation_item.target = moderated_notification
+                
+                # Save certificates for the moderated notification
+                try:
+                    if 'certificates' in moderation_item.data:
+                        save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                except Exception as e:
+                    print(f"Error saving certificates: {str(e)}")
+                    pass
+                    
                 if (
                     moderation_item.category not in ["change_request", "moderator_edit"]
                     and notification

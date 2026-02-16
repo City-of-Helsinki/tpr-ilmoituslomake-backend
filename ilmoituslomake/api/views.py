@@ -19,12 +19,13 @@ from rest_framework.generics import (
     RetrieveAPIView,
 )
 
-from base.models import MatkoWord, OntologyWord
+from base.models import MatkoWord, OntologyWord, Certificate
 from moderation.models import ModeratedNotification
 from api.serializers import (
     ApiModeratedNotificationSerializerV1,
     ApiMatkoWordSerializerV1,
     ApiOntologyWordSerializerV1,
+    ApiCertificateSerializerV1,
 )
 
 from django.db.models import Q
@@ -85,6 +86,28 @@ class ApiMatkoWordListViewV1(ListAPIView):
     queryset = MatkoWord.objects.all()
     serializer_class = ApiMatkoWordSerializerV1
     pagination_class = None
+
+
+class ApiCertificateListViewV1(ListAPIView):
+    """
+    Returns a collection of certificates and labels.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = Certificate.objects.all()
+    serializer_class = ApiCertificateSerializerV1
+    pagination_class = None
+
+
+class ApiCertificateRetrieveViewV1(RetrieveAPIView):
+    """
+    Returns a single Certificate instance.
+    """
+
+    permission_classes = [AllowAny]
+    lookup_field = "id"
+    queryset = Certificate.objects.all()
+    serializer_class = ApiCertificateSerializerV1
 
 
 class ApiRetrieveViewV1(RetrieveAPIView):
