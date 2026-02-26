@@ -210,26 +210,18 @@ class NotificationCreateView(CreateAPIView):
 
     def perform_create(self, serializer, item_status, images):
         instance = serializer.save(user=self.request.user, status=item_status)
-        
+
         # Enrich certificate data from database - frontend only sends IDs
         if 'certificates' in instance.data:
             instance.data['certificates'] = enrich_certificates_data(
                 instance.data['certificates']
             )
-            instance.save()  # Save updated data with enriched certificates
         
         try:
             process_images(NotificationImage, instance, images)
         except Exception as e:
             pass
-        
-        # Save certificates if present in the data
-        try:
-            if 'certificates' in instance.data:
-                save_customer_certificates(instance.pk, instance.data['certificates'])
-        except Exception as e:
-            print(f"Error saving certificates: {str(e)}")
-            pass
+
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)

@@ -370,6 +370,21 @@
                 },
                 "required": ["uuid", "title", "link"]
             }
+        },
+        "certificates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": ["id"]
+            }
         }
     },
 	"required": [

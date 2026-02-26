@@ -36,16 +36,7 @@ def enrich_certificates_data(certificates_data):
                 enriched.append({
                     'id': -1,
                     'tyyppi': cert_data.get('tyyppi', other_cert.certificate_type),
-                    'name': cert_data.get('name', {
-                        'fi': other_cert.name_fi,
-                        'sv': other_cert.name_sv,
-                        'en': other_cert.name_en
-                    }),
-                    'website': {
-                        'fi': other_cert.url_fi,
-                        'sv': other_cert.url_sv,
-                        'en': other_cert.url_en
-                    }
+                    'name': cert_data.get('name')
                 })
             except Certificate.DoesNotExist:
                 enriched.append(cert_data)
@@ -110,16 +101,10 @@ def save_customer_certificates(notification_id, certificates_data):
             # Get custom name for "Other" option (id = -1)
             custom_name = None
             if cert_id == -1:
-                if 'name' in cert_data and isinstance(cert_data['name'], dict):
-                    # Custom name might be in any language field
-                    custom_name = (
-                        cert_data['name'].get('fi') or 
-                        cert_data['name'].get('sv') or 
-                        cert_data['name'].get('en')
-                    )
-                # Only save if custom name provided for "Other"
-                if not custom_name:
+                if 'name' not in cert_data or cert_data['name'] == '':
                     continue
+                # Custom name might be in any language field
+                custom_name = cert_data['name']
             
             # Look up certificate in Certificate table (including id=-1 for "Other")
             try:
