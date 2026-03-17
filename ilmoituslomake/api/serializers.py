@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
-from base.models import MatkoWord, OntologyWord
+from base.models import MatkoWord, OntologyWord, Certificate
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -165,6 +165,12 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def get_openinghours(self, obj):
         return []
 
+    certificates = serializers.SerializerMethodField()
+
+    def get_certificates(self, obj):
+        """Return certificates from the data field"""
+        return obj.data.get("certificates", [])
+
     class Meta:
         model = ModeratedNotification
         fields = (
@@ -188,6 +194,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             "images",
             "created_time",
             "modified_time",
+            "certificates",
             #"openinghours",
         )
         read_only_fields = fields
@@ -215,3 +222,24 @@ class ApiMatkoWordSerializerV1(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ret["data"]
+
+
+class ApiCertificateSerializerV1(serializers.ModelSerializer):
+    """
+    API serializer for Certificate model.
+    Returns multilingual certificate data for public API.
+    """
+    class Meta:
+        model = Certificate
+        fields = (
+            "id",
+            "certificate_type",
+            "name_fi",
+            "name_sv",
+            "name_en",
+            "url_fi",
+            "url_sv",
+            "url_en",
+            "displayed_in_myhelsinki",
+        )
+

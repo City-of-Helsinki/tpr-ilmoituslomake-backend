@@ -30,6 +30,7 @@ from base.models import (
     MatkoWord,
     IdMappingAll,
     IdMappingKaupunkialustaMaster,
+    Certificate,
 )
 
 # from notification_form.serializers import NotificationImageSerializer
@@ -39,6 +40,7 @@ from base.serializers import (
     MatkoWordSerializer,
     IdMappingAllSerializer,
     IdMappingKaupunkialustaMasterSerializer,
+    CertificateSerializer,
 )
 from moderation.serializers import (
     PublicModeratedNotificationSerializer,
@@ -47,6 +49,7 @@ from moderation.serializers import (
 
 from django.db.models import Q
 # from image_utils import preprocess_images, process_images   
+from moderation.certificate_utils import enrich_certificates_data, save_customer_certificates   
 
 from notification_form.utils import (
     add_accessibility_external_reference,
@@ -207,10 +210,18 @@ class NotificationCreateView(CreateAPIView):
 
     def perform_create(self, serializer, item_status, images):
         instance = serializer.save(user=self.request.user, status=item_status)
+
+        # Enrich certificate data from database - frontend only sends IDs
+        if 'certificates' in instance.data:
+            instance.data['certificates'] = enrich_certificates_data(
+                instance.data['certificates']
+            )
+        
         try:
             process_images(NotificationImage, instance, images)
         except Exception as e:
             pass
+
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -272,6 +283,17 @@ class MatkoWordListView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = MatkoWord.objects.all()
     serializer_class = MatkoWordSerializer
+    pagination_class = None
+
+
+class CertificateListView(ListAPIView):
+    """
+    Returns a collection of certificates and labels.
+    """
+
+    permission_classes = [AllowAny]
+    queryset = Certificate.objects.all()
+    serializer_class = CertificateSerializer
     pagination_class = None
 
 
