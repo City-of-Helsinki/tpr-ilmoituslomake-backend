@@ -411,11 +411,16 @@ class ModerationItemUpdateView(UpdateAPIView):
         moderation_item.data = request.data["data"]
         moderation_hauki_id = request.data["hauki_id"]
         
-        # Enrich certificate data from database - frontend only sends IDs
-        if 'certificates' in moderation_item.data:
-            moderation_item.data['certificates'] = enrich_certificates_data(
-                moderation_item.data['certificates']
-            )
+        # Enrich certificate data from database - frontend sends certificate_ids (array of ints)
+        if 'certificate_ids' in moderation_item.data:
+            other_certs = moderation_item.data.get('other_certificates', {})
+            cert_objects = []
+            for cid in moderation_item.data['certificate_ids']:
+                if cid == -1:
+                    cert_objects.append({"id": -1, "name": other_certs})
+                else:
+                    cert_objects.append({"id": cid})
+            moderation_item.data['certificates'] = enrich_certificates_data(cert_objects)
 
         #
         try:
