@@ -32,6 +32,7 @@ def enrich_certificates_data(certificates_data):
         # For "Other" option, keep custom name from frontend
         if cert_id == -1:
             try:
+                # Other certificate with id=-1 should exist in Certificate table, these are handled manually in the database
                 other_cert = Certificate.objects.get(pk=-1)
                 enriched.append({
                     'id': -1,
