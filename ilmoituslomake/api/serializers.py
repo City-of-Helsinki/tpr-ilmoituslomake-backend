@@ -168,8 +168,11 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     certificates = serializers.SerializerMethodField()
 
     def get_certificates(self, obj):
-        """Return certificates from the data field"""
-        return obj.data.get("certificates", [])
+        """Return certificates from the data field, appending a no-certificate entry if flagged"""
+        certs = list(obj.data.get("certificates", []))
+        if obj.data.get("no_certificate", False):
+            certs.append({"name_fi": "Ei sertifikaattia", "name_sv": "Inget certifikat", "name_en": "No certificate"})
+        return certs
 
     class Meta:
         model = ModeratedNotification
