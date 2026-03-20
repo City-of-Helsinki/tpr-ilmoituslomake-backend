@@ -174,6 +174,12 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             certs.append({"name_fi": "Ei sertifikaattia", "name_sv": "Inget certifikat", "name_en": "No certificate"})
         return certs
 
+    labels = serializers.SerializerMethodField()
+
+    def get_labels(self, obj):
+        """Return labels from the data field"""
+        return obj.data.get("labels", [])
+
     class Meta:
         model = ModeratedNotification
         fields = (

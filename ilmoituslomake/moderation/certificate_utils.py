@@ -37,7 +37,8 @@ def enrich_certificates_data(certificates_data):
                 enriched.append({
                     'id': -1,
                     'tyyppi': cert_data.get('tyyppi', other_cert.certificate_type),
-                    'name': cert_data.get('name')
+                    'name': cert_data.get('name'),
+                    'url': cert_data.get('url', {'fi': '', 'sv': '', 'en': ''})
                 })
             except Certificate.DoesNotExist:
                 enriched.append(cert_data)
@@ -83,8 +84,11 @@ def save_customer_certificates(notification_id, certificates_data):
     Note: In the database, certificate_id=-1 references the special "Other" Certificate record.
     """
     try:
-        # First, delete all existing certificate associations for this notification
-        CustomerCertificate.objects.filter(notification_id=notification_id).delete()
+        # Delete only Certificate-type entries for this notification (Labels are handled separately)
+        CustomerCertificate.objects.filter(
+            notification_id=notification_id,
+            certificate__certificate_type="Certificate"
+        ).delete()
         
         # If certificates_data is empty or None, nothing more to do
         if not certificates_data:
@@ -122,4 +126,37 @@ def save_customer_certificates(notification_id, certificates_data):
     except Exception as e:
         # Log error but don't fail the entire notification save
         print(f"Error saving customer certificates: {str(e)}")
+        pass
+
+
+def save_customer_labels(notification_id, labels_data):
+    """
+    Save or update labels for a notification.
+    Works the same as save_customer_certificates but scoped to Label-type entries.
+    """
+    try:
+        # Delete only Label-type entries for this notification
+        CustomerCertificate.objects.filter(
+            notification_id=notification_id,
+            certificate__certificate_type="Label"
+        ).delete()
+
+        if not labels_data:
+            return
+
+        for label_data in labels_data:
+            label_id = label_data.get('id')
+            if label_id is None:
+                continue
+            try:
+                certificate = Certificate.objects.get(pk=label_id)
+                CustomerCertificate.objects.create(
+                    notification_id=notification_id,
+                    certificate=certificate,
+                )
+            except Certificate.DoesNotExist:
+                pass
+
+    except Exception as e:
+        print(f"Error saving customer labels: {str(e)}")
         pass
