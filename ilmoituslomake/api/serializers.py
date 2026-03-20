@@ -204,6 +204,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             "created_time",
             "modified_time",
             "certificates",
+            "labels",
             #"openinghours",
         )
         read_only_fields = fields
