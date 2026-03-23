@@ -171,7 +171,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
         """Return certificates from the data field, appending a no-certificate entry if flagged"""
         certs = list(obj.data.get("certificates", []))
         if obj.data.get("no_certificate", False):
-            certs.append({"name_fi": "Ei sertifikaattia", "name_sv": "Inget certifikat", "name_en": "No certificate"})
+            certs.append({"name": {"fi": "Ei sertifikaattia", "sv": "Inget certifikat", "en": "No certificate"}})
         return certs
 
     labels = serializers.SerializerMethodField()
