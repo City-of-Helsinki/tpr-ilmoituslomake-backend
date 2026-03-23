@@ -28,7 +28,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.postgres.search import SearchVector
 from django.db.models.fields.json import KeyTextTransform
 from moderation.utils import get_query, send_accessibility_email
-from moderation.certificate_utils import enrich_certificates_data, save_customer_certificates
+from moderation.certificate_utils import enrich_certificates_data, save_customer_certificates, save_customer_labels
 
 #
 # from base.models import Notification
@@ -414,13 +414,19 @@ class ModerationItemUpdateView(UpdateAPIView):
         # Enrich certificate data from database - frontend sends certificate_ids (array of ints)
         if 'certificate_ids' in moderation_item.data:
             other_certs = moderation_item.data.get('other_certificates', {})
+            other_certs_url = moderation_item.data.get('other_certificates_url', {'fi': '', 'sv': '', 'en': ''})
             cert_objects = []
             for cid in moderation_item.data['certificate_ids']:
                 if cid == -1:
-                    cert_objects.append({"id": -1, "name": other_certs})
+                    cert_objects.append({"id": -1, "name": other_certs, "url": other_certs_url})
                 else:
                     cert_objects.append({"id": cid})
             moderation_item.data['certificates'] = enrich_certificates_data(cert_objects)
+
+        # Enrich label data from database - frontend sends label_ids (array of ints)
+        if 'label_ids' in moderation_item.data:
+            label_objects = [{"id": lid} for lid in moderation_item.data['label_ids']]
+            moderation_item.data['labels'] = enrich_certificates_data(label_objects)
 
         #
         try:
@@ -452,8 +458,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                     try:
                         if 'certificates' in moderation_item.data:
                             save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                        if 'labels' in moderation_item.data:
+                            save_customer_labels(moderated_notification.pk, moderation_item.data['labels'])
                     except Exception as e:
-                        print(f"Error saving certificates: {str(e)}")
+                        print(f"Error saving certificates/labels: {str(e)}")
                         pass
                 else:
 
@@ -481,8 +489,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                     try:
                         if 'certificates' in moderation_item.data:
                             save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                        if 'labels' in moderation_item.data:
+                            save_customer_labels(moderated_notification.pk, moderation_item.data['labels'])
                     except Exception as e:
-                        print(f"Error saving certificates: {str(e)}")
+                        print(f"Error saving certificates/labels: {str(e)}")
                         pass
             # elif moderation_item.item_type == "modified":
             elif moderation_item.target:
@@ -501,8 +511,10 @@ class ModerationItemUpdateView(UpdateAPIView):
                 try:
                     if 'certificates' in moderation_item.data:
                         save_customer_certificates(moderated_notification.pk, moderation_item.data['certificates'])
+                    if 'labels' in moderation_item.data:
+                        save_customer_labels(moderated_notification.pk, moderation_item.data['labels'])
                 except Exception as e:
-                    print(f"Error saving certificates: {str(e)}")
+                    print(f"Error saving certificates/labels: {str(e)}")
                     pass
                     
                 if (

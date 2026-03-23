@@ -168,8 +168,17 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     certificates = serializers.SerializerMethodField()
 
     def get_certificates(self, obj):
-        """Return certificates from the data field"""
-        return obj.data.get("certificates", [])
+        """Return certificates from the data field, appending a no-certificate entry if flagged"""
+        certs = list(obj.data.get("certificates", []))
+        if obj.data.get("no_certificate", False):
+            certs.append({"name": {"fi": "Ei sertifikaattia", "sv": "Inget certifikat", "en": "No certificate"}})
+        return certs
+
+    labels = serializers.SerializerMethodField()
+
+    def get_labels(self, obj):
+        """Return labels from the data field"""
+        return obj.data.get("labels", [])
 
     class Meta:
         model = ModeratedNotification
@@ -195,6 +204,7 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             "created_time",
             "modified_time",
             "certificates",
+            "labels",
             #"openinghours",
         )
         read_only_fields = fields

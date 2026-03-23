@@ -385,6 +385,39 @@
                 },
                 "required": ["id"]
             }
+        },
+        "certificate_ids": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "label_ids": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "other_certificates": {
+            "type": "object",
+            "properties": {
+                "fi": { "type": "string" },
+                "sv": { "type": "string" },
+                "en": { "type": "string" }
+            },
+            "required": ["fi", "sv", "en"]
+        },
+        "other_certificates_url": {
+            "type": "object",
+            "properties": {
+                "fi": { "type": "string" },
+                "sv": { "type": "string" },
+                "en": { "type": "string" }
+            },
+            "required": ["fi", "sv", "en"]
+        },
+        "no_certificate": {
+            "type": "boolean"
         }
     },
 	"required": [
