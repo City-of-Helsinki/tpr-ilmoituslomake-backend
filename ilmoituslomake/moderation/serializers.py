@@ -161,6 +161,11 @@ class ModerationNotificationSerializer(serializers.ModelSerializer):
         schema = NotificationSchema.objects.latest("created_at").schema
         # Validate
         try:
+            if 'certificates' in data:
+                for cert_data in data['certificates']:
+                    cert_id = cert_data.get('id')
+                    if cert_id == -1 and ('name' not in cert_data or cert_data['name'] == ''):
+                        raise ValueError("Custom name must be provided for 'Other' certificate with id=-1")
             # Generic JSON-Schema validation
             validate(instance=data, schema=schema)
         except Exception as e:

@@ -134,3 +134,77 @@ class IdMappingKaupunkialustaMaster(models.Model):
 
     tpr_internal_id = models.IntegerField(null=True, blank=True)
     kaupunkialusta_id = models.IntegerField(null=True, blank=True)
+
+
+class Certificate(models.Model):
+    """
+    Master table for certificates and labels (merkit ja sertifikaatit).
+    Contains system data for all available certificates and labels.
+    """
+    TYPE_CHOICES = [
+        ("Label", "Label"),
+        ("Certificate", "Certificate"),
+    ]
+    
+    certificate_type = models.CharField(
+        max_length=16, 
+        choices=TYPE_CHOICES, 
+        default="Certificate",
+        db_index=True
+    )
+    
+    # Multilingual names
+    name_fi = models.CharField(max_length=125)
+    name_sv = models.CharField(max_length=125)
+    name_en = models.CharField(max_length=125)
+    
+    # URLs for more information in different languages
+    url_fi = models.URLField(blank=True)
+    url_sv = models.URLField(blank=True)
+    url_en = models.URLField(blank=True)
+    
+    # Boolean flag for MyHelsinki visibility
+    displayed_in_myhelsinki = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name_fi']
+    
+    def __str__(self):
+        return f"{self.certificate_type}: {self.name_fi}"
+
+
+class CustomerCertificate(models.Model):
+    """
+    Links customers (notifications) to certificates/labels.
+    Stores the selections made in the notification form.
+    """
+    # Foreign key to the notification (can be Notification or ModeratedNotification)
+    notification_id = models.IntegerField(db_index=True)
+    
+    # Foreign key to Certificate. -1 indicates "Other"
+    certificate = models.ForeignKey(
+        Certificate,
+        on_delete=models.CASCADE,
+        related_name='customer_certificates',
+        null=True,
+        blank=True
+    )
+    
+    # For "Other" option - custom certificate name
+    custom_name = models.CharField(max_length=255, blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        # Ensure uniqueness per notification and certificate
+        unique_together = [['notification_id', 'certificate']]
+    
+    def __str__(self):
+        if self.certificate:
+            return f"Notification {self.notification_id} - {self.certificate.name_fi}"
+        else:
+            return f"Notification {self.notification_id} - Custom: {self.custom_name}"
