@@ -94,7 +94,7 @@ class ApiCertificateListViewV1(ListAPIView):
     """
 
     permission_classes = [AllowAny]
-    queryset = Certificate.objects.all()
+    queryset = Certificate.objects.exclude(id__in=[-1, -2])
     serializer_class = ApiCertificateSerializerV1
     pagination_class = None
 
@@ -106,7 +106,7 @@ class ApiCertificateRetrieveViewV1(RetrieveAPIView):
 
     permission_classes = [AllowAny]
     lookup_field = "id"
-    queryset = Certificate.objects.all()
+    queryset = Certificate.objects.exclude(id__in=[-1, -2])
     serializer_class = ApiCertificateSerializerV1
 
 

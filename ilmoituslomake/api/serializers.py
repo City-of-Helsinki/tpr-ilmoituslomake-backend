@@ -168,17 +168,49 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     certificates = serializers.SerializerMethodField()
 
     def get_certificates(self, obj):
-        """Return certificates from the data field, appending a no-certificate entry if flagged"""
+        """Return certificates from the data field"""
+        lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "fi"
         certs = list(obj.data.get("certificates", []))
-        if obj.data.get("no_certificate", False):
-            certs.append({"name": {"fi": "Ei sertifikaattia", "sv": "Inget certifikat", "en": "No certificate"}})
-        return certs
+        result = []
+        for c in certs:
+            c_id = c.get("id")
+            name = c.get("name")
+            entry = { "id": c_id }
+            if isinstance(name, dict):
+                value = name.get(lang)
+                # Special handling for id -1 ("muu, mikä")
+                if c_id == -1 and (not value or value.strip() == ""):
+                    # Find first non-empty value from any language
+                    value = next((v for v in [name.get("fi"), name.get("sv"), name.get("en")] if v and v.strip() != ""), "")
+                entry["name"] = value
+            elif isinstance(name, str):
+                entry["name"] = name
+            result.append(entry)
+        return result
 
     labels = serializers.SerializerMethodField()
 
     def get_labels(self, obj):
         """Return labels from the data field"""
-        return obj.data.get("labels", [])
+        lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "fi"
+        labels = list(obj.data.get("labels", []))
+        result = []
+        for l in labels:
+            l_id = l.get("id")
+            if l_id == -2:
+                continue
+            name = l.get("name")
+            entry = { "id": l_id }
+            if isinstance(name, dict):
+                entry["name"] = name.get(lang)
+            elif isinstance(name, str):
+                entry["name"] = name
+            result.append(entry)
+        return result
 
     class Meta:
         model = ModeratedNotification
