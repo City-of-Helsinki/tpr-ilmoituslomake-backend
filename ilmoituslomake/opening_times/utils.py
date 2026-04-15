@@ -84,7 +84,32 @@ def create_url(url_data):
     )
 
     # Return url string
-    return HAUKI_UI_URL + url_data.get("hsa_resource") + "/?" + param_string
+    # Use numeric ID in the path if available (required for Hauki v1.11.0+)
+    # hsa_resource stays as the origin string for the HSA signature params
+    path_resource = url_data.get("url_path_resource", url_data.get("hsa_resource"))
+    return HAUKI_UI_URL + path_resource + "/?" + param_string
+
+
+def _get_resource_numeric_id(resource_origin):
+    """
+    Look up the numeric Hauki resource ID using the list API with auth.
+    Needed for Hauki v1.11.0+ where path-based origin lookups are broken.
+    Returns the integer id, or None if not found.
+    """
+    try:
+        response = requests.get(
+            HAUKI_API_URL + "resource/",
+            params={"resource_ids": resource_origin},
+            headers={"Authorization": "APIToken " + API_TOKEN},
+            timeout=10,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("count", 0) > 0:
+                return data["results"][0]["id"]
+    except Exception:
+        pass
+    return None
 
 
 def create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, stop_on_error):
@@ -110,6 +135,8 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
     except Exception as e:
         pass
 
+    hauki_numeric_id = None
+
     if draft_id_response != None:
         # Get the data values from the notification
         data_response = get_hauki_data_from_notification(draft_id, notification_data)
@@ -123,7 +150,8 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
         timezone = data_response["timezone"]
 
         if draft_id_response.status_code == 200:
-            # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
+            # Draft kaupunkialusta id already exists in Hauki (pre-v1.11.0 path lookup still works)
+            hauki_numeric_id = draft_id_response.json().get("id")
             update_response = update_name_and_address(
                 name, address, draft_resource
             )
@@ -142,7 +170,10 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
                 timezone,
             )
 
-            if stop_on_error == True and create_response.status_code != 201:
+            if create_response.status_code == 201:
+                # Successfully created — extract the numeric ID from the response
+                hauki_numeric_id = create_response.json().get("id")
+            elif stop_on_error == True:
                 # Hauki v1.11.0+ returns 409 Conflict when the resource already exists
                 # (previously the GET /resource/<origin>/ lookup worked, but it now returns
                 # 404, causing the code to fall into this create branch unnecessarily).
@@ -153,6 +184,8 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
                 )
                 if not already_exists:
                     return Response(create_response.text, status=create_response.status_code)
+                # 409: resource exists but we don't have its ID — look it up via list API
+                hauki_numeric_id = _get_resource_numeric_id(draft_resource)
 
             if published_id_response != None and published_id_response.status_code == 200:
                 # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource
@@ -160,6 +193,8 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
 
                 if stop_on_error == True and copy_response.status_code != 200:
                     return Response(copy_response)
+
+    return hauki_numeric_id
 
 
 def update_origin(
