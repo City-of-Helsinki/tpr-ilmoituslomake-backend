@@ -143,7 +143,16 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
             )
 
             if stop_on_error == True and create_response.status_code != 201:
-                return Response(create_response)
+                # Hauki v1.11.0+ returns 409 Conflict when the resource already exists
+                # (previously the GET /resource/<origin>/ lookup worked, but it now returns
+                # 404, causing the code to fall into this create branch unnecessarily).
+                # In this case proceed to generate the URL instead of returning an error
+                # that would silently break the opening times button.
+                already_exists = create_response.status_code == 409 or (
+                    "already exists" in create_response.text
+                )
+                if not already_exists:
+                    return Response(create_response.text, status=create_response.status_code)
 
             if published_id_response != None and published_id_response.status_code == 200:
                 # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource
