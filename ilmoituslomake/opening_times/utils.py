@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import requests
 import json
+import time
 
 REQUIRED_AUTH_PARAM_NAMES = [
     "hsa_source",
@@ -116,97 +117,75 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
     published_resource = "kaupunkialusta:" + published_id
     draft_resource = "kaupunkialusta:" + draft_id
 
-    published_id_response = None
+    # Look up published resource numeric ID (non-ilmoitus origins still work with direct GET)
     published_numeric_id = None
-    if (published == True):
+    if published == True:
         try:
-            # Search for published id from Hauki
             published_id_response = requests.get(
                 HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
             )
+            if published_id_response.status_code == 200:
+                published_numeric_id = published_id_response.json().get("id")
         except Exception as e:
             pass
 
-    if published_id_response is not None and published_id_response.status_code == 200:
-        published_numeric_id = published_id_response.json().get("id")
+    # Look up draft resource using list API filter (Hauki v1.11.0 broke GET-by-origin-path)
+    draft_numeric_id = _get_resource_numeric_id(draft_resource)
+    # Also check the stored DB value as fallback
+    if draft_numeric_id is None and stored_hauki_id > 0:
+        draft_numeric_id = stored_hauki_id
 
-    draft_id_response = None
-    try:
-        # Search for draft id from Hauki
-        draft_id_response = requests.get(
-            HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
-        )
-    except Exception as e:
-        pass
+    # Get the data values from the notification
+    data_response = get_hauki_data_from_notification(draft_id, notification_data)
+    name = data_response["name"]
+    description = data_response["description"]
+    address = data_response["address"]
+    resource_type = data_response["resource_type"]
+    origins = data_response["origins"]
+    is_public = data_response["is_public"]
+    timezone = data_response["timezone"]
 
     hauki_numeric_id = None
 
-    if draft_id_response != None:
-        # Get the data values from the notification
-        data_response = get_hauki_data_from_notification(draft_id, notification_data)
+    if draft_numeric_id:
+        # Draft resource exists and is visible — update it by numeric ID
+        hauki_numeric_id = draft_numeric_id
+        update_response = update_name_and_address(name, address, str(hauki_numeric_id))
+        if stop_on_error == True and update_response.status_code != 200:
+            return Response(update_response)
+    else:
+        # Draft resource not found — try to create it
+        create_response = create_hauki_resource(
+            name, description, address, resource_type, origins, is_public, timezone
+        )
 
-        name = data_response["name"]
-        description = data_response["description"]
-        address = data_response["address"]
-        resource_type = data_response["resource_type"]
-        origins = data_response["origins"]
-        is_public = data_response["is_public"]
-        timezone = data_response["timezone"]
-
-        if draft_id_response.status_code == 200:
-            # Draft kaupunkialusta id already exists in Hauki (pre-v1.11.0 path lookup still works)
-            hauki_numeric_id = draft_id_response.json().get("id")
-            update_response = update_name_and_address(
-                name, address, draft_resource
-            )
-
-            if stop_on_error == True and update_response.status_code != 200:
-                return Response(update_response)
-        else:
-            # Draft kaupunkialusta id does not exist in Hauki, so create it
-            create_response = create_hauki_resource(
-                name,
-                description,
-                address,
-                resource_type,
-                origins,
-                is_public,
-                timezone,
-            )
-
-            if create_response.status_code == 201:
-                # Successfully created — extract the numeric ID from the response
-                hauki_numeric_id = create_response.json().get("id")
-            elif stop_on_error == True:
-                # Hauki v1.11.0+ returns 409 Conflict when the resource already exists
-                # (previously the GET /resource/<origin>/ lookup worked, but it now returns
-                # 404, causing the code to fall into this create branch unnecessarily).
-                already_exists = create_response.status_code == 409 or (
-                    "already exists" in create_response.text
+        if create_response.status_code == 201:
+            hauki_numeric_id = create_response.json().get("id")
+        elif create_response.status_code == 409 or "already exists" in create_response.text:
+            # 409: ghost resource (soft-deleted in Hauki, invisible to list API).
+            # Strategy 1: PATCH by origin string (works for some ghosts)
+            patch_response = update_name_and_address(name, address, draft_resource)
+            if patch_response and patch_response.status_code == 200:
+                hauki_numeric_id = patch_response.json().get("id")
+            else:
+                # Strategy 2: create with a new unique origin to bypass the ghost
+                new_origin_id = draft_id + "-" + str(int(time.time()))
+                new_origins = [{"data_source": {"id": "kaupunkialusta"}, "origin_id": new_origin_id}]
+                retry_response = create_hauki_resource(
+                    name, description, address, resource_type, new_origins, is_public, timezone
                 )
-                if not already_exists:
-                    return Response(create_response.text, status=create_response.status_code)
-                # 409: resource exists (possibly soft-deleted) — PATCH it directly using
-                # the origin string path. PATCH works even when GET returns 404 in
-                # Hauki v1.11.0+, and also reactivates soft-deleted resources.
-                # The PATCH response contains the numeric id we need for the Hauki UI URL.
-                patch_response = update_name_and_address(name, address, draft_resource)
-                if patch_response and patch_response.status_code == 200:
-                    hauki_numeric_id = patch_response.json().get("id")
-                elif stored_hauki_id > 0:
-                    # PATCH also failed — last resort: use the stored DB id
-                    hauki_numeric_id = stored_hauki_id
-                    update_name_and_address(name, address, str(hauki_numeric_id))
+                if retry_response.status_code == 201:
+                    hauki_numeric_id = retry_response.json().get("id")
+                elif stop_on_error:
+                    return Response(retry_response.text, status=retry_response.status_code)
+        elif stop_on_error:
+            return Response(create_response.text, status=create_response.status_code)
 
-            if published_id_response != None and published_id_response.status_code == 200:
-                # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource.
-                # Hauki v1.11.0+ requires numeric resource IDs instead of origin strings.
-                # Skip copy if we couldn't determine the draft resource's numeric ID (e.g. zombie 409 case).
-                if hauki_numeric_id and published_numeric_id:
-                    copy_response = copy_hauki_date_periods(published_numeric_id, hauki_numeric_id)
-
-                    if stop_on_error == True and copy_response.status_code != 200:
-                        return Response(copy_response)
+        # Copy published date periods to the new draft resource if applicable
+        if published_numeric_id and hauki_numeric_id:
+            copy_response = copy_hauki_date_periods(published_numeric_id, hauki_numeric_id)
+            if stop_on_error == True and copy_response.status_code != 200:
+                return Response(copy_response)
 
     return hauki_numeric_id
 

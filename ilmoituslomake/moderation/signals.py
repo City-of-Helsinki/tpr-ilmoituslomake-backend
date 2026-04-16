@@ -83,36 +83,41 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
         is_public = data_response["is_public"]
         timezone = data_response["timezone"]
 
-        published_id_response = None
+        # Look up published resource — non-ilmoitus origins still work with direct GET
+        published_numeric_id = None
         try:
-            # Search for published id from Hauki
             published_id_response = requests.get(
                 HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
             )
+            if published_id_response.status_code == 200:
+                published_numeric_id = published_id_response.json().get("id")
+                update_response = update_name_and_address(
+                    name, address, str(published_numeric_id)
+                )
+            else:
+                create_response = create_hauki_resource(
+                    name, description, address, resource_type, origins, is_public, timezone
+                )
+                if create_response.status_code == 201:
+                    published_numeric_id = create_response.json().get("id")
         except Exception as e:
             pass
-
-        if published_id_response != None and published_id_response.status_code == 200:
-            # Published kaupunkialusta id already exists in Hauki, so just update the name and address
-            update_response = update_name_and_address(
-                name, address, published_resource
-            )
-        elif published_id_response != None:
-            # Published kaupunkialusta id does not exist in Hauki, so create it
-            create_response = create_hauki_resource(
-                name,
-                description,
-                address,
-                resource_type,
-                origins,
-                is_public,
-                timezone,
-            )
 
         # If the notification times are rejected, or this is a change request or moderator edit, then hauki_id is 0
         if instance.hauki_id > 0:
             # The date periods themselves were approved, so copy the draft date periods to the published resource
-            copy_response = copy_hauki_date_periods(draft_resource, published_resource)
+            # Use numeric IDs (Hauki v1.11.0 broke origin-string path lookups for ilmoitus- resources)
+            draft_numeric_id = _get_resource_numeric_id(draft_resource)
+            if draft_numeric_id is None:
+                # Fallback: check the Notification record for a stored hauki_id
+                try:
+                    notif = Notification.objects.get(pk=instance.notification_id)
+                    if notif.hauki_id > 0:
+                        draft_numeric_id = notif.hauki_id
+                except Exception:
+                    pass
+            if draft_numeric_id and published_numeric_id:
+                copy_response = copy_hauki_date_periods(draft_numeric_id, published_numeric_id)
 
     if instance.notification_id > 0:
         # Check if the draft resource is still needed by an open moderation item
@@ -124,17 +129,20 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
             pass
 
         if moderation_item_count <= 1:
-            # Store the numeric Hauki ID before soft-deleting the draft resource.
-            # Hauki v1.11.0+ hides soft-deleted resources from the list API, so once
-            # deleted we can't look them up. Storing the ID now lets us reactivate the
-            # resource via PATCH if the same draft is re-submitted in the future.
+            # Look up the numeric ID before deleting, and store it in the Notification
+            # record so future re-edits can find the resource even after soft-delete.
+            draft_numeric_id_for_delete = _get_resource_numeric_id(draft_resource)
             try:
                 notif = Notification.objects.get(pk=instance.notification_id)
-                if notif.hauki_id == 0:
-                    numeric_id = _get_resource_numeric_id(draft_resource)
-                    if numeric_id:
-                        notif.hauki_id = numeric_id
-                        notif.save(update_fields=["hauki_id"])
+                if draft_numeric_id_for_delete and notif.hauki_id != draft_numeric_id_for_delete:
+                    notif.hauki_id = draft_numeric_id_for_delete
+                    notif.save(update_fields=["hauki_id"])
+                elif draft_numeric_id_for_delete is None and notif.hauki_id > 0:
+                    draft_numeric_id_for_delete = notif.hauki_id
             except Exception:
                 pass
-            delete_hauki_resource(draft_resource)
+            # Delete by numeric ID if available, otherwise fall back to origin string
+            if draft_numeric_id_for_delete:
+                delete_hauki_resource(str(draft_numeric_id_for_delete))
+            else:
+                delete_hauki_resource(draft_resource)
