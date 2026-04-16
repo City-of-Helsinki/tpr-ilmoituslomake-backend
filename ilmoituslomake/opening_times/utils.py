@@ -113,6 +113,28 @@ def _get_resource_numeric_id(resource_origin):
     return None
 
 
+def _get_resource_origin(numeric_id):
+    """
+    Fetch the actual kaupunkialusta origin string from a resource by its numeric ID.
+    Returns the full origin string (e.g. 'kaupunkialusta:ilmoitus-3767-1776347178') or None.
+    """
+    try:
+        response = requests.get(
+            HAUKI_API_URL + "resource/" + str(numeric_id) + "/",
+            headers={"Authorization": "APIToken " + API_TOKEN},
+            timeout=10,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            for origin in data.get("origins", []):
+                ds = origin.get("data_source", {})
+                if ds.get("id") == "kaupunkialusta":
+                    return "kaupunkialusta:" + origin["origin_id"]
+    except Exception:
+        pass
+    return None
+
+
 def create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, stop_on_error, stored_hauki_id=0):
     published_resource = "kaupunkialusta:" + published_id
     draft_resource = "kaupunkialusta:" + draft_id
@@ -151,6 +173,10 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
     if draft_numeric_id:
         # Draft resource exists and is visible — update it by numeric ID
         hauki_numeric_id = draft_numeric_id
+        # Fetch the actual origin from Hauki (may differ from draft_resource if ghost workaround was used previously)
+        real_origin = _get_resource_origin(hauki_numeric_id)
+        if real_origin:
+            actual_resource = real_origin
         update_response = update_name_and_address(name, address, str(hauki_numeric_id))
         if stop_on_error == True and update_response.status_code != 200:
             return Response(update_response)
