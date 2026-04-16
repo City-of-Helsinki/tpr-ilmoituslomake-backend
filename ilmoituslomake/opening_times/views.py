@@ -71,12 +71,19 @@ class CreateLink(UpdateAPIView):
         hauki_numeric_id = None
         if id > 0:
             # Create or update draft opening times in Hauki using the draft notification data and published opening times if possible
-            create_or_update_result = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True)
+            # Pass the stored DB hauki_id so create_or_update can reactivate soft-deleted
+            # ghost resources even when Hauki's list API hides them (409 case).
+            create_or_update_result = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True, notification.hauki_id)
 
             # Returns a Response on error, or a numeric id (int) / None on success
             if isinstance(create_or_update_result, Response):
                 return create_or_update_result
             hauki_numeric_id = create_or_update_result
+
+            # Persist the numeric ID so future calls can use it directly (avoids list API lookup)
+            if hauki_numeric_id and hauki_numeric_id != notification.hauki_id:
+                notification.hauki_id = hauki_numeric_id
+                notification.save(update_fields=["hauki_id"])
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)

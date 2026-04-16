@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 import requests
 from ilmoituslomake.settings import HAUKI_API_URL
 from opening_times.utils import (
+    _get_resource_numeric_id,
     copy_hauki_date_periods,
     create_hauki_resource,
     create_or_update_draft_hauki_data,
@@ -123,5 +124,17 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
             pass
 
         if moderation_item_count <= 1:
-            # There are no open moderation items for this draft resource (apart from this one), so delete it
+            # Store the numeric Hauki ID before soft-deleting the draft resource.
+            # Hauki v1.11.0+ hides soft-deleted resources from the list API, so once
+            # deleted we can't look them up. Storing the ID now lets us reactivate the
+            # resource via PATCH if the same draft is re-submitted in the future.
+            try:
+                notif = Notification.objects.get(pk=instance.notification_id)
+                if notif.hauki_id == 0:
+                    numeric_id = _get_resource_numeric_id(draft_resource)
+                    if numeric_id:
+                        notif.hauki_id = numeric_id
+                        notif.save(update_fields=["hauki_id"])
+            except Exception:
+                pass
             delete_hauki_resource(draft_resource)
