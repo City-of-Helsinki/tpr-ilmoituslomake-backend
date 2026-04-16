@@ -75,10 +75,13 @@ class CreateLink(UpdateAPIView):
             # ghost resources even when Hauki's list API hides them (409 case).
             create_or_update_result = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True, notification.hauki_id)
 
-            # Returns a Response on error, or a numeric id (int) / None on success
+            # Returns a Response on error, or a (numeric_id, actual_resource) tuple on success
             if isinstance(create_or_update_result, Response):
                 return create_or_update_result
-            hauki_numeric_id = create_or_update_result
+            hauki_numeric_id, actual_resource = create_or_update_result
+
+            # Update hsa_resource to match the actual origin used (may differ if ghost workaround created a new origin)
+            hsa_resource = actual_resource
 
             # Persist the numeric ID so future calls can use it directly (avoids list API lookup)
             if hauki_numeric_id and hauki_numeric_id != notification.hauki_id:

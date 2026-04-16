@@ -146,6 +146,7 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
     timezone = data_response["timezone"]
 
     hauki_numeric_id = None
+    actual_resource = draft_resource  # track the origin actually used
 
     if draft_numeric_id:
         # Draft resource exists and is visible — update it by numeric ID
@@ -176,6 +177,7 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
                 )
                 if retry_response.status_code == 201:
                     hauki_numeric_id = retry_response.json().get("id")
+                    actual_resource = "kaupunkialusta:" + new_origin_id
                 elif stop_on_error:
                     return Response(retry_response.text, status=retry_response.status_code)
         elif stop_on_error:
@@ -187,7 +189,7 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
             if stop_on_error == True and copy_response.status_code != 200:
                 return Response(copy_response)
 
-    return hauki_numeric_id
+    return (hauki_numeric_id, actual_resource)
 
 
 def update_origin(
