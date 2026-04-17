@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import requests
 import json
+import time
 
 REQUIRED_AUTH_PARAM_NAMES = [
     "hsa_source",
@@ -84,73 +85,137 @@ def create_url(url_data):
     )
 
     # Return url string
-    return HAUKI_UI_URL + url_data.get("hsa_resource") + "/?" + param_string
+    # Use numeric ID in the path if available (required for Hauki v1.11.0+)
+    # hsa_resource stays as the origin string for the HSA signature params
+    path_resource = url_data.get("url_path_resource", url_data.get("hsa_resource"))
+    return HAUKI_UI_URL + path_resource + "/?" + param_string
 
 
-def create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, stop_on_error):
+def _get_resource_numeric_id(resource_origin):
+    """
+    Look up the numeric Hauki resource ID using the list API with auth.
+    Needed for Hauki v1.11.0+ where path-based origin lookups are broken.
+    Returns the integer id, or None if not found.
+    """
+    try:
+        response = requests.get(
+            HAUKI_API_URL + "resource/",
+            params={"resource_ids": resource_origin},
+            headers={"Authorization": "APIToken " + API_TOKEN},
+            timeout=10,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("count", 0) > 0:
+                return data["results"][0]["id"]
+    except Exception:
+        pass
+    return None
+
+
+def _get_resource_origin(numeric_id):
+    """
+    Fetch the actual kaupunkialusta origin string from a resource by its numeric ID.
+    Returns the full origin string (e.g. 'kaupunkialusta:ilmoitus-3767-1776347178') or None.
+    """
+    try:
+        response = requests.get(
+            HAUKI_API_URL + "resource/" + str(numeric_id) + "/",
+            headers={"Authorization": "APIToken " + API_TOKEN},
+            timeout=10,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            for origin in data.get("origins", []):
+                ds = origin.get("data_source", {})
+                if ds.get("id") == "kaupunkialusta":
+                    return "kaupunkialusta:" + origin["origin_id"]
+    except Exception:
+        pass
+    return None
+
+
+def create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, stop_on_error, stored_hauki_id=0):
     published_resource = "kaupunkialusta:" + published_id
     draft_resource = "kaupunkialusta:" + draft_id
 
-    published_id_response = None
-    if (published == True):
+    # Look up published resource numeric ID (non-ilmoitus origins still work with direct GET)
+    published_numeric_id = None
+    if published == True:
         try:
-            # Search for published id from Hauki
             published_id_response = requests.get(
                 HAUKI_API_URL + "resource/" + published_resource + "/", timeout=10
             )
+            if published_id_response.status_code == 200:
+                published_numeric_id = published_id_response.json().get("id")
         except Exception as e:
             pass
 
-    draft_id_response = None
-    try:
-        # Search for draft id from Hauki
-        draft_id_response = requests.get(
-            HAUKI_API_URL + "resource/" + draft_resource + "/", timeout=10
+    # Look up draft resource using list API filter (Hauki v1.11.0 broke GET-by-origin-path)
+    draft_numeric_id = _get_resource_numeric_id(draft_resource)
+    # Also check the stored DB value as fallback
+    if draft_numeric_id is None and stored_hauki_id > 0:
+        draft_numeric_id = stored_hauki_id
+
+    # Get the data values from the notification
+    data_response = get_hauki_data_from_notification(draft_id, notification_data)
+    name = data_response["name"]
+    description = data_response["description"]
+    address = data_response["address"]
+    resource_type = data_response["resource_type"]
+    origins = data_response["origins"]
+    is_public = data_response["is_public"]
+    timezone = data_response["timezone"]
+
+    hauki_numeric_id = None
+    actual_resource = draft_resource  # track the origin actually used
+
+    if draft_numeric_id:
+        # Draft resource exists and is visible — update it by numeric ID
+        hauki_numeric_id = draft_numeric_id
+        # Fetch the actual origin from Hauki (may differ from draft_resource if ghost workaround was used previously)
+        real_origin = _get_resource_origin(hauki_numeric_id)
+        if real_origin:
+            actual_resource = real_origin
+        update_response = update_name_and_address(name, address, str(hauki_numeric_id))
+        if stop_on_error == True and update_response.status_code != 200:
+            return Response(update_response)
+    else:
+        # Draft resource not found — try to create it
+        create_response = create_hauki_resource(
+            name, description, address, resource_type, origins, is_public, timezone
         )
-    except Exception as e:
-        pass
 
-    if draft_id_response != None:
-        # Get the data values from the notification
-        data_response = get_hauki_data_from_notification(draft_id, notification_data)
+        if create_response.status_code == 201:
+            hauki_numeric_id = create_response.json().get("id")
+        elif create_response.status_code == 409 or "already exists" in create_response.text:
+            # 409: ghost resource (soft-deleted in Hauki, invisible to list API).
+            # Strategy 1: PATCH by origin string (works for some ghosts)
+            patch_response = update_name_and_address(name, address, draft_resource)
+            if patch_response and patch_response.status_code == 200:
+                hauki_numeric_id = patch_response.json().get("id")
+            else:
+                # Strategy 2: create with a new unique origin to bypass the ghost
+                new_origin_id = draft_id + "-" + str(int(time.time()))
+                new_origins = [{"data_source": {"id": "kaupunkialusta"}, "origin_id": new_origin_id}]
+                retry_response = create_hauki_resource(
+                    name, description, address, resource_type, new_origins, is_public, timezone
+                )
+                if retry_response.status_code == 201:
+                    hauki_numeric_id = retry_response.json().get("id")
+                    actual_resource = "kaupunkialusta:" + new_origin_id
+                elif stop_on_error:
+                    return Response(retry_response.text, status=retry_response.status_code)
+        elif stop_on_error:
+            return Response(create_response.text, status=create_response.status_code)
 
-        name = data_response["name"]
-        description = data_response["description"]
-        address = data_response["address"]
-        resource_type = data_response["resource_type"]
-        origins = data_response["origins"]
-        is_public = data_response["is_public"]
-        timezone = data_response["timezone"]
+        # Copy published date periods to the new draft resource if applicable
+        if published_numeric_id and hauki_numeric_id:
+            copy_response = copy_hauki_date_periods(published_numeric_id, hauki_numeric_id)
+            if stop_on_error == True and copy_response.status_code != 200:
+                return Response(copy_response)
 
-        if draft_id_response.status_code == 200:
-            # Draft kaupunkialusta id already exists in Hauki, so just update the name and address
-            update_response = update_name_and_address(
-                name, address, draft_resource
-            )
-
-            if stop_on_error == True and update_response.status_code != 200:
-                return Response(update_response)
-        else:
-            # Draft kaupunkialusta id does not exist in Hauki, so create it
-            create_response = create_hauki_resource(
-                name,
-                description,
-                address,
-                resource_type,
-                origins,
-                is_public,
-                timezone,
-            )
-
-            if stop_on_error == True and create_response.status_code != 201:
-                return Response(create_response)
-
-            if published_id_response != None and published_id_response.status_code == 200:
-                # Kaupunkialusta id already exists in Hauki, so copy the published date periods to the draft resource
-                copy_response = copy_hauki_date_periods(published_resource, draft_resource)
-
-                if stop_on_error == True and copy_response.status_code != 200:
-                    return Response(copy_response)
+    return (hauki_numeric_id, actual_resource)
 
 
 def update_origin(
