@@ -135,8 +135,9 @@ def update_hauki_after_moderation(sender, instance, **kwargs):
             try:
                 notif = Notification.objects.get(pk=instance.notification_id)
                 if draft_numeric_id_for_delete and notif.hauki_id != draft_numeric_id_for_delete:
-                    notif.hauki_id = draft_numeric_id_for_delete
-                    notif.save(update_fields=["hauki_id"])
+                    # Use filter().update() instead of .save() to avoid triggering
+                    # the Notification post_save signal (which would create a duplicate ModerationItem)
+                    Notification.objects.filter(pk=instance.notification_id).update(hauki_id=draft_numeric_id_for_delete)
                 elif draft_numeric_id_for_delete is None and notif.hauki_id > 0:
                     draft_numeric_id_for_delete = notif.hauki_id
             except Exception:

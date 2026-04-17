@@ -84,9 +84,9 @@ class CreateLink(UpdateAPIView):
             hsa_resource = actual_resource
 
             # Persist the numeric ID so future calls can use it directly (avoids list API lookup)
+            # Use filter().update() to avoid triggering the Notification post_save signal
             if hauki_numeric_id and hauki_numeric_id != notification.hauki_id:
-                notification.hauki_id = hauki_numeric_id
-                notification.save(update_fields=["hauki_id"])
+                Notification.objects.filter(pk=notification_id).update(hauki_id=hauki_numeric_id)
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
