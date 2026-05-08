@@ -1,4 +1,8 @@
-FROM postgis/postgis:12-2.5
+# Django 5.2 requires PostgreSQL >= 14 and GeoDjango requires PostGIS >= 3.1.
+# Upgraded from postgis:12-2.5 to match production (PG 14, PostGIS 3.2).
+# NOTE: existing pgdata/ must be cleared before starting (pg_dumpall from old
+# instance first if you need to preserve data).
+FROM postgis/postgis:14-3.2
 RUN localedef -i fi_FI -c -f UTF-8 -A /usr/share/locale/locale.alias fi_FI.UTF8
 ENV LANG fi_FI.utf8
 COPY init_db.sql /docker-entrypoint-initdb.d/

@@ -105,7 +105,7 @@ class ModerationItemSearchListView(ListAPIView):
         "target__data__name__en",
         "target__id",
     )
-    filter_fields = ("category",)
+    filterset_fields = ("category",)
     serializer_class = ModerationItemSerializer
 
     def list(self, request, *args, **kwargs):

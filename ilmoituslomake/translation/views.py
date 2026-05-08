@@ -243,7 +243,7 @@ class TranslationTaskSearchListView(ListAPIView):
         "target__data__name__en",
         "target__id",
     )
-    filter_fields = ("category",)
+    filterset_fields = ("category",)
 
 
 class ModerationTranslationTaskSearchListView(ListAPIView):
@@ -261,7 +261,7 @@ class ModerationTranslationTaskSearchListView(ListAPIView):
         "target__data__name__en",
         "target__id",
     )
-    filter_fields = ("category",)
+    filterset_fields = ("category",)
     serializer_class = TranslationTaskSerializer
 
     def list(self, request, *args, **kwargs):
@@ -294,7 +294,7 @@ class TranslationRequestSearchListView(ListAPIView):
         "target__data__name__en",
         "target__id",
     )
-    filter_fields = ("category",)
+    filterset_fields = ("category",)
     serializer_class = TranslationRequestSerializer
 
 

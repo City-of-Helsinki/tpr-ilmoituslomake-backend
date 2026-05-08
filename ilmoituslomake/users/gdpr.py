@@ -1,6 +1,8 @@
+from typing import Optional
+
 from django.contrib.auth import get_user_model
 
-from helsinki_gdpr.types import Error, ErrorResponse, LocalizedMessage
+from helsinki_gdpr.types import Error, ErrorResponse
 
 def get_user(user: get_user_model()) -> get_user_model():
     """
@@ -15,7 +17,7 @@ def get_user(user: get_user_model()) -> get_user_model():
 
 
 
-def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> ErrorResponse:
+def delete_gdpr_data(user: get_user_model(), dry_run: bool) -> Optional[ErrorResponse]:
     """
     Function used by the Helsinki Profile GDPR API to delete all GDPR data collected of the user.
     The GDPR API package will run this within a transaction.
