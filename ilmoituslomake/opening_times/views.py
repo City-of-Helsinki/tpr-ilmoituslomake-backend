@@ -120,10 +120,20 @@ class GetTimes(RetrieveAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, id=None, *args, **kwargs):
+        # For ilmoitus- draft resources, Hauki v1.11.0+ broke origin-string lookups.
+        # Use the numeric hauki_id stored in the DB instead.
+        resource = "kaupunkialusta:" + id
+        if id.startswith("ilmoitus-"):
+            parts = id.split("-")
+            if len(parts) == 2:
+                try:
+                    notification = Notification.objects.filter(pk=int(parts[1])).first()
+                    if notification and notification.hauki_id:
+                        resource = str(notification.hauki_id)
+                except (ValueError, Exception):
+                    pass
         response = requests.get(
-            HAUKI_API_URL
-            + "date_periods_as_text_for_tprek/?resource="
-            + "kaupunkialusta:" + id,
+            HAUKI_API_URL + "date_periods_as_text_for_tprek/?resource=" + resource,
             timeout=10,
         )
         return Response(response.json(), status=status.HTTP_200_OK)
