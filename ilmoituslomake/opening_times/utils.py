@@ -170,18 +170,20 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
     hauki_numeric_id = None
     actual_resource = draft_resource  # track the origin actually used
 
+    found_existing = False
     if draft_numeric_id:
-        # Draft resource exists and is visible — update it by numeric ID
-        hauki_numeric_id = draft_numeric_id
-        # Fetch the actual origin from Hauki (may differ from draft_resource if ghost workaround was used previously)
-        real_origin = _get_resource_origin(hauki_numeric_id)
-        if real_origin:
+        # Verify the resource is still active (stored_hauki_id may point to a soft-deleted ghost)
+        real_origin = _get_resource_origin(draft_numeric_id)
+        if real_origin is not None:
+            found_existing = True
+            hauki_numeric_id = draft_numeric_id
             actual_resource = real_origin
-        update_response = update_name_and_address(name, address, str(hauki_numeric_id))
-        if stop_on_error == True and update_response.status_code != 200:
-            return Response(update_response)
-    else:
-        # Draft resource not found — try to create it
+            update_response = update_name_and_address(name, address, str(hauki_numeric_id))
+            if stop_on_error == True and update_response.status_code != 200:
+                return Response(update_response.text, status=update_response.status_code)
+
+    if not found_existing:
+        # Draft resource not found (or stored ID points to a soft-deleted ghost) — try to create it
         create_response = create_hauki_resource(
             name, description, address, resource_type, origins, is_public, timezone
         )
@@ -213,7 +215,7 @@ def create_or_update_draft_hauki_data(published, published_id, draft_id, notific
         if published_numeric_id and hauki_numeric_id:
             copy_response = copy_hauki_date_periods(published_numeric_id, hauki_numeric_id)
             if stop_on_error == True and copy_response.status_code != 200:
-                return Response(copy_response)
+                return Response(copy_response.text, status=copy_response.status_code)
 
     return (hauki_numeric_id, actual_resource)
 
