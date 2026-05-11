@@ -155,6 +155,8 @@ urlpatterns += [
     path("api/ontologywords/", notification_form_views.OntologyWordListView.as_view()),
     # matko words
     path("api/matkowords/", notification_form_views.MatkoWordListView.as_view()),
+    # certificates
+    path("api/certificates/", notification_form_views.CertificateListView.as_view()),
 ]
 
 
@@ -175,6 +177,14 @@ urlpatterns += [
     path(
         "api/open/v1/ontologyword/",
         api_views.ApiOntologyWordListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/certificate/",
+        api_views.ApiCertificateListViewV1.as_view(),
+    ),
+    path(
+        "api/open/v1/certificate/<int:id>/",
+        api_views.ApiCertificateRetrieveViewV1.as_view(),
     ),
 ]
 

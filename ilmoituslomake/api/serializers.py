@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 
 from moderation.models import ModeratedNotification
-from base.models import MatkoWord, OntologyWord
+from base.models import MatkoWord, OntologyWord, Certificate
 
 from ilmoituslomake.settings import AZURE_STORAGE, PUBLIC_AZURE_CONTAINER
 
@@ -165,6 +165,53 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
     def get_openinghours(self, obj):
         return []
 
+    certificates = serializers.SerializerMethodField()
+
+    def get_certificates(self, obj):
+        """Return certificates from the data field"""
+        lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "fi"
+        certs = list(obj.data.get("certificates", []))
+        result = []
+        for c in certs:
+            c_id = c.get("id")
+            name = c.get("name")
+            entry = { "id": c_id }
+            if isinstance(name, dict):
+                value = name.get(lang)
+                # Special handling for id -1 ("muu, mikä")
+                if c_id == -1 and (not value or value.strip() == ""):
+                    # Find first non-empty value from any language
+                    value = next((v for v in [name.get("fi"), name.get("sv"), name.get("en")] if v and v.strip() != ""), "")
+                entry["name"] = value
+            elif isinstance(name, str):
+                entry["name"] = name
+            result.append(entry)
+        return result
+
+    labels = serializers.SerializerMethodField()
+
+    def get_labels(self, obj):
+        """Return labels from the data field"""
+        lang = self.context.get("lang", "fi")
+        if lang not in ["fi", "sv", "en"]:
+            lang = "fi"
+        labels = list(obj.data.get("labels", []))
+        result = []
+        for l in labels:
+            l_id = l.get("id")
+            if l_id == -2:
+                continue
+            name = l.get("name")
+            entry = { "id": l_id }
+            if isinstance(name, dict):
+                entry["name"] = name.get(lang)
+            elif isinstance(name, str):
+                entry["name"] = name
+            result.append(entry)
+        return result
+
     class Meta:
         model = ModeratedNotification
         fields = (
@@ -188,6 +235,8 @@ class ApiModeratedNotificationSerializerV1(serializers.ModelSerializer):
             "images",
             "created_time",
             "modified_time",
+            "certificates",
+            "labels",
             #"openinghours",
         )
         read_only_fields = fields
@@ -215,3 +264,24 @@ class ApiMatkoWordSerializerV1(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ret["data"]
+
+
+class ApiCertificateSerializerV1(serializers.ModelSerializer):
+    """
+    API serializer for Certificate model.
+    Returns multilingual certificate data for public API.
+    """
+    class Meta:
+        model = Certificate
+        fields = (
+            "id",
+            "certificate_type",
+            "name_fi",
+            "name_sv",
+            "name_en",
+            "url_fi",
+            "url_sv",
+            "url_en",
+            "displayed_in_myhelsinki",
+        )
+

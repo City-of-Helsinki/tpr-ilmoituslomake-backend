@@ -68,15 +68,32 @@ class CreateLink(UpdateAPIView):
             except Exception as e:
                 return Response("Hauki link creation failed, notification " + notification_id + " does not exist.", status=status.HTTP_400_BAD_REQUEST)
 
+        hauki_numeric_id = None
         if id > 0:
             # Create or update draft opening times in Hauki using the draft notification data and published opening times if possible
-            create_or_update_response = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True)
+            # Pass the stored DB hauki_id so create_or_update can reactivate soft-deleted
+            # ghost resources even when Hauki's list API hides them (409 case).
+            create_or_update_result = create_or_update_draft_hauki_data(published, published_id, draft_id, notification_data, True, notification.hauki_id)
 
-            if create_or_update_response != None:
-                return create_or_update_response
+            # Returns a Response on error, or a (numeric_id, actual_resource) tuple on success
+            if isinstance(create_or_update_result, Response):
+                return create_or_update_result
+            hauki_numeric_id, actual_resource = create_or_update_result
+
+            # Update hsa_resource to match the actual origin used (may differ if ghost workaround created a new origin)
+            hsa_resource = actual_resource
+
+            # Persist the numeric ID so future calls can use it directly (avoids list API lookup)
+            # Use filter().update() to avoid triggering the Notification post_save signal
+            if hauki_numeric_id and hauki_numeric_id != notification.hauki_id:
+                Notification.objects.filter(pk=notification_id).update(hauki_id=hauki_numeric_id)
 
         # Now time used for link expiration and creation time
         now = datetime.utcnow().replace(microsecond=0)
+
+        # Hauki v1.11.0+ requires the numeric resource ID in the URL path,
+        # while hsa_resource must remain as the origin string for HSA auth.
+        url_path_resource = str(hauki_numeric_id) if hauki_numeric_id else hsa_resource
 
         # Construct the url
         url_data = {
@@ -87,6 +104,7 @@ class CreateLink(UpdateAPIView):
             "hsa_organization": "tprek:0c71aa86-f76c-466b-b6f3-81143bd9eecc",
             "hsa_resource": hsa_resource,
             "hsa_has_organization_rights": "false",
+            "url_path_resource": url_path_resource,
         }
         url = create_url(url_data)
 
@@ -102,10 +120,20 @@ class GetTimes(RetrieveAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, id=None, *args, **kwargs):
+        # For ilmoitus- draft resources, Hauki v1.11.0+ broke origin-string lookups.
+        # Use the numeric hauki_id stored in the DB instead.
+        resource = "kaupunkialusta:" + id
+        if id.startswith("ilmoitus-"):
+            parts = id.split("-")
+            if len(parts) == 2:
+                try:
+                    notification = Notification.objects.filter(pk=int(parts[1])).first()
+                    if notification and notification.hauki_id:
+                        resource = str(notification.hauki_id)
+                except (ValueError, Exception):
+                    pass
         response = requests.get(
-            HAUKI_API_URL
-            + "date_periods_as_text_for_tprek/?resource="
-            + "kaupunkialusta:" + id,
+            HAUKI_API_URL + "date_periods_as_text_for_tprek/?resource=" + resource,
             timeout=10,
         )
         return Response(response.json(), status=status.HTTP_200_OK)
