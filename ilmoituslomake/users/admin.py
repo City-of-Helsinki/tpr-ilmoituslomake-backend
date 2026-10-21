@@ -6,6 +6,7 @@ from django.contrib.auth.admin import UserAdmin
 from users.models import User
 from django.utils.translation import gettext, gettext_lazy as _
 
+@admin.register(User)
 class UserAdminConfig(UserAdmin):
     list_display = ("username", "email", "first_name", "last_name", "is_staff", "is_translator")
 
@@ -18,4 +19,3 @@ class UserAdminConfig(UserAdmin):
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     
-admin.site.register(User, UserAdminConfig)

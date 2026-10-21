@@ -8,33 +8,33 @@ from moderation.models import ModeratedNotification, ModerationItem
 from users.models import Organization
 
 
+@admin.register(ModeratedNotification)
 class ModeratedNotificationAdmin(SimpleHistoryAdmin):
     pass
 
 
+@admin.register(ModerationItem)
 class ModerationItemAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Notification)
 class NotificationAdmin(SimpleHistoryAdmin):
     pass
 
 
+@admin.register(NotificationImage)
 class NotificationImageAdmin(SimpleHistoryAdmin):
     pass
 
 
+@admin.register(OntologyWord)
 class OntologyWordAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(ModeratedNotification, ModeratedNotificationAdmin)
-admin.site.register(ModerationItem, ModerationItemAdmin)
-admin.site.register(Notification, NotificationAdmin)
-admin.site.register(NotificationImage, NotificationImageAdmin)
-admin.site.register(OntologyWord, OntologyWordAdmin)
-admin.site.register(Organization, OrganizationAdmin)
