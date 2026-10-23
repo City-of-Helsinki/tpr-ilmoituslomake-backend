@@ -16,7 +16,7 @@ import base64
 import uuid
 import io
 import requests
-from PIL import Image
+from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +107,8 @@ def process_images(model, instance, images):
                     image.mode,
                     image.size,
                 )
+                # Apply EXIF orientation to pixels; phone photos are often stored sideways with a rotation tag
+                image = ImageOps.exif_transpose(image)
                 with io.BytesIO() as output:
                     # print(output)
                     image.save(output, format="JPEG")
