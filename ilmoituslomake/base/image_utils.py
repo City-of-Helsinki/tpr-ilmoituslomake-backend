@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -16,6 +17,8 @@ import uuid
 import io
 import requests
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 #
 headers = {
@@ -59,6 +62,7 @@ def preprocess_images(request):
                     print("Existing data.")
         return images
     except Exception as e:
+        logger.exception("Image preprocessing failed")
         # print(e, file=sys.stderr)
         pass
     return []
@@ -104,6 +108,7 @@ def process_images(model, instance, images):
             else:
                 continue
         except Exception as e:
+            logger.exception("Image decoding or JPEG conversion failed")
             # print(e, file=sys.stderr)
             continue
 
@@ -127,6 +132,7 @@ def process_images(model, instance, images):
                 )
                 image.save()
         except Exception as e:
+            logger.exception("Image upload or database save failed")
             pass
             # print(e, file=sys.stderr)
 
