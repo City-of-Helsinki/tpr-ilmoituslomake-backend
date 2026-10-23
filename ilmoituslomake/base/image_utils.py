@@ -101,6 +101,12 @@ def process_images(model, instance, images):
             #
             if data != None:
                 image = Image.open(io.BytesIO(data))
+                logger.warning(
+                    "Decoded image: format=%s mode=%s size=%s",
+                    image.format,
+                    image.mode,
+                    image.size,
+                )
                 with io.BytesIO() as output:
                     # print(output)
                     image.save(output, format="JPEG")
