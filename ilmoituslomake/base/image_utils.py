@@ -109,6 +109,7 @@ def process_images(model, instance, images):
                 )
                 # Apply EXIF orientation to pixels; phone photos are often stored sideways with a rotation tag
                 image = ImageOps.exif_transpose(image)
+                image = image.convert("RGB")
                 with io.BytesIO() as output:
                     # print(output)
                     image.save(output, format="JPEG")
