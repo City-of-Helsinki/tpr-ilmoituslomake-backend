@@ -1,4 +1,4 @@
-FROM python:3.10-bookworm
+FROM python:3.12-bookworm
 
 # https://docs.djangoproject.com/en/2.2/ref/contrib/gis/install/geolibs/
 RUN apt-get update && \
@@ -30,13 +30,14 @@ COPY requirements.txt /app/requirements.txt
 WORKDIR /app/
 
 # install python dependencies
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip==26.2.2 && \
+    python -m pip install -r requirements.txt
 
 # CGI DEV: remove comment from Zscaler certification related lines for development env
 # requires 3 sertificate files (.crt, .pem, .der) in certificates/ under root
 # This sertification configuration is tested on WSL ubuntu 22.04.5 LTS
-# RUN cat /usr/local/share/ca-certificates/zscaler-root.crt >> /usr/local/lib/python3.10/site-packages/certifi/cacert.pem && \
-#     cat /usr/local/share/ca-certificates/telia-root.crt >> /usr/local/lib/python3.10/site-packages/certifi/cacert.pem
+# RUN cat /usr/local/share/ca-certificates/zscaler-root.crt >> /usr/local/lib/python3.12/site-packages/certifi/cacert.pem && \
+#     cat /usr/local/share/ca-certificates/telia-root.crt >> /usr/local/lib/python3.12/site-packages/certifi/cacert.pem
 
 COPY ./ilmoituslomake/ /app
 COPY ./local_dev/run_web.sh /app/run_web.sh
