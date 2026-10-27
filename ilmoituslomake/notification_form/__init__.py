@@ -1,1 +1,0 @@
-default_app_config = "notification_form.apps.NotificationFormConfig"

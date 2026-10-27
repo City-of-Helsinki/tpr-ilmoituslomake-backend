@@ -1,9 +1,14 @@
-FROM python:3.10-bullseye
+FROM python:3.10-bookworm
 
-RUN apt update
 # https://docs.djangoproject.com/en/2.2/ref/contrib/gis/install/geolibs/
-RUN apt-get install -y binutils libproj-dev gdal-bin ca-certificates && \ 
-    update-ca-certificates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        binutils \
+        libproj-dev \
+        gdal-bin \
+        ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # CGI DEV: remove comment from Zscaler certification related lines for development env
 # requires 3 sertificate files (.crt, .pem, .der) in certificates/ under root
