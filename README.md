@@ -6,7 +6,12 @@ Notifification form app (Ilmoituslomakesovellus) for the city of Helsinki. Peopl
 
 ## Tech stack
 
-Backend is based on Django 2.2 LTS and Python 3.7.
+Backend is based on Django 5.2 LTS and Python 3.12.
+
+The October 2026 dependency patch requires Python 3.12 and a database migration
+for the nullable `users.User.last_api_use` field inherited from django-helusers.
+See [deprecations.txt](deprecations.txt) for audit results, deferred social-auth
+alerts, and deployment checks. The existing GET-based login flow is unchanged.
 
 # Development
 
@@ -25,6 +30,35 @@ Backend is based on Django 2.2 LTS and Python 3.7.
 * Build: rebuild_dev.sh
 * Run: run_dev.sh
 * You need the UI: https://github.com/City-of-Helsinki/tpr-ilmoituslomake-ui/ and run it in development mode
+
+For a dependency-only rebuild that preserves the local database, use:
+
+```sh
+docker-compose build tpr-ilmoituslomake
+```
+
+Do not use `rebuild_dev.sh` just to update dependencies: that existing script
+deletes `pgdata`. No database reset is needed for this patch.
+
+With the development database running and `local_dev/.env` configured, review
+the migration plan and run the checks before starting the updated backend:
+
+```sh
+docker-compose run --rm --no-deps tpr-ilmoituslomake python manage.py check
+docker-compose run --rm --no-deps tpr-ilmoituslomake python manage.py test base users moderation
+docker-compose run --rm --no-deps tpr-ilmoituslomake python manage.py migrate --plan
+```
+
+After reviewing the plan and backing up the database, apply the migrations:
+
+```sh
+docker-compose run --rm --no-deps tpr-ilmoituslomake python manage.py migrate
+```
+
+Non-Docker deployments need a new Python 3.12 virtual environment; installing
+these requirements into the old Python 3.10 environment will not work. Switch
+the application's launcher to the new environment only after checking it and
+applying the required migrations.
 
 # API Endpoints
 
